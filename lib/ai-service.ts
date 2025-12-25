@@ -1,6 +1,5 @@
 import OpenAI from "openai";
 import { z } from "zod";
-import { zodResponseFormat } from "openai/helpers/zod";
 import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
 import { determineApplicableLaws, ApplicableLaws } from "@/lib/legal/law-applicability";
 import { ClauseTag, ViolatedLaw } from "@/lib/types/clause-tags";
@@ -182,7 +181,7 @@ ${lawContext}
 // ============================================
 
 export async function extractContractParties(text: string): Promise<ExtractionResult> {
-    const completion = await openai.beta.chat.completions.parse({
+    const completion = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
             {
@@ -193,19 +192,22 @@ export async function extractContractParties(text: string): Promise<ExtractionRe
 3. 契約書の種類
 4. 推定される契約期間（月数）
 
-不明な場合は「不明」、期間が不明な場合はnullとしてください。`,
+不明な場合は「不明」、期間が不明な場合はnullとしてください。
+必ずJSON形式で返答してください。`,
             },
             {
                 role: "user",
                 content: text,
             },
         ],
-        response_format: zodResponseFormat(ExtractionSchema, "extraction_result"),
+        response_format: { type: "json_object" },
     });
 
-    const validResponse = completion.choices[0].message.parsed;
-    if (!validResponse) throw new Error("Failed to extract parties");
-    return validResponse;
+    const content = completion.choices[0].message.content;
+    if (!content) throw new Error("Failed to extract parties");
+
+    const parsed = JSON.parse(content);
+    return ExtractionSchema.parse(parsed);
 }
 
 export async function analyzeContractText(
@@ -218,27 +220,27 @@ export async function analyzeContractText(
     // 動的プロンプトを生成
     const systemPrompt = buildEnhancedSystemPrompt(userContext, applicableLaws);
 
-    const completion = await openai.beta.chat.completions.parse({
+    const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
             {
                 role: "system",
-                content: systemPrompt,
+                content: systemPrompt + "\n\n必ずJSON形式で返答してください。",
             },
             {
                 role: "user",
                 content: text,
             },
         ],
-        response_format: zodResponseFormat(EnhancedAnalysisSchema, "analysis_result"),
+        response_format: { type: "json_object" },
     });
 
-    const validResponse = completion.choices[0].message.parsed;
-
-    if (!validResponse) {
+    const content = completion.choices[0].message.content;
+    if (!content) {
         throw new Error("AI failed to return structured data");
     }
 
-    return validResponse;
+    const parsed = JSON.parse(content);
+    return EnhancedAnalysisSchema.parse(parsed);
 }
 
