@@ -20,10 +20,10 @@ export default function CompanyPage() {
                         <dd className="text-slate-600">株式会社ヒトコト</dd>
 
                         <dt className="font-bold text-slate-900">代表者</dt>
-                        <dd className="text-slate-600">代表取締役 〇〇 〇〇（※必要に応じて記載）</dd>
+                        <dd className="text-slate-600">代表取締役 小南優作</dd>
 
                         <dt className="font-bold text-slate-900">所在地</dt>
-                        <dd className="text-slate-600">〒000-0000<br />（※住所を記載）</dd>
+                        <dd className="text-slate-600">非公開</dd>
 
                         <dt className="font-bold text-slate-900">事業内容</dt>
                         <dd className="text-slate-600">
