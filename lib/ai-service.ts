@@ -1,0 +1,244 @@
+import OpenAI from "openai";
+import { z } from "zod";
+import { zodResponseFormat } from "openai/helpers/zod";
+import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
+import { determineApplicableLaws, ApplicableLaws } from "@/lib/legal/law-applicability";
+import { ClauseTag, ViolatedLaw } from "@/lib/types/clause-tags";
+
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
+
+// ============================================
+// Schemas
+// ============================================
+
+const ExtractionSchema = z.object({
+    party_a: z.string().describe("甲の名称（正式名称）"),
+    party_b: z.string().describe("乙の名称（正式名称）"),
+    contract_type: z.string().describe("契約書の種類（例：業務委託契約書、秘密保持契約書）"),
+    estimated_contract_months: z.number().nullable().describe("推定される契約期間（月数）。不明な場合はnull"),
+});
+
+export type ExtractionResult = z.infer<typeof ExtractionSchema>;
+
+const NegotiationMessageSchema = z.object({
+    formal: z.string(),
+    neutral: z.string(),
+    casual: z.string(),
+});
+
+const EnhancedRiskSchema = z.object({
+    // 条項分類タグ
+    clause_tag: z.enum([
+        "CLAUSE_SCOPE", "CLAUSE_PAYMENT", "CLAUSE_ACCEPTANCE", "CLAUSE_IP",
+        "CLAUSE_LIABILITY", "CLAUSE_TERM", "CLAUSE_TERMINATION", "CLAUSE_NON_COMPETE",
+        "CLAUSE_JURISDICTION", "CLAUSE_CONFIDENTIAL", "CLAUSE_HARASSMENT",
+        "CLAUSE_REDELEGATE", "CLAUSE_INVOICE", "CLAUSE_OTHER"
+    ]),
+
+    section_title: z.string(),
+    original_text: z.string(),
+
+    // リスクレベル（4段階）
+    risk_level: z.enum(["critical", "high", "medium", "low"]),
+
+    // 違反の可能性がある法律
+    violated_laws: z.array(z.enum([
+        "freelance_new_law_art3", "freelance_new_law_art4", "freelance_new_law_art5",
+        "freelance_new_law_art12", "freelance_new_law_art13",
+        "subcontract_act", "civil_code_conformity", "copyright_art27_28",
+        "disguised_employment", "antitrust_underpayment", "public_order"
+    ])),
+
+    explanation: z.string(),
+
+    suggestion: z.object({
+        revised_text: z.string(),
+        negotiation_message: NegotiationMessageSchema,
+        // 法的根拠
+        legal_basis: z.string(),
+    }),
+});
+
+const EnhancedAnalysisSchema = z.object({
+    summary: z.string(),
+    risks: z.array(EnhancedRiskSchema),
+    // 契約類型の判定
+    contract_classification: z.enum(["ukeoi", "jun_inin_hourly", "jun_inin_result", "mixed", "unknown"]),
+    // 重要な欠落項目
+    missing_clauses: z.array(z.string()),
+});
+
+export type EnhancedAnalysisResult = z.infer<typeof EnhancedAnalysisSchema>;
+
+// 後方互換性のため
+export type AnalysisResult = EnhancedAnalysisResult;
+
+// ============================================
+// System Prompts
+// ============================================
+
+function buildEnhancedSystemPrompt(ctx: UserContext, laws: ApplicableLaws): string {
+    const userRoleJa = ctx.userRole === "vendor" ? "受注者（フリーランス）" : "発注者";
+
+    let lawContext = "";
+    if (laws.freelanceNewLawStrict) {
+        lawContext += `
+【フリーランス新法（厳格規定）が適用されます】
+- 第3条：取引条件の明示義務
+- 第4条：60日以内の支払期日規制（重要！）
+- 第5条：禁止行為（受領拒否、報酬減額、返品、購入強制等）
+- 第12条：ハラスメント対策義務
+- 第13条：育児・介護への配慮義務（6ヶ月以上の契約）
+`;
+    } else if (laws.freelanceNewLaw) {
+        lawContext += `
+【フリーランス新法（基本規定）が適用されます】
+- 第3条：取引条件の明示義務
+`;
+    }
+
+    if (laws.subcontractAct) {
+        lawContext += `
+【下請法も適用される可能性があります】
+- 書面交付義務
+- 支払遅延利息（年14.6%）
+- 60日以内の支払義務
+`;
+    }
+
+    return `あなたは日本法に精通した契約書リスク解析AIです。フリーランス・個人事業主を保護するために開発されました。
+
+【ユーザー情報】
+- 立場：${userRoleJa}
+- 視点：${ctx.userRole === "vendor" ? "ユーザーにとって不利な条項を指摘" : "法令遵守の観点から問題点を指摘"}
+
+${lawContext}
+
+【最重要チェック項目 - これらは必ず確認してください】
+
+★1. 支払期日（60日ルール）- フリーランス新法第4条
+   - 「受領日（納品日）」から起算して60日以内に支払われるか
+   - 【重要】「検収完了日」ではなく「納品日」が起算点
+   - 違反例：「検収完了の翌月末払い」（検収に20日かかると合計80日になる）
+   - 「翌々月末払い」は明確な違反の可能性が高い
+   - risk_level: critical を設定
+
+★2. 著作権の移転（27条・28条の特掲）- 著作権法第61条第2項
+   - 「すべての著作権を譲渡」だけでは27条・28条は移転しない法律上の特則がある
+   - 第27条：翻訳権・翻案権（改変する権利）
+   - 第28条：二次的著作物の利用権（続編・派生版を作る権利）
+   - 【受注者の場合】特掲がないと「実は権利が残っている」可能性がある（有利）
+   - 【発注者の場合】特掲がないと「改変できない」リスクがある（不利）
+   - risk_level: high を設定
+
+★3. 損害賠償の上限
+   - 「一切の損害を賠償する」は青天井リスク（critical）
+   - 上限規定がない場合は必ず指摘
+   - 推奨：「過去〇ヶ月の報酬総額を上限」
+
+★4. 禁止行為 - フリーランス新法第5条
+   - 受領拒否：「都合により受領を拒否できる」→ 違法
+   - 報酬減額：「予算の都合により減額する場合がある」→ 違法
+   - 返品：「必要ないと判断した場合は返品できる」→ 違法
+   - 購入強制：「指定のツールを契約すること」→ 違法の可能性
+
+★5. 偽装請負リスク
+   以下が複数該当する場合は「偽装請負（実質的な雇用）」の可能性を警告:
+   - 指揮命令：「甲の指示に従い」「甲の監督の下」
+   - 時間拘束：「9時〜18時」「所定労働時間」
+   - 場所拘束：「甲の本社にて」「指定場所で常駐」
+   - 代替性なし：「第三者に再委託してはならない」
+
+★6. 競業避止義務
+   - 期間が1年超：無効リスク高（公序良俗違反）
+   - 対象が広範：「競合他社すべて」→ 無効リスク
+   - 対価なし：代償がなければ無効の可能性
+
+【欠落チェック - 条項が「存在しない」ことも問題】
+以下が契約書に含まれていない場合、missing_clauses に追加:
+- 支払期日の明確な規定
+- 損害賠償の上限規定
+- 著作権の帰属に関する規定
+- 契約解除の条件
+
+【契約類型の判定】
+- ukeoi：請負（成果物の完成が目的）
+- jun_inin_hourly：準委任・履行割合型（時間・工数ベース）
+- jun_inin_result：準委任・成果完成型
+- mixed：混合契約
+- unknown：判別不能
+
+【出力に必ず含めてください】
+- clause_tag：条項の分類タグ
+- violated_laws：違反の可能性がある法律条項
+- legal_basis：なぜその法律に抵触するのかの説明
+- 修正案と3トーンの交渉メッセージ`;
+}
+
+// ============================================
+// API Functions
+// ============================================
+
+export async function extractContractParties(text: string): Promise<ExtractionResult> {
+    const completion = await openai.beta.chat.completions.parse({
+        model: "gpt-4o-mini",
+        messages: [
+            {
+                role: "system",
+                content: `契約書のテキストから以下を抽出してください：
+1. 甲の名称（正式名称）
+2. 乙の名称（正式名称）
+3. 契約書の種類
+4. 推定される契約期間（月数）
+
+不明な場合は「不明」、期間が不明な場合はnullとしてください。`,
+            },
+            {
+                role: "user",
+                content: text,
+            },
+        ],
+        response_format: zodResponseFormat(ExtractionSchema, "extraction_result"),
+    });
+
+    const validResponse = completion.choices[0].message.parsed;
+    if (!validResponse) throw new Error("Failed to extract parties");
+    return validResponse;
+}
+
+export async function analyzeContractText(
+    text: string,
+    userContext: UserContext = DEFAULT_USER_CONTEXT
+): Promise<EnhancedAnalysisResult> {
+    // 適用法規を決定
+    const applicableLaws = determineApplicableLaws(userContext);
+
+    // 動的プロンプトを生成
+    const systemPrompt = buildEnhancedSystemPrompt(userContext, applicableLaws);
+
+    const completion = await openai.beta.chat.completions.parse({
+        model: "gpt-4o",
+        messages: [
+            {
+                role: "system",
+                content: systemPrompt,
+            },
+            {
+                role: "user",
+                content: text,
+            },
+        ],
+        response_format: zodResponseFormat(EnhancedAnalysisSchema, "analysis_result"),
+    });
+
+    const validResponse = completion.choices[0].message.parsed;
+
+    if (!validResponse) {
+        throw new Error("AI failed to return structured data");
+    }
+
+    return validResponse;
+}
+
