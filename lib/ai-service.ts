@@ -4,9 +4,20 @@ import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
 import { determineApplicableLaws, ApplicableLaws } from "@/lib/legal/law-applicability";
 import { ClauseTag, ViolatedLaw } from "@/lib/types/clause-tags";
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// 遅延初期化でOpenAIクライアントを作成（サーバーサイドでのみ使用される）
+let _openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+    if (!_openai) {
+        if (!process.env.OPENAI_API_KEY) {
+            throw new Error("OPENAI_API_KEY environment variable is not set. Please configure it in Vercel.");
+        }
+        _openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
+    }
+    return _openai;
+}
 
 // ============================================
 // Schemas
@@ -181,7 +192,7 @@ ${lawContext}
 // ============================================
 
 export async function extractContractParties(text: string): Promise<ExtractionResult> {
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAIClient().chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
             {
@@ -220,7 +231,7 @@ export async function analyzeContractText(
     // 動的プロンプトを生成
     const systemPrompt = buildEnhancedSystemPrompt(userContext, applicableLaws);
 
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAIClient().chat.completions.create({
         model: "gpt-4o",
         messages: [
             {

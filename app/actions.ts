@@ -1,3 +1,5 @@
+"use server";
+
 import { extractTextFromPdf } from "@/lib/pdf-service";
 import { analyzeContractText, extractContractParties, EnhancedAnalysisResult } from "@/lib/ai-service";
 import { UserContext } from "@/lib/types/user-context";
