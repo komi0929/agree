@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { EnhancedAnalysisResult } from "@/lib/ai-service";
+import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 import { SplitLayout } from "@/components/split-layout";
 import { ContractViewer } from "@/components/split-view/contract-viewer";
 import { RiskPanel } from "@/components/split-view/risk-panel";

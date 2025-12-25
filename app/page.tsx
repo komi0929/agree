@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { UploadSection } from "@/components/upload-section";
 import { AnalysisResultPlaceholder } from "@/components/analysis-result-placeholder";
 import { AnalysisViewer } from "@/components/analysis-viewer";
-import { EnhancedAnalysisResult, ExtractionResult } from "@/lib/ai-service";
+import { EnhancedAnalysisResult, ExtractionResult } from "@/lib/types/analysis";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Footer } from "@/components/footer";

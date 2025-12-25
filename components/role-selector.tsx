@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ExtractionResult } from "@/lib/ai-service";
+import { ExtractionResult } from "@/lib/types/analysis";
 import { Button } from "@/components/ui/button";
 import { Check, User } from "lucide-react";
 

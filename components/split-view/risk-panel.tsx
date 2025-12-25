@@ -1,6 +1,6 @@
 "use client";
 
-import { EnhancedAnalysisResult } from "@/lib/ai-service";
+import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check, AlertTriangle, Info, ArrowRight, Copy, AlertOctagon } from "lucide-react";

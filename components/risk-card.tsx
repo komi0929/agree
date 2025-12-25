@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
-import { AnalysisResult } from "@/lib/ai-service";
+import { AnalysisResult } from "@/lib/types/analysis";
 
 type Risk = AnalysisResult["risks"][0];
 

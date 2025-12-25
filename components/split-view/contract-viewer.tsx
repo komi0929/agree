@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { EnhancedAnalysisResult } from "@/lib/ai-service";
+import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 
 interface ContractViewerProps {
     text: string;

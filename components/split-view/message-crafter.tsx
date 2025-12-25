@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { EnhancedAnalysisResult } from "@/lib/ai-service";
+import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";

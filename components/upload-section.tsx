@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UploadCloud, Loader2 } from "lucide-react";
 import { extractPartiesAction } from "@/app/actions";
-import { ExtractionResult } from "@/lib/ai-service";
+import { ExtractionResult } from "@/lib/types/analysis";
 
 interface UploadSectionProps {
     onAnalysisStart: () => void;
