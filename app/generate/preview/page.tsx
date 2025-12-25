@@ -12,6 +12,7 @@ import ReactMarkdown from "react-markdown";
 import { ContractInput } from "@/lib/types/contract-input";
 import { GeneratedContract } from "@/lib/contract-generator";
 import { modifyContractAction, generateEmailAction } from "../actions";
+import { Footer } from "@/components/footer";
 
 interface ChatMessage {
     role: "user" | "assistant";
@@ -111,16 +112,16 @@ export default function PreviewPage() {
 
     if (!contract || !input) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-                <div className="text-slate-500">読み込み中...</div>
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="text-slate-400 text-sm">読み込み中...</div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col">
+        <div className="min-h-screen bg-white flex flex-col font-sans text-slate-600 selection:bg-slate-100 selection:text-slate-900">
             {/* Header */}
-            <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+            <header className="border-b border-slate-100 sticky top-0 z-50 bg-white">
                 <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
                     <Link href="/generate" className="flex items-center gap-2 text-slate-400 hover:text-slate-600 transition-colors">
                         <ArrowLeft className="w-4 h-4" />
@@ -130,14 +131,14 @@ export default function PreviewPage() {
                         <Button
                             variant="outline"
                             onClick={handleGenerateEmail}
-                            className="h-9"
+                            className="h-9 rounded-full border-slate-200 text-slate-600 hover:bg-slate-50"
                         >
                             <Mail className="w-4 h-4 mr-2" />
                             送付メールを作成
                         </Button>
                         <Button
                             onClick={handleCopy}
-                            className="bg-slate-900 hover:bg-slate-800 h-9"
+                            className="h-9 rounded-full bg-white border border-slate-200 text-slate-800 hover:bg-slate-50 shadow-sm"
                         >
                             {copied ? (
                                 <>
@@ -158,18 +159,18 @@ export default function PreviewPage() {
             {/* Main Content */}
             <div className="flex-1 flex">
                 {/* Left: Preview */}
-                <div className="flex-1 border-r border-slate-200 bg-white overflow-auto">
+                <div className="flex-1 border-r border-slate-100 bg-white overflow-auto">
                     <div className="max-w-3xl mx-auto p-8">
                         {/* Highlights */}
                         {contract.highlightedClauses.length > 0 && (
-                            <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                                <div className="flex items-center gap-2 text-blue-700 font-medium text-sm mb-2">
+                            <div className="mb-6 p-4 border border-slate-200 rounded-xl">
+                                <div className="flex items-center gap-2 text-slate-600 font-medium text-sm mb-2">
                                     <Star className="w-4 h-4" />
                                     あなたを守る条項
                                 </div>
                                 <div className="flex flex-wrap gap-2">
                                     {contract.highlightedClauses.map((clause, i) => (
-                                        <span key={i} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                                        <span key={i} className="text-xs border border-slate-200 text-slate-500 px-2 py-1 rounded-full">
                                             {clause}
                                         </span>
                                     ))}
@@ -178,14 +179,14 @@ export default function PreviewPage() {
                         )}
 
                         {/* Contract Markdown */}
-                        <div className="prose prose-slate max-w-none prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-p:text-slate-700 prose-p:leading-relaxed">
+                        <div className="prose prose-slate max-w-none prose-headings:font-medium prose-h1:text-xl prose-h2:text-lg prose-p:text-slate-500 prose-p:leading-relaxed prose-p:font-light">
                             <ReactMarkdown
                                 components={{
                                     h2: ({ children }) => {
                                         const text = String(children);
                                         const isHighlighted = text.includes("⭐");
                                         return (
-                                            <h2 className={isHighlighted ? "text-blue-700 bg-blue-50 px-3 py-2 rounded-lg" : ""}>
+                                            <h2 className={isHighlighted ? "text-slate-800 border-l-2 border-slate-400 pl-3 bg-slate-50 py-2 rounded-r" : ""}>
                                                 {children}
                                             </h2>
                                         );
@@ -199,44 +200,44 @@ export default function PreviewPage() {
                 </div>
 
                 {/* Right: Chat */}
-                <div className="w-96 bg-slate-50 flex flex-col">
-                    <div className="p-4 border-b border-slate-200 bg-white">
-                        <h3 className="font-medium text-slate-800 flex items-center gap-2">
+                <div className="w-96 bg-white flex flex-col border-l border-slate-100">
+                    <div className="p-4 border-b border-slate-100">
+                        <h3 className="font-medium text-slate-900 flex items-center gap-2 text-sm">
                             <FileText className="w-4 h-4" />
                             AIで修正
                         </h3>
-                        <p className="text-xs text-slate-500 mt-1">
+                        <p className="text-xs text-slate-400 mt-1 font-light">
                             チャットで指示すると契約書を修正します
                         </p>
                     </div>
 
                     {/* Chat Messages */}
-                    <div className="flex-1 overflow-auto p-4 space-y-4">
+                    <div className="flex-1 overflow-auto p-4 space-y-4 bg-slate-50/50">
                         {chatMessages.length === 0 && (
                             <div className="text-center text-slate-400 text-sm py-8">
-                                <p className="mb-4">修正したい内容を入力してください</p>
+                                <p className="mb-4 font-light">修正したい内容を入力してください</p>
                                 <div className="space-y-2 text-xs">
-                                    <p className="bg-white p-2 rounded border border-slate-200">「支払いを月末にして」</p>
-                                    <p className="bg-white p-2 rounded border border-slate-200">「もう少し柔らかい表現に」</p>
-                                    <p className="bg-white p-2 rounded border border-slate-200">「着手金を30%に変更」</p>
+                                    <p className="bg-white p-2 rounded-lg border border-slate-100">「支払いを月末にして」</p>
+                                    <p className="bg-white p-2 rounded-lg border border-slate-100">「もう少し柔らかい表現に」</p>
+                                    <p className="bg-white p-2 rounded-lg border border-slate-100">「着手金を30%に変更」</p>
                                 </div>
                             </div>
                         )}
                         {chatMessages.map((msg, i) => (
                             <div
                                 key={i}
-                                className={`p-3 rounded-lg text-sm ${msg.role === "user"
-                                        ? "bg-slate-900 text-white ml-8"
-                                        : "bg-white border border-slate-200 mr-8"
+                                className={`p-3 rounded-xl text-sm ${msg.role === "user"
+                                    ? "bg-slate-900 text-white ml-8"
+                                    : "bg-white border border-slate-100 mr-8"
                                     }`}
                             >
                                 {msg.content}
                             </div>
                         ))}
                         {isModifying && (
-                            <div className="bg-white border border-slate-200 p-3 rounded-lg mr-8">
-                                <div className="flex items-center gap-2 text-sm text-slate-500">
-                                    <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                            <div className="bg-white border border-slate-100 p-3 rounded-xl mr-8">
+                                <div className="flex items-center gap-2 text-sm text-slate-400">
+                                    <div className="w-4 h-4 border-2 border-slate-200 border-t-slate-500 rounded-full animate-spin" />
                                     修正中...
                                 </div>
                             </div>
@@ -245,16 +246,21 @@ export default function PreviewPage() {
                     </div>
 
                     {/* Chat Input */}
-                    <form onSubmit={handleChatSubmit} className="p-4 border-t border-slate-200 bg-white">
+                    <form onSubmit={handleChatSubmit} className="p-4 border-t border-slate-100 bg-white">
                         <div className="flex gap-2">
                             <Input
                                 value={chatInput}
                                 onChange={(e) => setChatInput(e.target.value)}
                                 placeholder="修正内容を入力..."
-                                className="flex-1"
+                                className="flex-1 border-slate-200 focus-visible:ring-0 focus-visible:border-slate-400"
                                 disabled={isModifying}
                             />
-                            <Button type="submit" size="icon" disabled={isModifying || !chatInput.trim()}>
+                            <Button
+                                type="submit"
+                                size="icon"
+                                disabled={isModifying || !chatInput.trim()}
+                                className="bg-slate-900 hover:bg-slate-800"
+                            >
                                 <Send className="w-4 h-4" />
                             </Button>
                         </div>
@@ -264,16 +270,17 @@ export default function PreviewPage() {
 
             {/* Email Modal */}
             {showEmail && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-auto shadow-xl">
+                <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-auto shadow-xl border border-slate-200">
                         <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                            <h3 className="font-bold text-lg">送付用メール</h3>
+                            <h3 className="font-medium text-slate-900">送付用メール</h3>
                             <div className="flex items-center gap-2">
                                 <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={handleCopyEmail}
                                     disabled={!emailContent || isGeneratingEmail}
+                                    className="rounded-full border-slate-200"
                                 >
                                     {emailCopied ? (
                                         <>
@@ -287,7 +294,12 @@ export default function PreviewPage() {
                                         </>
                                     )}
                                 </Button>
-                                <Button variant="ghost" size="sm" onClick={() => setShowEmail(false)}>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setShowEmail(false)}
+                                    className="text-slate-400 hover:text-slate-600"
+                                >
                                     閉じる
                                 </Button>
                             </div>
@@ -295,18 +307,18 @@ export default function PreviewPage() {
                         <div className="p-6">
                             {isGeneratingEmail ? (
                                 <div className="flex items-center justify-center py-12">
-                                    <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
-                                    <span className="ml-3 text-slate-500">メールを生成中...</span>
+                                    <div className="w-5 h-5 border-2 border-slate-200 border-t-slate-500 rounded-full animate-spin" />
+                                    <span className="ml-3 text-slate-400 text-sm">メールを生成中...</span>
                                 </div>
                             ) : emailContent ? (
                                 <div className="space-y-4">
                                     <div>
-                                        <p className="text-xs text-slate-400 mb-1">件名</p>
-                                        <p className="font-medium">{emailContent.subject}</p>
+                                        <p className="text-xs text-slate-400 mb-1 font-light">件名</p>
+                                        <p className="text-sm text-slate-900">{emailContent.subject}</p>
                                     </div>
                                     <div>
-                                        <p className="text-xs text-slate-400 mb-1">本文</p>
-                                        <div className="bg-slate-50 p-4 rounded-lg text-sm whitespace-pre-wrap">
+                                        <p className="text-xs text-slate-400 mb-1 font-light">本文</p>
+                                        <div className="border border-slate-100 p-4 rounded-xl text-sm text-slate-600 whitespace-pre-wrap font-light leading-relaxed">
                                             {emailContent.body}
                                         </div>
                                     </div>

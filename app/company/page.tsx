@@ -1,40 +1,43 @@
 import { Footer } from "@/components/footer";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
 
 export default function CompanyPage() {
     return (
-        <div className="min-h-screen flex flex-col bg-white text-slate-800 font-sans">
-            <main className="flex-1 max-w-3xl mx-auto w-full px-6 py-20">
-                <div className="mb-12">
-                    <Link href="/" className="inline-flex items-center text-sm text-slate-400 hover:text-slate-600 transition-colors mb-8">
-                        <ArrowLeft className="w-4 h-4 mr-1" />
-                        トップに戻る
-                    </Link>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-4">運営会社</h1>
-                </div>
+        <div className="min-h-screen flex flex-col bg-white text-slate-600 font-sans selection:bg-slate-100 selection:text-slate-900">
+            <main className="flex-1 max-w-2xl mx-auto w-full px-6 pt-24 pb-20">
+                <PageHeader title="運営会社" />
 
-                <div className="bg-slate-50 rounded-2xl p-8 border border-slate-100">
-                    <dl className="grid grid-cols-1 md:grid-cols-[160px_1fr] gap-y-8 gap-x-4">
-                        <dt className="font-bold text-slate-900">会社名</dt>
-                        <dd className="text-slate-600">株式会社ヒトコト</dd>
+                <div className="border border-slate-200 rounded-xl p-8">
+                    <dl className="space-y-6">
+                        <div className="flex flex-col sm:flex-row sm:gap-8">
+                            <dt className="text-sm font-medium text-slate-900 sm:w-32 mb-1 sm:mb-0">会社名</dt>
+                            <dd className="text-sm text-slate-500 font-light">株式会社ヒトコト</dd>
+                        </div>
 
-                        <dt className="font-bold text-slate-900">代表者</dt>
-                        <dd className="text-slate-600">代表取締役 小南優作</dd>
+                        <div className="flex flex-col sm:flex-row sm:gap-8">
+                            <dt className="text-sm font-medium text-slate-900 sm:w-32 mb-1 sm:mb-0">代表者</dt>
+                            <dd className="text-sm text-slate-500 font-light">代表取締役 小南優作</dd>
+                        </div>
 
-                        <dt className="font-bold text-slate-900">所在地</dt>
-                        <dd className="text-slate-600">非公開</dd>
+                        <div className="flex flex-col sm:flex-row sm:gap-8">
+                            <dt className="text-sm font-medium text-slate-900 sm:w-32 mb-1 sm:mb-0">所在地</dt>
+                            <dd className="text-sm text-slate-500 font-light">非公開</dd>
+                        </div>
 
-                        <dt className="font-bold text-slate-900">事業内容</dt>
-                        <dd className="text-slate-600">
-                            <ul className="list-disc pl-5 space-y-1">
-                                <li>AI活用サービスの企画・開発・運営</li>
-                                <li>コンサルティング事業</li>
-                            </ul>
-                        </dd>
+                        <div className="flex flex-col sm:flex-row sm:gap-8">
+                            <dt className="text-sm font-medium text-slate-900 sm:w-32 mb-1 sm:mb-0">事業内容</dt>
+                            <dd className="text-sm text-slate-500 font-light">
+                                <ul className="list-disc pl-4 space-y-1">
+                                    <li>AI活用サービスの企画・開発・運営</li>
+                                    <li>コンサルティング事業</li>
+                                </ul>
+                            </dd>
+                        </div>
 
-                        <dt className="font-bold text-slate-900">連絡先</dt>
-                        <dd className="text-slate-600">y.kominami@hitokoto1.co.jp</dd>
+                        <div className="flex flex-col sm:flex-row sm:gap-8">
+                            <dt className="text-sm font-medium text-slate-900 sm:w-32 mb-1 sm:mb-0">連絡先</dt>
+                            <dd className="text-sm text-slate-500 font-light">y.kominami@hitokoto1.co.jp</dd>
+                        </div>
                     </dl>
                 </div>
             </main>
