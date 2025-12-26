@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { UploadSection } from "@/components/upload-section";
+import { trackEvent, trackPageView, ANALYTICS_EVENTS } from "@/lib/analytics/client";
 import { AnalysisResultPlaceholder } from "@/components/analysis-result-placeholder";
 import { AnalysisViewer } from "@/components/analysis-viewer";
 import { EnhancedAnalysisResult, ExtractionResult } from "@/lib/types/analysis";
@@ -26,6 +27,11 @@ export default function Home() {
   // Store the promise of the deep analysis so we can await it later
   const deepAnalysisPromiseRef = useRef<Promise<AnalysisState> | null>(null);
 
+  // Track page view on mount
+  useEffect(() => {
+    trackPageView();
+  }, []);
+
   const handleAnalysisStart = () => {
     setLoading(true);
     setAnalysisData(null);
@@ -49,9 +55,11 @@ export default function Home() {
     setStep("role_selection");
     // 🚀 START DEEP ANALYSIS IN BACKGROUND with user context!
     deepAnalysisPromiseRef.current = analyzeDeepAction(contractText, ctx);
+    trackEvent(ANALYTICS_EVENTS.USER_CONTEXT_COMPLETED);
   };
 
   const handleRoleSelect = async (role: "party_a" | "party_b") => {
+    trackEvent(ANALYTICS_EVENTS.ROLE_SELECTED, { role });
     setStep("analyzing");
 
     // Await the background analysis that (hopefully) started seconds ago
@@ -60,15 +68,18 @@ export default function Home() {
         const result = await deepAnalysisPromiseRef.current;
         if (result.success && result.data) {
           setAnalysisData(result.data);
+          trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED);
           // Here we would ideally filter results based on 'role', but for now we just show everything
           // In next phase, we pass 'role' to the viewer to contextualize
           setStep("complete");
         } else {
+          trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "analysis_failed" });
           alert("詳細解析に失敗しました");
           setStep("upload");
         }
       } catch (e) {
         console.error(e);
+        trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "exception" });
         alert("エラーが発生しました");
         setStep("upload");
       }
@@ -100,7 +111,10 @@ export default function Home() {
               </div>
 
               <Button
-                onClick={() => setHasStarted(true)}
+                onClick={() => {
+                  trackEvent(ANALYTICS_EVENTS.STARTED_CLICKED);
+                  setHasStarted(true);
+                }}
                 className="rounded-full px-8 py-6 bg-white border border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-300 shadow-sm transition-all text-base font-normal"
               >
                 はじめる

@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UploadCloud, Loader2 } from "lucide-react";
 import { extractPartiesAction } from "@/app/actions";
 import { ExtractionResult } from "@/lib/types/analysis";
+import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics/client";
 
 interface UploadSectionProps {
     onAnalysisStart: () => void;
@@ -22,8 +23,10 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
     async function handleFileSelect(file: File) {
         if (!file) return;
 
+        trackEvent(ANALYTICS_EVENTS.FILE_SELECTED, { fileName: file.name, fileSize: file.size });
         setIsUploading(true);
         onAnalysisStart();
+        trackEvent(ANALYTICS_EVENTS.UPLOAD_STARTED, { type: "file" });
 
         const formData = new FormData();
         formData.append("file", file);
@@ -38,6 +41,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
             }
         } catch (e: any) {
             console.error(e);
+            trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "upload_error", message: e.message });
             alert(`エラーが発生しました: ${e.message}`);
             onAnalysisComplete(null);
         } finally {
