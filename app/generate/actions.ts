@@ -37,17 +37,31 @@ export async function generateContractAction(input: ContractInput): Promise<Gene
             };
         }
 
+        console.log("[Contract Generation] Starting with input:", JSON.stringify({
+            clientName: input.clientName,
+            userName: input.userName,
+            amount: input.amount,
+            deadline: input.deadline,
+            scopeLength: input.scopeDescription?.length || 0,
+        }));
+
         const result = await generateContract(input);
+
+        console.log("[Contract Generation] Success, markdown length:", result.markdown?.length || 0);
 
         return {
             success: true,
             data: result,
         };
-    } catch (error) {
-        console.error("Contract generation error:", error);
+    } catch (error: any) {
+        const errorMessage = error?.message || "Unknown error";
+        const errorStack = error?.stack || "";
+        console.error("[Contract Generation] Error:", errorMessage);
+        console.error("[Contract Generation] Stack:", errorStack);
+
         return {
             success: false,
-            error: "契約書の生成中にエラーが発生しました。",
+            error: `契約書の生成中にエラーが発生しました: ${errorMessage}`,
         };
     }
 }
