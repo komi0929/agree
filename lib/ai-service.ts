@@ -180,11 +180,37 @@ ${lawContext}
 - mixed：混合契約
 - unknown：判別不能
 
-【出力に必ず含めてください】
-- clause_tag：条項の分類タグ
-- violated_laws：違反の可能性がある法律条項
-- legal_basis：なぜその法律に抵触するのかの説明
-- 修正案と3トーンの交渉メッセージ`;
+【重要：出力形式】
+以下の形式で必ずJSONを出力してください：
+{
+  "summary": "契約書全体の要約と主なリスクの概要（2-3文で）",
+  "contract_classification": "ukeoi | jun_inin_hourly | jun_inin_result | mixed | unknown",
+  "risks": [
+    {
+      "clause_tag": "CLAUSE_PAYMENT | CLAUSE_IP | CLAUSE_LIABILITY | CLAUSE_SCOPE | CLAUSE_TERMINATION | CLAUSE_NON_COMPETE | CLAUSE_OTHER",
+      "section_title": "条項のタイトル（例：第4条 支払条件）",
+      "original_text": "【必須】問題のある契約書の原文をそのまま抜粋（ハイライト用、20-100文字程度）",
+      "risk_level": "critical | high | medium | low",
+      "violated_laws": ["該当する法律のコード"],
+      "explanation": "なぜこの条項にリスクがあるのかの説明",
+      "suggestion": {
+        "revised_text": "修正案の文面",
+        "negotiation_message": {
+          "formal": "フォーマルな交渉メッセージ",
+          "neutral": "ニュートラルな交渉メッセージ",
+          "casual": "カジュアルな交渉メッセージ"
+        },
+        "legal_basis": "法的根拠の説明"
+      }
+    }
+  ],
+  "missing_clauses": ["欠落している重要条項のリスト"]
+}
+
+【original_textについて】
+- 必ず契約書から問題箇所の文章をコピーしてください
+- これがないとユーザーが問題箇所を特定できません
+- 例：「検収完了の翌月末までに、甲の指定する方法により支払うものとする」`;
 }
 
 // ============================================
