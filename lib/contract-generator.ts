@@ -68,9 +68,11 @@ export async function generateContract(input: ContractInput): Promise<GeneratedC
             markdown,
             highlightedClauses,
         };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Contract generation error:", error);
-        throw new Error("契約書の生成に失敗しました。しばらく時間をおいて再度お試しください。");
+        // 開発中は詳細なエラーを表示
+        const errorDetail = error?.message || JSON.stringify(error) || "Unknown error";
+        throw new Error(`生成エラー: ${errorDetail}`);
     }
 }
 
