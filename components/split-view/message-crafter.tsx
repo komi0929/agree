@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,20 +9,51 @@ import { Copy, Check } from "lucide-react";
 
 interface MessageCrafterProps {
     risk: EnhancedAnalysisResult["risks"][0] | null;
+    selectedRisks?: EnhancedAnalysisResult["risks"];
     onFinish: () => void;
 }
 
-export function MessageCrafter({ risk, onFinish }: MessageCrafterProps) {
+export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafterProps) {
     const [tone, setTone] = useState<"formal" | "neutral" | "casual">("neutral");
     const [copied, setCopied] = useState(false);
     const [showFinish, setShowFinish] = useState(false);
+    const [generatedMessage, setGeneratedMessage] = useState("");
 
-    if (!risk) return <div className="p-8 text-center text-slate-400">項目を選択してください</div>;
+    const isMultiple = selectedRisks && selectedRisks.length > 0;
 
-    const message = risk.suggestion.negotiation_message[tone];
+    useEffect(() => {
+        if (isMultiple && selectedRisks) {
+            // Generate combined message
+            const preamble = {
+                formal: "お世話になっております。\n契約書の内容を確認いたしました。\n以下の点について、修正をお願いしたく存じます。\n\n",
+                neutral: "お疲れ様です。\n契約書を確認しました。\n以下の箇所について修正をお願いできますでしょうか。\n\n",
+                casual: "契約書見ました！\nちょっと以下の点だけ気になったので、相談させてください。\n\n"
+            };
+
+            const closing = {
+                formal: "\n\nお手数をおかけしますが、ご検討のほどよろしくお願いいたします。",
+                neutral: "\n\nご確認よろしくお願いいたします。",
+                casual: "\n\nよろしくお願いします！"
+            };
+
+            const points = selectedRisks.map((r, i) => {
+                const suggestion = r.suggestion.revised_text || "（修正内容を記載）";
+                return `${i + 1}. ${r.section_title}\n   要望: ${suggestion}`;
+            }).join("\n\n");
+
+            setGeneratedMessage(`${preamble[tone]}${points}${closing[tone]}`);
+
+        } else if (risk) {
+            // Use pre-calculated message from AI if available, or fallback
+            // Note: The AI result structure assumes `negotiation_message` exists.
+            setGeneratedMessage(risk.suggestion.negotiation_message[tone]);
+        }
+    }, [risk, selectedRisks, tone, isMultiple]);
+
+    if (!risk && !isMultiple) return <div className="p-8 text-center text-slate-400">項目を選択してください</div>;
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(message);
+        navigator.clipboard.writeText(generatedMessage);
         setCopied(true);
         setShowFinish(true); // Show finish button after copy
         setTimeout(() => setCopied(false), 2000);
@@ -31,9 +62,14 @@ export function MessageCrafter({ risk, onFinish }: MessageCrafterProps) {
     return (
         <div className="flex-1 flex flex-col p-8 space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="space-y-2">
-                <h3 className="text-xl font-bold text-slate-900">相手へのメッセージ案</h3>
+                <h3 className="text-xl font-bold text-slate-900">
+                    {isMultiple ? `${selectedRisks?.length}項目の修正依頼メッセージ` : "相手へのメッセージ案"}
+                </h3>
                 <p className="text-slate-500 text-sm">
-                    修正依頼を送るためのメッセージを作成しました。<br />
+                    {isMultiple
+                        ? "選択した複数の修正点を含むメッセージを作成しました。"
+                        : "修正依頼を送るためのメッセージを作成しました。"}
+                    <br />
                     相手との関係性に合わせてトーンを選んでください。
                 </p>
             </div>
@@ -49,7 +85,7 @@ export function MessageCrafter({ risk, onFinish }: MessageCrafterProps) {
 
                 <div className="relative flex-1">
                     <Textarea
-                        value={message}
+                        value={generatedMessage}
                         readOnly
                         className="h-full min-h-[300px] resize-none p-6 text-base leading-relaxed border-slate-200 focus-visible:ring-slate-300 bg-slate-50/50 rounded-xl mb-16"
                     />

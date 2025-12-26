@@ -4,29 +4,33 @@ import { useRef, useEffect } from "react";
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, AlertOctagon, Check, ArrowRight, ArrowLeft, Lightbulb } from "lucide-react";
+import { AlertTriangle, AlertOctagon, Check, ArrowRight, ArrowLeft, Lightbulb, CheckSquare, Square } from "lucide-react";
 import { VIOLATED_LAW_EXPLANATIONS, ViolatedLaw } from "@/lib/types/clause-tags";
 
 interface RiskPanelProps {
     risks: EnhancedAnalysisResult["risks"];
     highlightedRiskIndex: number | null;
+    selectedRiskIndices: number[];
     onRiskHover: (index: number | null) => void;
     onRiskSelect: (index: number) => void;
+    onRiskToggle: (index: number) => void;
     onScrollToContract: (index: number) => void;
 }
 
 export function RiskPanel({
     risks,
     highlightedRiskIndex,
+    selectedRiskIndices,
     onRiskHover,
     onRiskSelect,
+    onRiskToggle,
     onScrollToContract
 }: RiskPanelProps) {
     const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
     // Scroll to highlighted card when highlightedRiskIndex changes
     useEffect(() => {
-        if (highlightedRiskIndex !== null) {
+        if (highlightedRiskIndex !== null && highlightedRiskIndex !== -1) { // -1 check just in case
             const element = cardRefs.current.get(highlightedRiskIndex);
             if (element) {
                 element.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -93,10 +97,12 @@ export function RiskPanel({
             </div>
 
             {/* Cards */}
-            <div className="flex-1 overflow-auto p-4 space-y-4">
+            <div className="flex-1 overflow-auto p-4 space-y-4 pb-24">
                 {risks.map((risk, index) => {
                     const styling = getRiskStyling(risk.risk_level);
-                    const isActive = highlightedRiskIndex === index;
+                    const isHighlighted = highlightedRiskIndex === index;
+                    const isSelected = selectedRiskIndices.includes(index);
+                    const canAdopt = !!risk.suggestion.revised_text;
 
                     return (
                         <div
@@ -105,16 +111,48 @@ export function RiskPanel({
                                 if (el) cardRefs.current.set(index, el);
                             }}
                             className={`
-                                relative p-4 rounded-lg border border-slate-200 shadow-sm transition-all duration-300 cursor-pointer
-                                border-l-4 ${styling.border} ${styling.bg}
-                                ${isActive ? "ring-2 ring-slate-400 shadow-md" : "hover:shadow-md"}
+                                relative p-4 rounded-lg border shadow-sm transition-all duration-300
+                                border-l-4 ${styling.border} 
+                                ${isSelected ? "bg-blue-50/50 border-blue-200 ring-1 ring-blue-300" : styling.bg}
+                                ${isHighlighted ? "ring-2 ring-slate-400 shadow-md" : (!isSelected && "border-slate-200 hover:shadow-md")}
                             `}
                             onMouseEnter={() => onRiskHover(index)}
                             onMouseLeave={() => onRiskHover(null)}
                             onClick={() => onRiskSelect(index)}
                         >
+                            {/* Selection Checkbox (Only if adoptable) */}
+                            {canAdopt && (
+                                <div className="absolute top-4 right-4 z-10">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onRiskToggle(index);
+                                        }}
+                                        className={`
+                                            flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all
+                                            ${isSelected
+                                                ? "bg-blue-600 text-white shadow-md hover:bg-blue-700"
+                                                : "bg-white text-slate-500 border border-slate-200 hover:border-blue-400 hover:text-blue-600"
+                                            }
+                                        `}
+                                    >
+                                        {isSelected ? (
+                                            <>
+                                                <CheckSquare className="w-3.5 h-3.5" />
+                                                採用する
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Square className="w-3.5 h-3.5" />
+                                                修正案を採用
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+
                             {/* Header Row */}
-                            <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-start justify-between mb-3 pr-24">
                                 <div className="flex items-center gap-2">
                                     <span className={`
                                         w-6 h-6 rounded-full flex items-center justify-center
@@ -126,7 +164,7 @@ export function RiskPanel({
                                         {styling.label}
                                     </span>
                                 </div>
-                                {styling.icon}
+                                {!canAdopt && styling.icon}
                             </div>
 
                             {/* Title */}
@@ -146,15 +184,27 @@ export function RiskPanel({
                             </div>
 
                             {/* Suggestion Box */}
-                            <div className="bg-teal-50 border border-teal-100 rounded-lg p-3 mb-3">
-                                <div className="flex items-center gap-1 text-[10px] text-teal-700 mb-1">
-                                    <Lightbulb className="w-3 h-3" />
-                                    改善の提案
+                            {risk.suggestion.revised_text && (
+                                <div
+                                    className={`
+                                        border rounded-lg p-3 mb-3 cursor-pointer transition-colors
+                                        ${isSelected ? "bg-blue-100/50 border-blue-200" : "bg-teal-50 border-teal-100 hover:bg-teal-100/50"}
+                                    `}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onRiskToggle(index);
+                                    }}
+                                >
+                                    <div className="flex items-center gap-1 text-[10px] mb-1 font-medium
+                                        ${isSelected ? 'text-blue-700' : 'text-teal-700'}">
+                                        <Lightbulb className="w-3 h-3" />
+                                        改善の提案 {isSelected && <span className="ml-1 text-blue-600 font-bold">(採用中)</span>}
+                                    </div>
+                                    <p className={`text-xs leading-relaxed ${isSelected ? 'text-blue-900' : 'text-teal-800'}`}>
+                                        {risk.suggestion.revised_text}
+                                    </p>
                                 </div>
-                                <p className="text-xs text-teal-800 leading-relaxed">
-                                    {risk.suggestion.revised_text || "専門家にご確認ください。"}
-                                </p>
-                            </div>
+                            )}
 
                             {/* Violated Laws */}
                             {risk.violated_laws && risk.violated_laws.length > 0 && (
@@ -173,14 +223,14 @@ export function RiskPanel({
 
                             {/* Link to Contract */}
                             <button
-                                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
+                                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors mt-2"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onScrollToContract(index);
                                 }}
                             >
                                 <ArrowLeft className="w-3 h-3" />
-                                原本内の該当箇所と連結中...
+                                原本内の該当箇所と連結
                             </button>
                         </div>
                     );
