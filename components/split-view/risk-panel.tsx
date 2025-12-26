@@ -1,94 +1,160 @@
 "use client";
 
+import { useRef, useEffect } from "react";
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check, AlertTriangle, Info, ArrowRight, Copy, AlertOctagon } from "lucide-react";
-import { useState } from "react";
+import { AlertTriangle, AlertOctagon, Check, ArrowRight, ArrowLeft, Lightbulb } from "lucide-react";
 import { VIOLATED_LAW_EXPLANATIONS, ViolatedLaw } from "@/lib/types/clause-tags";
 
 interface RiskPanelProps {
     risks: EnhancedAnalysisResult["risks"];
+    highlightedRiskIndex: number | null;
     onRiskHover: (index: number | null) => void;
     onRiskSelect: (index: number) => void;
+    onScrollToContract: (index: number) => void;
 }
 
-export function RiskPanel({ risks, onRiskHover, onRiskSelect }: RiskPanelProps) {
-    const [selectedId, setSelectedId] = useState<number | null>(null);
+export function RiskPanel({
+    risks,
+    highlightedRiskIndex,
+    onRiskHover,
+    onRiskSelect,
+    onScrollToContract
+}: RiskPanelProps) {
+    const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+
+    // Scroll to highlighted card when highlightedRiskIndex changes
+    useEffect(() => {
+        if (highlightedRiskIndex !== null) {
+            const element = cardRefs.current.get(highlightedRiskIndex);
+            if (element) {
+                element.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    }, [highlightedRiskIndex]);
+
+    // Get risk styling based on level
+    const getRiskStyling = (riskLevel: string) => {
+        switch (riskLevel) {
+            case "critical":
+                return {
+                    border: "border-l-purple-600",
+                    bg: "bg-purple-50/30",
+                    badge: "bg-purple-100 text-purple-700 border-purple-200",
+                    label: "重大リスク",
+                    icon: <AlertOctagon className="w-4 h-4 text-purple-600" />,
+                };
+            case "high":
+                return {
+                    border: "border-l-red-500",
+                    bg: "bg-red-50/30",
+                    badge: "bg-red-100 text-red-700 border-red-200",
+                    label: "HIGH RISK",
+                    icon: <AlertTriangle className="w-4 h-4 text-red-500" />,
+                };
+            case "medium":
+                return {
+                    border: "border-l-yellow-500",
+                    bg: "bg-yellow-50/30",
+                    badge: "bg-yellow-100 text-yellow-700 border-yellow-200",
+                    label: "MED RISK",
+                    icon: <AlertTriangle className="w-4 h-4 text-yellow-500" />,
+                };
+            default:
+                return {
+                    border: "border-l-green-500",
+                    bg: "bg-green-50/30",
+                    badge: "bg-green-100 text-green-700 border-green-200",
+                    label: "提案",
+                    icon: <Check className="w-4 h-4 text-green-500" />,
+                };
+        }
+    };
 
     return (
-        <div className="space-y-6 pb-20">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-slate-800">解析レポート</h3>
-                <Badge variant="outline" className="rounded-full px-3 py-1 text-xs">
-                    {risks.length} 件の指摘
-                </Badge>
+        <div className="h-full flex flex-col bg-slate-50">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-slate-200">
+                <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-slate-700">✨ AI診断レポート</span>
+                    <Badge variant="outline" className="rounded-full text-[10px] px-2">
+                        {risks.length}箇所を検出
+                    </Badge>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                    <span className="flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-red-500" />HIGH
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-yellow-500" />MED
+                    </span>
+                </div>
             </div>
 
-            <div className="space-y-4">
+            {/* Cards */}
+            <div className="flex-1 overflow-auto p-4 space-y-4">
                 {risks.map((risk, index) => {
-                    const isSelected = selectedId === index;
-
-                    // Categorize color based on risk_level (now includes critical)
-                    let colorClass = "border-l-4 border-l-slate-300";
-                    let icon = <Info className="w-4 h-4 text-slate-400" />;
-                    let bgClass = "bg-white";
-                    let levelLabel = "提案";
-
-                    if (risk.risk_level === "critical") {
-                        colorClass = "border-l-4 border-l-purple-600";
-                        icon = <AlertOctagon className="w-4 h-4 text-purple-600" />;
-                        bgClass = "bg-purple-50/20";
-                        levelLabel = "重大リスク";
-                    } else if (risk.risk_level === "high") {
-                        colorClass = "border-l-4 border-l-red-500";
-                        icon = <AlertTriangle className="w-4 h-4 text-red-500" />;
-                        bgClass = "bg-red-50/10";
-                        levelLabel = "修正必須";
-                    } else if (risk.risk_level === "medium") {
-                        colorClass = "border-l-4 border-l-yellow-400";
-                        icon = <AlertTriangle className="w-4 h-4 text-yellow-500" />;
-                        bgClass = "bg-yellow-50/10";
-                        levelLabel = "要検討";
-                    } else {
-                        colorClass = "border-l-4 border-l-green-400";
-                        icon = <Check className="w-4 h-4 text-green-500" />;
-                        bgClass = "bg-green-50/10";
-                        levelLabel = "提案";
-                    }
+                    const styling = getRiskStyling(risk.risk_level);
+                    const isActive = highlightedRiskIndex === index;
 
                     return (
                         <div
                             key={index}
+                            ref={(el) => {
+                                if (el) cardRefs.current.set(index, el);
+                            }}
                             className={`
-                                group relative p-5 rounded-lg border border-slate-100 shadow-sm transition-all duration-300
-                                ${colorClass} ${bgClass}
-                                ${isSelected ? "ring-2 ring-slate-900 shadow-md transform scale-[1.02]" : "hover:shadow-md hover:border-slate-300"}
+                                relative p-4 rounded-lg border border-slate-200 shadow-sm transition-all duration-300 cursor-pointer
+                                border-l-4 ${styling.border} ${styling.bg}
+                                ${isActive ? "ring-2 ring-slate-400 shadow-md" : "hover:shadow-md"}
                             `}
                             onMouseEnter={() => onRiskHover(index)}
                             onMouseLeave={() => onRiskHover(null)}
-                            onClick={() => {
-                                setSelectedId(index);
-                                onRiskSelect(index);
-                            }}
+                            onClick={() => onRiskSelect(index)}
                         >
+                            {/* Header Row */}
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-2">
-                                    {icon}
-                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                        {levelLabel}
+                                    <span className={`
+                                        w-6 h-6 rounded-full flex items-center justify-center
+                                        text-xs font-bold ${styling.badge} border
+                                    `}>
+                                        {index + 1}
+                                    </span>
+                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${styling.badge}`}>
+                                        {styling.label}
                                     </span>
                                 </div>
-                                <span className="text-xs text-slate-300">#{index + 1}</span>
+                                {styling.icon}
                             </div>
 
-                            <h4 className="text-base font-bold text-slate-900 mb-2">
+                            {/* Title */}
+                            <h4 className="text-sm font-bold text-slate-800 mb-2">
                                 {risk.section_title || "条項"}
                             </h4>
 
-                            <p className="text-sm text-slate-600 leading-relaxed mb-3">
-                                {risk.explanation}
-                            </p>
+                            {/* Explanation */}
+                            <div className="mb-3">
+                                <div className="flex items-center gap-1 text-[10px] text-slate-500 mb-1">
+                                    <AlertTriangle className="w-3 h-3" />
+                                    検出されたリスク
+                                </div>
+                                <p className="text-xs text-slate-600 leading-relaxed">
+                                    {risk.explanation}
+                                </p>
+                            </div>
+
+                            {/* Suggestion Box */}
+                            <div className="bg-teal-50 border border-teal-100 rounded-lg p-3 mb-3">
+                                <div className="flex items-center gap-1 text-[10px] text-teal-700 mb-1">
+                                    <Lightbulb className="w-3 h-3" />
+                                    改善の提案
+                                </div>
+                                <p className="text-xs text-teal-800 leading-relaxed">
+                                    {risk.suggestion.revised_text || "専門家にご確認ください。"}
+                                </p>
+                            </div>
 
                             {/* Violated Laws */}
                             {risk.violated_laws && risk.violated_laws.length > 0 && (
@@ -97,7 +163,7 @@ export function RiskPanel({ risks, onRiskHover, onRiskSelect }: RiskPanelProps) 
                                         <Badge
                                             key={i}
                                             variant="secondary"
-                                            className="text-[10px] bg-slate-100 text-slate-600 rounded-full"
+                                            className="text-[9px] bg-slate-100 text-slate-600 rounded-full"
                                         >
                                             {VIOLATED_LAW_EXPLANATIONS[law as ViolatedLaw]?.split("（")[0] || law}
                                         </Badge>
@@ -105,28 +171,17 @@ export function RiskPanel({ risks, onRiskHover, onRiskSelect }: RiskPanelProps) 
                                 </div>
                             )}
 
-                            {/* Legal Basis */}
-                            {risk.suggestion.legal_basis && (
-                                <div className="text-xs text-slate-500 italic mb-3 p-2 bg-slate-50 rounded border-l-2 border-slate-300">
-                                    💡 {risk.suggestion.legal_basis}
-                                </div>
-                            )}
-
-                            <div className="bg-slate-50 p-3 rounded text-sm text-slate-700 font-mono text-xs mb-4 border border-slate-100">
-                                <div className="text-[10px] text-slate-400 mb-1">修正案:</div>
-                                {risk.suggestion.revised_text}
-                            </div>
-
-                            {/* Actions Area - revealed on hover or select */}
-                            <div className={`
-                                flex items-center gap-2 pt-2 border-t border-slate-100 mt-2
-                                ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"} transition-opacity
-                            `}>
-                                <Button size="sm" className="w-full bg-slate-900 text-white hover:bg-slate-700 h-9 text-xs rounded-full">
-                                    修正を採用してメッセージを作成
-                                    <ArrowRight className="w-3 h-3 ml-2" />
-                                </Button>
-                            </div>
+                            {/* Link to Contract */}
+                            <button
+                                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onScrollToContract(index);
+                                }}
+                            >
+                                <ArrowLeft className="w-3 h-3" />
+                                原本内の該当箇所と連結中...
+                            </button>
                         </div>
                     );
                 })}

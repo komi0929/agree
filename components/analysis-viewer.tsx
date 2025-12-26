@@ -1,11 +1,13 @@
+"use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
-import { SplitLayout } from "@/components/split-layout";
+import { SummaryHeader } from "@/components/split-view/summary-header";
 import { ContractViewer } from "@/components/split-view/contract-viewer";
 import { RiskPanel } from "@/components/split-view/risk-panel";
 import { MessageCrafter } from "@/components/split-view/message-crafter";
 import { EngagementModal } from "@/components/engagement-modal";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
@@ -20,38 +22,50 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
     const [viewMode, setViewMode] = useState<"contract" | "message">("contract");
     const [showEngagement, setShowEngagement] = useState(false);
 
-    const handleRiskSelect = (index: number) => {
+    // When a risk card is clicked in the right panel
+    const handleRiskSelect = useCallback((index: number) => {
         setSelectedRiskIndex(index);
         setHighlightedRiskIndex(index);
-        setViewMode("contract");
-        // Note: The prompt implies instant message drafting upon "Decision", but maybe we keep it as "contract" 
-        // until they explicitly click "Adopt" in the panel.
-        // Actually, the RiskPanel button says "Adopt and Draft".
-        // So let's handle that in a separate handler passed to RiskPanel.
-    };
+        // After a brief moment, open message crafter
+        setTimeout(() => {
+            setViewMode("message");
+        }, 300);
+    }, []);
 
-    const handleAdoptRisk = (index: number) => {
-        setSelectedRiskIndex(index);
-        setViewMode("message");
-    };
+    // Scroll to contract highlight when clicking link in risk panel
+    const handleScrollToContract = useCallback((index: number) => {
+        setHighlightedRiskIndex(index);
+        setViewMode("contract");
+    }, []);
+
+    // When clicking a highlight in the contract viewer
+    const handleHighlightClick = useCallback((index: number) => {
+        setHighlightedRiskIndex(index);
+    }, []);
 
     const handleFinish = () => {
         setShowEngagement(true);
     };
 
     return (
-        <div className="h-full w-full font-sans">
-            <SplitLayout
-                leftPane={
-                    viewMode === "contract" ? (
+        <div className="h-screen w-full flex flex-col font-sans bg-slate-100">
+            {/* Summary Header */}
+            <SummaryHeader data={data} />
+
+            {/* Main Split View */}
+            <div className="flex-1 flex overflow-hidden">
+                {/* Left Pane */}
+                <div className="w-full md:w-1/2 h-full flex flex-col border-r border-slate-200 bg-white overflow-hidden">
+                    {viewMode === "contract" ? (
                         <ContractViewer
                             text={text}
                             risks={data.risks}
                             highlightedRiskIndex={highlightedRiskIndex}
+                            onHighlightClick={handleHighlightClick}
                         />
                     ) : (
                         <div className="h-full flex flex-col bg-white">
-                            <div className="p-4 border-b border-slate-100 flex items-center">
+                            <div className="p-4 border-b border-slate-100 flex items-center bg-white">
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -70,16 +84,20 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
                                 onFinish={handleFinish}
                             />
                         </div>
-                    )
-                }
-                rightPane={
+                    )}
+                </div>
+
+                {/* Right Pane */}
+                <div className="w-full md:w-1/2 h-full flex flex-col bg-slate-50 overflow-hidden">
                     <RiskPanel
                         risks={data.risks}
+                        highlightedRiskIndex={highlightedRiskIndex}
                         onRiskHover={setHighlightedRiskIndex}
-                        onRiskSelect={handleAdoptRisk} // Changed to trigger message mode directly on click/select
+                        onRiskSelect={handleRiskSelect}
+                        onScrollToContract={handleScrollToContract}
                     />
-                }
-            />
+                </div>
+            </div>
 
             <EngagementModal
                 open={showEngagement}
@@ -88,4 +106,3 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
         </div>
     );
 }
-
