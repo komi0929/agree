@@ -14,8 +14,8 @@ export async function extractTextFromPdf(buffer: Buffer): Promise<string> {
     try {
         const data = await pdf(buffer);
         return data.text;
-    } catch (error) {
+    } catch (error: any) {
         console.error("PDF Parsing Error:", error);
-        throw new Error("Failed to extract text from PDF");
+        throw new Error(`Failed to extract text from PDF: ${error.message || "Unknown error"}`);
     }
 }

@@ -83,9 +83,12 @@ export async function extractPartiesAction(prevState: any, formData: FormData): 
 
         return { success: true, data: result, text: text };
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Extraction Error:", error);
-        return { success: false, message: "解析の準備中にエラーが発生しました。" };
+        return {
+            success: false,
+            message: `解析の準備中にエラーが発生しました。(${error.message || "Unknown Error"})`
+        };
     }
 }
 
