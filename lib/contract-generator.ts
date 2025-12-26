@@ -26,43 +26,52 @@ export interface GeneratedEmail {
  * 契約書を生成
  */
 export async function generateContract(input: ContractInput): Promise<GeneratedContract> {
-    const systemPrompt = buildContractGenerationPrompt(input);
+    try {
+        const systemPrompt = buildContractGenerationPrompt(input);
 
-    const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-            {
-                role: "system",
-                content: systemPrompt,
-            },
-            {
-                role: "user",
-                content: `上記の情報をもとに、業務委託契約書を生成してください。`,
-            },
-        ],
-        temperature: 0.3,  // 安定性重視
-        max_tokens: 4000,
-    });
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+                {
+                    role: "system",
+                    content: systemPrompt,
+                },
+                {
+                    role: "user",
+                    content: `上記の情報をもとに、業務委託契約書を生成してください。`,
+                },
+            ],
+            temperature: 0.3,  // 安定性重視
+            max_tokens: 4000,
+        });
 
-    const markdown = completion.choices[0]?.message?.content || "";
+        const markdown = completion.choices[0]?.message?.content || "";
 
-    // ⭐マークの付いた条項を抽出
-    const highlightedClauses: string[] = [];
-    const lines = markdown.split("\n");
-    for (const line of lines) {
-        if (line.includes("⭐")) {
-            // 条文タイトルから⭐以前の部分を抽出
-            const match = line.match(/第\d+条（([^）]+)）/);
-            if (match) {
-                highlightedClauses.push(match[1]);
+        if (!markdown || markdown.trim().length < 100) {
+            throw new Error("生成された契約書が空または不完全です");
+        }
+
+        // ⭐マークの付いた条項を抽出
+        const highlightedClauses: string[] = [];
+        const lines = markdown.split("\n");
+        for (const line of lines) {
+            if (line.includes("⭐")) {
+                // 条文タイトルから⭐以前の部分を抽出
+                const match = line.match(/第\d+条（([^）]+)）/);
+                if (match) {
+                    highlightedClauses.push(match[1]);
+                }
             }
         }
-    }
 
-    return {
-        markdown,
-        highlightedClauses,
-    };
+        return {
+            markdown,
+            highlightedClauses,
+        };
+    } catch (error) {
+        console.error("Contract generation error:", error);
+        throw new Error("契約書の生成に失敗しました。しばらく時間をおいて再度お試しください。");
+    }
 }
 
 /**
