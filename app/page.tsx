@@ -90,12 +90,12 @@ export default function Home() {
             <div className="text-center space-y-10 animate-fade-in-delayed">
               <div className="space-y-6">
                 <p className="text-base leading-loose max-w-md mx-auto">
-                  agreeは、契約書のリスクを静かにチェックする<br />
-                  シンプルなAIツールです。
+                  お仕事の契約の、はじまりから終わりまで。<br />
+                  あなたの立場をそっと、確かに守ります。
                 </p>
                 <p className="text-base leading-loose max-w-md mx-auto">
-                  面倒な登録も、騒がしい通知もありません。<br />
-                  ただ、あなたの安全のために。
+                  面倒な登録も、煩わしい通知もありません。<br />
+                  ただ、あなたのあんしんのために。
                 </p>
               </div>
 
@@ -127,11 +127,12 @@ export default function Home() {
                 </button>
               </div>
             </div>
-          )}
-        </section>
+          )
+          }
+        </section >
 
         <Footer />
-      </div>
+      </div >
     );
   }
 

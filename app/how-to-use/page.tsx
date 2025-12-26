@@ -19,10 +19,9 @@ export default function HowToUsePage() {
                             <UploadCloud className="w-4 h-4 text-slate-400" />
                         </div>
                         <div className="space-y-2 pt-1">
-                            <h2 className="text-base font-medium text-slate-900">Step 1. 契約書をアップロード</h2>
+                            <h2 className="text-base font-medium text-slate-900">Step 1. 契約書をお預けください</h2>
                             <p className="text-sm text-slate-500 leading-relaxed font-light">
-                                トップページから、チェックしたい契約書のPDFファイルをドラッグ＆ドロップしてください。
-                                公開されているPDFのURLを直接入力することも可能です。
+                                トップページから、確認したい契約書のPDFファイルをドラッグ&ドロップしてください。URLからの確認も可能です。
                             </p>
                         </div>
                     </div>
@@ -33,10 +32,9 @@ export default function HowToUsePage() {
                             <Search className="w-4 h-4 text-slate-400" />
                         </div>
                         <div className="space-y-2 pt-1">
-                            <h2 className="text-base font-medium text-slate-900">Step 2. AIが自動解析</h2>
+                            <h2 className="text-base font-medium text-slate-900">Step 2. 内容を確認します</h2>
                             <p className="text-sm text-slate-500 leading-relaxed font-light">
-                                最新のAIが契約書の内容を読み込み、フリーランスにとって不利な条項やリスクがないかを数秒で解析します。
-                                解析中は少しだけお待ちください。
+                                契約書の内容を読み込み、あなたにとって不利な条項やリスクがないかを確認いたします。15秒ほどお待ちください。
                             </p>
                         </div>
                     </div>
@@ -47,10 +45,9 @@ export default function HowToUsePage() {
                             <ShieldCheck className="w-4 h-4 text-slate-400" />
                         </div>
                         <div className="space-y-2 pt-1">
-                            <h2 className="text-base font-medium text-slate-900">Step 3. 結果の確認と修正</h2>
+                            <h2 className="text-base font-medium text-slate-900">Step 3. 結果と、お伝えする言葉をご提案</h2>
                             <p className="text-sm text-slate-500 leading-relaxed font-light">
-                                解析結果が表示されます。リスクのある箇所には「修正案」や、相手方に送るための「交渉メッセージ」も提案されます。
-                                これらを参考に、安心して契約を結んでください。
+                                確認結果をお見せします。気になる箇所には「修正のご提案」や、先方へお伝えするための「メッセージ案」もご用意いたします。これらを参考に、安心して契約をお進めください。
                             </p>
                         </div>
                     </div>
