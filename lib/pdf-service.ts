@@ -1,43 +1,34 @@
 // @ts-nocheck
-import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import PDFParser from "pdf2json";
 
 /**
- * Extracts text from a PDF buffer using pdfjs-dist.
+ * Extracts text from a PDF buffer using pdf2json.
  * This is a server-side function.
  */
 export async function extractTextFromPdf(buffer: Buffer): Promise<string> {
-    try {
-        // Convert Buffer to Uint8Array for pdfjs-dist
-        const data = new Uint8Array(buffer);
+    return new Promise((resolve, reject) => {
+        const pdfParser = new PDFParser(null, 1); // 1 for text content
 
-        // Load the PDF document
-        const loadingTask = getDocument({
-            data,
-            useSystemFonts: true, // Reduce reliance on canvas/font loading
-            disableFontFace: true, // Disable font face loading to avoid some environment issues
+        pdfParser.on("pdfParser_dataError", (errData: any) => {
+            console.error("PDF Parser Error:", errData.parserError);
+            reject(new Error(errData.parserError));
         });
 
-        const pdfDocument = await loadingTask.promise;
-        const numPages = pdfDocument.numPages;
-        let fullText = "";
+        pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
+            try {
+                // pdf2json returns raw text content in a specific format
+                // We need to parse it if we want clean text, but getRawTextContent() matches the structure
+                const text = pdfParser.getRawTextContent();
+                resolve(text);
+            } catch (e) {
+                reject(e);
+            }
+        });
 
-        // Iterate over all pages and extract text
-        for (let i = 1; i <= numPages; i++) {
-            const page = await pdfDocument.getPage(i);
-            const textContent = await page.getTextContent();
-
-            // Join items with space, preserving some structure
-            const pageText = textContent.items
-                .map((item: any) => item.str)
-                .join(" ");
-
-            fullText += pageText + "\n";
+        try {
+            pdfParser.parseBuffer(buffer);
+        } catch (e) {
+            reject(e);
         }
-
-        return fullText;
-
-    } catch (error: any) {
-        console.error("PDF Parsing Error:", error);
-        throw new Error(`Failed to extract text from PDF: ${error.message || "Unknown error"}`);
-    }
+    });
 }

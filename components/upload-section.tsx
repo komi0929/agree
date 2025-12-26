@@ -36,9 +36,9 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                 alert(result.message || "解析に失敗しました");
                 onAnalysisComplete(null);
             }
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
-            alert("エラーが発生しました");
+            alert(`エラーが発生しました: ${e.message}`);
             onAnalysisComplete(null);
         } finally {
             setIsUploading(false);
