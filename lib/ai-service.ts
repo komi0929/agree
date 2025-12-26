@@ -259,33 +259,76 @@ export async function analyzeContractText(
     text: string,
     userContext: UserContext = DEFAULT_USER_CONTEXT
 ): Promise<EnhancedAnalysisResult> {
-    // 適用法規を決定
-    const applicableLaws = determineApplicableLaws(userContext);
+    // Fallback result for errors
+    const fallbackResult: EnhancedAnalysisResult = {
+        summary: "契約書の解析に問題が発生しました。再度お試しいただくか、別のファイルでお試しください。",
+        risks: [],
+        contract_classification: "unknown",
+        missing_clauses: [],
+    };
 
-    // 動的プロンプトを生成
-    const systemPrompt = buildEnhancedSystemPrompt(userContext, applicableLaws);
+    try {
+        // Check if text is valid
+        if (!text || text.trim().length < 100) {
+            return {
+                ...fallbackResult,
+                summary: "契約書のテキストが短すぎるか、読み取れませんでした。",
+            };
+        }
 
-    const completion = await getOpenAIClient().chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-            {
-                role: "system",
-                content: systemPrompt + "\n\n必ずJSON形式で返答してください。",
-            },
-            {
-                role: "user",
-                content: text,
-            },
-        ],
-        response_format: { type: "json_object" },
-    });
+        // 適用法規を決定
+        const applicableLaws = determineApplicableLaws(userContext);
 
-    const content = completion.choices[0].message.content;
-    if (!content) {
-        throw new Error("AI failed to return structured data");
+        // 動的プロンプトを生成
+        const systemPrompt = buildEnhancedSystemPrompt(userContext, applicableLaws);
+
+        const completion = await getOpenAIClient().chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+                {
+                    role: "system",
+                    content: systemPrompt + "\n\n必ずJSON形式で返答してください。",
+                },
+                {
+                    role: "user",
+                    content: text.substring(0, 15000), // Limit to avoid token limits
+                },
+            ],
+            response_format: { type: "json_object" },
+        });
+
+        const content = completion.choices[0].message.content;
+        if (!content) {
+            console.error("AI returned empty content");
+            return fallbackResult;
+        }
+
+        const parsed = JSON.parse(content);
+
+        // Manually construct result with fallbacks for each field
+        const result: EnhancedAnalysisResult = {
+            summary: parsed.summary || "解析結果のサマリーを取得できませんでした。",
+            risks: Array.isArray(parsed.risks) ? parsed.risks.map((r: any) => ({
+                clause_tag: r.clause_tag || "CLAUSE_OTHER",
+                section_title: r.section_title || "不明な条項",
+                original_text: r.original_text || "",
+                risk_level: r.risk_level || "medium",
+                violated_laws: Array.isArray(r.violated_laws) ? r.violated_laws : [],
+                explanation: r.explanation || "",
+                suggestion: r.suggestion || {
+                    revised_text: "",
+                    negotiation_message: { formal: "", neutral: "", casual: "" },
+                    legal_basis: "",
+                },
+            })) : [],
+            contract_classification: parsed.contract_classification || "unknown",
+            missing_clauses: Array.isArray(parsed.missing_clauses) ? parsed.missing_clauses : [],
+        };
+
+        return result;
+    } catch (error) {
+        console.error("Contract analysis error:", error);
+        return fallbackResult;
     }
-
-    const parsed = JSON.parse(content);
-    return EnhancedAnalysisSchema.parse(parsed);
 }
 
