@@ -192,33 +192,67 @@ ${lawContext}
 // ============================================
 
 export async function extractContractParties(text: string): Promise<ExtractionResult> {
-    const completion = await getOpenAIClient().chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-            {
-                role: "system",
-                content: `契約書のテキストから以下を抽出してください：
-1. 甲の名称（正式名称）
-2. 乙の名称（正式名称）
-3. 契約書の種類
-4. 推定される契約期間（月数）
+    // Check if text is valid
+    if (!text || text.trim().length < 50) {
+        // Return fallback for very short/empty text
+        return {
+            party_a: "不明",
+            party_b: "不明",
+            contract_type: "不明",
+            estimated_contract_months: null,
+        };
+    }
 
-不明な場合は「不明」、期間が不明な場合はnullとしてください。
-必ずJSON形式で返答してください。`,
-            },
-            {
-                role: "user",
-                content: text,
-            },
-        ],
-        response_format: { type: "json_object" },
-    });
+    try {
+        const completion = await getOpenAIClient().chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                {
+                    role: "system",
+                    content: `契約書のテキストから以下を抽出し、必ず以下のJSON形式で返答してください：
+{
+  "party_a": "甲の名称（正式名称）。不明な場合は「不明」",
+  "party_b": "乙の名称（正式名称）。不明な場合は「不明」",
+  "contract_type": "契約書の種類（例：業務委託契約書）。不明な場合は「契約書」",
+  "estimated_contract_months": 数値またはnull
+}
 
-    const content = completion.choices[0].message.content;
-    if (!content) throw new Error("Failed to extract parties");
+重要：必ず上記のキー名を使用してください。`,
+                },
+                {
+                    role: "user",
+                    content: text.substring(0, 8000), // Limit text length
+                },
+            ],
+            response_format: { type: "json_object" },
+        });
 
-    const parsed = JSON.parse(content);
-    return ExtractionSchema.parse(parsed);
+        const content = completion.choices[0].message.content;
+        if (!content) throw new Error("Failed to extract parties");
+
+        const parsed = JSON.parse(content);
+
+        // Provide fallbacks for missing fields
+        const result: ExtractionResult = {
+            party_a: parsed.party_a || parsed.partyA || parsed["甲"] || "不明",
+            party_b: parsed.party_b || parsed.partyB || parsed["乙"] || "不明",
+            contract_type: parsed.contract_type || parsed.contractType || parsed["契約種類"] || "契約書",
+            estimated_contract_months: typeof parsed.estimated_contract_months === "number"
+                ? parsed.estimated_contract_months
+                : null,
+        };
+
+        return result;
+    } catch (error) {
+        console.error("Extraction error:", error);
+        // Return fallback on any error
+        return {
+            party_a: "不明",
+            party_b: "不明",
+            contract_type: "契約書",
+            estimated_contract_months: null,
+        };
+    }
 }
 
 export async function analyzeContractText(
