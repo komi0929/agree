@@ -153,7 +153,7 @@ export default function Home() {
   // User Context Collection Step
   if (step === "user_context") {
     return (
-      <div className="min-h-screen flex flex-col bg-slate-50 font-sans">
+      <div className="min-h-screen flex flex-col bg-white font-sans">
         <div className="flex-1 flex flex-col items-center justify-center p-6">
           <UserContextForm onComplete={handleUserContextComplete} />
         </div>
@@ -163,7 +163,7 @@ export default function Home() {
 
   if (step === "role_selection" && extractionData) {
     return (
-      <div className="min-h-screen flex flex-col bg-slate-50 font-sans">
+      <div className="min-h-screen flex flex-col bg-white font-sans">
         <div className="flex-1 flex flex-col items-center justify-center p-6">
           <RoleSelector
             extractionData={extractionData}
