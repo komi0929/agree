@@ -11,7 +11,7 @@ import { EngagementModal } from "@/components/engagement-modal";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, FileText, Send, Sparkles, Loader2, X } from "lucide-react";
 import { modifyContractAction } from "@/app/generate/actions";
-import { ContractInput } from "@/lib/types/contract-input";
+import { ContractInput, DEFAULT_CONTRACT_OPTIONS } from "@/lib/types/contract-input";
 
 interface AnalysisViewerProps {
     data: EnhancedAnalysisResult;
@@ -85,9 +85,18 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
                     userName: "乙",
                     amount: 0,
                     deadline: "契約締結時",
+                    scopeDescription: "",
+                    options: DEFAULT_CONTRACT_OPTIONS,
                 };
             } catch {
-                input = { clientName: "甲", userName: "乙", amount: 0, deadline: "契約締結時" };
+                input = {
+                    clientName: "甲",
+                    userName: "乙",
+                    amount: 0,
+                    deadline: "契約締結時",
+                    scopeDescription: "",
+                    options: DEFAULT_CONTRACT_OPTIONS,
+                };
             }
 
             const result = await modifyContractAction(text, fullInstruction, input);
