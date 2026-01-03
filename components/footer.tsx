@@ -12,6 +12,7 @@ export function Footer() {
                         <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">β</span>
                     </Link>
                     <Link href="/how-to-use" className="hover:text-slate-600 transition-colors">使い方</Link>
+                    <Link href="/check-policy" className="hover:text-slate-600 transition-colors">チェックポリシー</Link>
                     <Link href="/terms" className="hover:text-slate-600 transition-colors">利用規約</Link>
                     <Link href="/privacy" className="hover:text-slate-600 transition-colors">プライバシーポリシー</Link>
                     <Link href="/company" className="hover:text-slate-600 transition-colors">運営会社</Link>
