@@ -1,0 +1,61 @@
+笞 Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\soyst\pnpm-lock.yaml as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\soyst\OneDrive\繝・せ繧ｯ繝医ャ繝予AGREE\package-lock.json
+
+笆ｲ Next.js 16.1.1 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  ﾂｷ serverActions
+
+  Creating an optimized production build ...
+
+thread 'tokio-runtime-worker' (14212) panicked at turbopack\crates\turbopack-core\src\ident.rs:352:34:
+byte index 14 is not a char boundary; it is inside '繧ｹ' (bytes 12..15) of `OneDrive_繝・せ繧ｯ繝医ャ繝誉AGREE__next-internal_server_app_check-policy_page_actions_ec7d921c`
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'tokio-runtime-worker' (13420) panicked at turbopack\crates\turbopack-core\src\ident.rs:352:34:
+byte index 11 is not a char boundary; it is inside '繝・ (bytes 9..12) of `OneDrive_繝・せ繧ｯ繝医ャ繝誉AGREE__next-internal_server_app_icon_png_route_actions_2ee656fc`
+
+thread 'tokio-runtime-worker' (13420) panicked at turbopack\crates\turbopack-core\src\ident.rs:352:34:
+byte index 17 is not a char boundary; it is inside '繧ｯ' (bytes 15..18) of `OneDrive_繝・せ繧ｯ繝医ャ繝誉AGREE__next-internal_server_app_apple-icon_png_route_actions_a41e02ca`
+
+thread 'tokio-runtime-worker' (13420) panicked at turbopack\crates\turbopack-core\src\ident.rs:352:34:
+byte index 22 is not a char boundary; it is inside '繝・ (bytes 21..24) of `OneDrive_繝・せ繧ｯ繝医ャ繝誉AGREE__next-internal_server_app_api_analytics_query_route_actions_b4ced5ae`
+
+thread 'tokio-runtime-worker' (13420) panicked at turbopack\crates\turbopack-core\src\ident.rs:352:34:
+byte index 22 is not a char boundary; it is inside '繝・ (bytes 21..24) of `OneDrive_繝・せ繧ｯ繝医ャ繝誉AGREE__next-internal_server_app_api_analytics_track_route_actions_6b3bc43e`
+
+thread 'tokio-runtime-worker' (14212) panicked at turbopack\crates\turbopack-core\src\ident.rs:352:34:
+byte index 10 is not a char boundary; it is inside '繝・ (bytes 9..12) of `OneDrive_繝・せ繧ｯ繝医ャ繝誉AGREE__next-internal_server_app_generate_page_actions_db9f474c`
+
+-----
+FATAL: An unexpected Turbopack error occurred. A panic log has been written to C:\Users\soyst\AppData\Local\Temp\next-panic-15c434f26a67930d2ce4e33f46b02970.log.
+
+To help make Turbopack better, report this error by clicking here.
+-----
+
+
+> Build error occurred
+Error [TurbopackInternalError]: byte index 11 is not a char boundary; it is inside '繝・ (bytes 9..12) of `OneDrive_繝・せ繧ｯ繝医ャ繝誉AGREE__next-internal_server_app_icon_png_route_actions_2ee656fc`
+
+Debug info:
+- Execution of get_all_written_entrypoints_with_issues_operation failed
+- Execution of EntrypointsOperation::new failed
+- Execution of all_entrypoints_write_to_disk_operation failed
+- Execution of Project::emit_all_output_assets failed
+- Execution of emit_assets failed
+- Execution of emit failed
+- Execution of <SourceMapAsset as Asset>::content failed
+- Execution of <EcmascriptBuildNodeEntryChunk as GenerateSourceMap>::generate_source_map failed
+- Execution of *<Code as GenerateSourceMap>::generate_source_map failed
+- Execution of EcmascriptBuildNodeEntryChunk::code failed
+- Execution of <NodeJsChunkingContext as ChunkingContext>::chunk_path failed
+- Execution of AssetIdent::output_name failed
+- byte index 11 is not a char boundary; it is inside '繝・ (bytes 9..12) of `OneDrive_繝・せ繧ｯ繝医ャ繝誉AGREE__next-internal_server_app_icon_png_route_actions_2ee656fc`
+    at <unknown> (TurbopackInternalError: byte index 11 is not a char boundary; it is inside '繝・ (bytes 9..12) of `OneDrive_繝・せ繧ｯ繝医ャ繝誉AGREE__next-internal_server_app_icon_png_route_actions_2ee656fc`) {
+  type: 'TurbopackInternalError',
+  location: 'turbopack\\crates\\turbopack-core\\src\\ident.rs:352:34'
+}
