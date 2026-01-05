@@ -1,12 +1,16 @@
 // @ts-nocheck
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 /**
  * Extracts text from a PDF buffer using pdfjs-dist directly.
  * This is the most reliable method for Japanese text extraction.
+ * 
+ * Using dynamic import to avoid Turbopack/Vercel build issues.
  */
 export async function extractTextFromPdf(buffer: Buffer): Promise<string> {
     try {
+        // Dynamic import to avoid build-time resolution issues
+        const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+
         // Convert Buffer to Uint8Array
         const uint8Array = new Uint8Array(buffer);
 
