@@ -4,6 +4,53 @@ import { extractTextFromPdf } from "@/lib/pdf-service";
 import { analyzeContractText, extractContractParties, EnhancedAnalysisResult } from "@/lib/ai-service";
 import { UserContext } from "@/lib/types/user-context";
 
+// ============================================
+// API Key Validation
+// ============================================
+function validateApiKey(): { valid: boolean; error?: string } {
+    if (!process.env.OPENAI_API_KEY) {
+        return {
+            valid: false,
+            error: "システム設定エラー: AI解析サービスが設定されていません。管理者にお問い合わせください。"
+        };
+    }
+    if (process.env.OPENAI_API_KEY.startsWith("sk-") === false) {
+        return {
+            valid: false,
+            error: "システム設定エラー: AI解析サービスの設定が不正です。管理者にお問い合わせください。"
+        };
+    }
+    return { valid: true };
+}
+
+// ============================================
+// Safe Error Message Extraction
+// ============================================
+function getErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+        // OpenAI API errors
+        if (error.message.includes("API key")) {
+            return "AI解析サービスへの認証に失敗しました。";
+        }
+        if (error.message.includes("rate limit")) {
+            return "サービスが混雑しています。しばらく待ってから再度お試しください。";
+        }
+        if (error.message.includes("timeout") || error.message.includes("ETIMEDOUT")) {
+            return "サーバーへの接続がタイムアウトしました。再度お試しください。";
+        }
+        if (error.message.includes("network") || error.message.includes("ECONNREFUSED")) {
+            return "ネットワークエラーが発生しました。インターネット接続を確認してください。";
+        }
+        // PDF parsing errors
+        if (error.message.includes("PDF") || error.message.includes("pdf")) {
+            return "PDFファイルの読み込みに失敗しました。ファイルが破損していないか確認してください。";
+        }
+        // Generic message for other errors
+        return error.message;
+    }
+    return "予期しないエラーが発生しました。";
+}
+
 export type AnalysisState = {
     success: boolean;
     message?: string;
@@ -18,6 +65,13 @@ export type ExtractionState = {
 };
 
 export async function extractPartiesAction(prevState: any, formData: FormData): Promise<ExtractionState> {
+    // Pre-check: Validate API key before processing
+    const apiKeyCheck = validateApiKey();
+    if (!apiKeyCheck.valid) {
+        console.error("API Key validation failed:", apiKeyCheck.error);
+        return { success: false, message: apiKeyCheck.error };
+    }
+
     try {
         const file = formData.get("file") as File;
         const url = formData.get("url") as string;
@@ -38,9 +92,25 @@ export async function extractPartiesAction(prevState: any, formData: FormData): 
                     return { success: false, message: "PDFファイルのみ対応しています" };
                 }
 
-                const arrayBuffer = await file.arrayBuffer();
+                let arrayBuffer: ArrayBuffer;
+                try {
+                    arrayBuffer = await file.arrayBuffer();
+                } catch (e) {
+                    console.error("Failed to read file buffer:", e);
+                    return { success: false, message: "ファイルの読み込みに失敗しました。ファイルを再度選択してください。" };
+                }
+
                 const buffer = Buffer.from(arrayBuffer);
-                text = await extractTextFromPdf(buffer);
+
+                try {
+                    text = await extractTextFromPdf(buffer);
+                } catch (pdfError) {
+                    console.error("PDF extraction failed:", pdfError);
+                    return {
+                        success: false,
+                        message: "PDFからテキストを抽出できませんでした。スキャンされた画像ベースのPDFは現在サポートしていません。"
+                    };
+                }
             } else if (url) {
                 // URL validation: must be https and end with .pdf
                 try {
@@ -55,9 +125,16 @@ export async function extractPartiesAction(prevState: any, formData: FormData): 
                     return { success: false, message: "URLの形式が正しくありません" };
                 }
 
-                const response = await fetch(url);
+                let response: Response;
+                try {
+                    response = await fetch(url, { signal: AbortSignal.timeout(30000) });
+                } catch (fetchError) {
+                    console.error("URL fetch failed:", fetchError);
+                    return { success: false, message: "URLからファイルを取得できませんでした。URLが正しいか確認してください。" };
+                }
+
                 if (!response.ok) {
-                    throw new Error("Failed to fetch PDF from URL");
+                    return { success: false, message: `URLからファイルを取得できませんでした（HTTP ${response.status}）` };
                 }
 
                 // Check content-length if available
@@ -68,14 +145,28 @@ export async function extractPartiesAction(prevState: any, formData: FormData): 
 
                 const arrayBuffer = await response.arrayBuffer();
                 const buffer = Buffer.from(arrayBuffer);
-                text = await extractTextFromPdf(buffer);
+
+                try {
+                    text = await extractTextFromPdf(buffer);
+                } catch (pdfError) {
+                    console.error("PDF extraction from URL failed:", pdfError);
+                    return {
+                        success: false,
+                        message: "PDFからテキストを抽出できませんでした。"
+                    };
+                }
             } else {
                 return { success: false, message: "ファイルまたはURLを入力してください。" };
             }
         }
 
         if (!text || text.trim().length === 0) {
-            return { success: false, message: "テキストの抽出に失敗しました。" };
+            return { success: false, message: "テキストの抽出に失敗しました。PDFが空か、テキストを含んでいない可能性があります。" };
+        }
+
+        // Minimum text check
+        if (text.trim().length < 100) {
+            return { success: false, message: "PDFに含まれるテキストが少なすぎます。契約書として十分な内容がありません。" };
         }
 
         // Fast Pass: Extract Parties
@@ -83,16 +174,24 @@ export async function extractPartiesAction(prevState: any, formData: FormData): 
 
         return { success: true, data: result, text: text };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Extraction Error:", error);
+        const message = getErrorMessage(error);
         return {
             success: false,
-            message: `解析の準備中にエラーが発生しました。(${error.message || "Unknown Error"})`
+            message: `解析の準備中にエラーが発生しました: ${message}`
         };
     }
 }
 
 export async function analyzeDeepAction(text: string, userContext?: UserContext): Promise<AnalysisState> {
+    // Pre-check: Validate API key
+    const apiKeyCheck = validateApiKey();
+    if (!apiKeyCheck.valid) {
+        console.error("API Key validation failed:", apiKeyCheck.error);
+        return { success: false, message: apiKeyCheck.error };
+    }
+
     try {
         if (!text) return { success: false, message: "テキストがありません" };
 
@@ -130,13 +229,21 @@ export async function analyzeDeepAction(text: string, userContext?: UserContext)
         };
 
         return { success: true, data: result };
-    } catch (error) {
+    } catch (error: unknown) {
         console.error("Deep Analysis Error:", error);
-        return { success: false, message: "詳細解析中にエラーが発生しました。" };
+        const message = getErrorMessage(error);
+        return { success: false, message: `詳細解析中にエラーが発生しました: ${message}` };
     }
 }
 
 export async function analyzeContract(prevState: any, formData: FormData): Promise<AnalysisState> {
+    // Pre-check: Validate API key
+    const apiKeyCheck = validateApiKey();
+    if (!apiKeyCheck.valid) {
+        console.error("API Key validation failed:", apiKeyCheck.error);
+        return { success: false, message: apiKeyCheck.error };
+    }
+
     try {
         const file = formData.get("file") as File;
         const url = formData.get("url") as string;
@@ -144,17 +251,27 @@ export async function analyzeContract(prevState: any, formData: FormData): Promi
         let text = "";
 
         if (file && file.size > 0) {
-            const arrayBuffer = await file.arrayBuffer();
-            const buffer = Buffer.from(arrayBuffer);
-            text = await extractTextFromPdf(buffer);
-        } else if (url) {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error("Failed to fetch PDF from URL");
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
+                text = await extractTextFromPdf(buffer);
+            } catch (pdfError) {
+                console.error("PDF extraction failed:", pdfError);
+                return { success: false, message: "PDFからテキストを抽出できませんでした。" };
             }
-            const arrayBuffer = await response.arrayBuffer();
-            const buffer = Buffer.from(arrayBuffer);
-            text = await extractTextFromPdf(buffer);
+        } else if (url) {
+            try {
+                const response = await fetch(url, { signal: AbortSignal.timeout(30000) });
+                if (!response.ok) {
+                    return { success: false, message: `URLからファイルを取得できませんでした（HTTP ${response.status}）` };
+                }
+                const arrayBuffer = await response.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
+                text = await extractTextFromPdf(buffer);
+            } catch (fetchError) {
+                console.error("URL fetch or PDF extraction failed:", fetchError);
+                return { success: false, message: "URLからのPDF取得または解析に失敗しました。" };
+            }
         } else {
             return { success: false, message: "ファイルまたはURLを入力してください。" };
         }
@@ -167,8 +284,10 @@ export async function analyzeContract(prevState: any, formData: FormData): Promi
 
         return { success: true, data: result };
 
-    } catch (error) {
+    } catch (error: unknown) {
         console.error("Analysis Error:", error);
-        return { success: false, message: "解析中にエラーが発生しました。" };
+        const message = getErrorMessage(error);
+        return { success: false, message: `解析中にエラーが発生しました: ${message}` };
     }
 }
+

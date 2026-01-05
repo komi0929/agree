@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UploadCloud, Loader2 } from "lucide-react";
+import { UploadCloud, Loader2, AlertCircle, XCircle } from "lucide-react";
 import { extractPartiesAction } from "@/app/actions";
 import { ExtractionResult } from "@/lib/types/analysis";
 import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics/client";
@@ -19,10 +19,12 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
     const [isUploading, setIsUploading] = useState(false);
     const [dragActive, setDragActive] = useState(false);
     const [url, setUrl] = useState("");
+    const [error, setError] = useState<string | null>(null);
 
     async function handleFileSelect(file: File) {
         if (!file) return;
 
+        setError(null); // Clear previous errors
         trackEvent(ANALYTICS_EVENTS.FILE_SELECTED, { fileName: file.name, fileSize: file.size });
         setIsUploading(true);
         onAnalysisStart();
@@ -36,13 +38,24 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
             if (result.success && result.data) {
                 onAnalysisComplete(result.data, result.text);
             } else {
-                alert(result.message || "解析に失敗しました");
+                const errorMessage = result.message || "解析に失敗しました";
+                setError(errorMessage);
+                trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "server_error", message: errorMessage });
                 onAnalysisComplete(null);
             }
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error(e);
-            trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "upload_error", message: e.message });
-            alert(`エラーが発生しました: ${e.message}`);
+            // Handle Server Action errors (including "unexpected response")
+            let errorMessage = "予期しないエラーが発生しました。";
+            if (e instanceof Error) {
+                if (e.message.includes("unexpected response")) {
+                    errorMessage = "サーバーとの通信でエラーが発生しました。しばらく待ってから再度お試しください。";
+                } else {
+                    errorMessage = e.message;
+                }
+            }
+            setError(errorMessage);
+            trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "upload_error", message: errorMessage });
             onAnalysisComplete(null);
         } finally {
             setIsUploading(false);
@@ -52,6 +65,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
     async function handleUrlAnalysis() {
         if (!url) return;
 
+        setError(null); // Clear previous errors
         setIsUploading(true);
         onAnalysisStart();
 
@@ -63,12 +77,21 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
             if (result.success && result.data) {
                 onAnalysisComplete(result.data, result.text);
             } else {
-                alert(result.message || "解析に失敗しました");
+                const errorMessage = result.message || "解析に失敗しました";
+                setError(errorMessage);
                 onAnalysisComplete(null);
             }
-        } catch (e) {
+        } catch (e: unknown) {
             console.error(e);
-            alert("エラーが発生しました");
+            let errorMessage = "予期しないエラーが発生しました。";
+            if (e instanceof Error) {
+                if (e.message.includes("unexpected response")) {
+                    errorMessage = "サーバーとの通信でエラーが発生しました。";
+                } else {
+                    errorMessage = e.message;
+                }
+            }
+            setError(errorMessage);
             onAnalysisComplete(null);
         } finally {
             setIsUploading(false);
@@ -102,7 +125,24 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
 
     return (
         <div className="w-full font-sans animate-fade-in">
-            <Tabs defaultValue="upload" className="w-full">
+            {/* Error Display */}
+            {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                        <p className="text-sm text-red-700 font-medium">エラーが発生しました</p>
+                        <p className="text-xs text-red-600 mt-1">{error}</p>
+                    </div>
+                    <button
+                        onClick={() => setError(null)}
+                        className="text-red-400 hover:text-red-600 transition-colors"
+                    >
+                        <XCircle className="h-4 w-4" />
+                    </button>
+                </div>
+            )}
+
+            <Tabs defaultValue="upload" className="w-full" onValueChange={() => setError(null)}>
                 <TabsList className="grid w-full max-w-[200px] grid-cols-2 mb-8 bg-slate-100/50 p-1 rounded-full mx-auto">
                     <TabsTrigger value="upload" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300">ファイル</TabsTrigger>
                     <TabsTrigger value="url" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300">URL</TabsTrigger>
