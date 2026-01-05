@@ -78,14 +78,14 @@ export async function extractPartiesAction(prevState: any, formData: FormData): 
         let text = formData.get("text") as string; // Allow passing text directly if already extracted
 
         // === Server-side validation ===
-        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+        const MAX_FILE_SIZE = 4.5 * 1024 * 1024; // 4.5MB (Vercel Request Body Limit)
         const ALLOWED_MIME_TYPES = ["application/pdf"];
 
         if (!text) {
             if (file && file.size > 0) {
                 // File size validation
                 if (file.size > MAX_FILE_SIZE) {
-                    return { success: false, message: "ファイルサイズが大きすぎます（最大10MB）" };
+                    return { success: false, message: "ファイルサイズが大きすぎます（最大4.5MB）。Vercelの制限により、4.5MBを超えるファイルは現在サポートしていません。必要に応じてPDFを分割してアップロードしてください。" };
                 }
                 // File type validation
                 if (!ALLOWED_MIME_TYPES.includes(file.type)) {
@@ -140,7 +140,7 @@ export async function extractPartiesAction(prevState: any, formData: FormData): 
                 // Check content-length if available
                 const contentLength = response.headers.get("content-length");
                 if (contentLength && parseInt(contentLength) > MAX_FILE_SIZE) {
-                    return { success: false, message: "ファイルサイズが大きすぎます（最大10MB）" };
+                    return { success: false, message: "ファイルサイズが大きすぎます（最大4.5MB）" };
                 }
 
                 const arrayBuffer = await response.arrayBuffer();

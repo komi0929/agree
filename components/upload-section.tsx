@@ -24,8 +24,14 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
     async function handleFileSelect(file: File) {
         if (!file) return;
 
-        setError(null); // Clear previous errors
-        trackEvent(ANALYTICS_EVENTS.FILE_SELECTED, { fileName: file.name, fileSize: file.size });
+        // Client-side size validation
+        const MAX_FILE_SIZE = 4.5 * 1024 * 1024; // 4.5MB
+        if (file.size > MAX_FILE_SIZE) {
+            setError("ファイルサイズが大きすぎます（最大4.5MB）。これより大きいファイルは解析できません。");
+            trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "file_too_large", size: file.size });
+            return;
+        }
+
         setIsUploading(true);
         onAnalysisStart();
         trackEvent(ANALYTICS_EVENTS.UPLOAD_STARTED, { type: "file" });
@@ -168,7 +174,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                                 <UploadCloud className="h-6 w-6 text-slate-300 group-hover:text-slate-400 transition-colors" />
                                 <div className="text-center space-y-2">
                                     <p className="text-sm text-slate-600 font-light">ここにファイルをドロップ</p>
-                                    <p className="text-[10px] text-slate-400 tracking-wide">PDF / 10MBまで</p>
+                                    <p className="text-[10px] text-slate-400 tracking-wide">PDF / 4.5MBまで</p>
                                 </div>
                             </>
                         )}
