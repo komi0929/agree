@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Use Webpack instead of Turbopack (Turbopack crashes with Japanese path characters)
+  // When running dev, use: npm run dev (without --turbopack flag)
   async headers() {
     return [
       {
@@ -30,6 +32,7 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '10mb', // Adjust as needed
     },
+    serverComponentsExternalPackages: ['pdf-parse', 'pdf2json'],
   },
 };
 

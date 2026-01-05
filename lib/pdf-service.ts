@@ -1,88 +1,157 @@
 // @ts-nocheck
+import PDFParser from "pdf2json";
+import pdfParse from "pdf-parse";
 
 /**
- * Extracts text from a PDF buffer using pdfjs-dist directly.
- * This is the most reliable method for Japanese text extraction.
+ * PDF Text Extraction Service
  * 
- * Using dynamic import to avoid Turbopack/Vercel build issues.
+ * Uses multiple extraction methods with fallback strategy:
+ * 1. pdf-parse (reliable, high quality extraction)
+ * 2. pdf2json (backup)
+ * 
+ * Note: These libraries are configured in next.config.ts as serverComponentsExternalPackages
+ * to avoid bundling issues with Webpack/Turbopack.
  */
-export async function extractTextFromPdf(buffer: Buffer): Promise<string> {
+
+/**
+ * Extract text using pdf-parse library
+ * This is generally more robust for various PDF formats including those with complex layouts.
+ */
+async function extractWithPdfParse(buffer: Buffer): Promise<string> {
     try {
-        // Dynamic import to avoid build-time resolution issues
-        const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+        console.log("[pdf-parse] Starting extraction...");
 
-        // Convert Buffer to Uint8Array
-        const uint8Array = new Uint8Array(buffer);
+        // We need to handle the buffer carefully. pdf-parse expects a buffer.
+        const data = await pdfParse(buffer);
 
-        // Load the PDF document
-        const loadingTask = pdfjsLib.getDocument({
-            data: uint8Array,
-            useSystemFonts: true,
-            disableFontFace: true,
+        const text = data.text || "";
+        console.log(`[pdf-parse] Extracted ${text.length} characters from ${data.numpages} pages`);
+
+        // Basic validation of extracted content
+        if (text.trim().length === 0) {
+            throw new Error("pdf-parse: テキストが空です");
+        }
+
+        return text;
+    } catch (e: any) {
+        console.error("[pdf-parse] Extraction error:", e.message);
+        throw e;
+    }
+}
+
+/**
+ * Extract text using pdf2json library
+ * Used as a fallback if pdf-parse fails.
+ */
+async function extractWithPdf2json(buffer: Buffer): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const pdfParser = new PDFParser(null, 1);
+
+        const timeout = setTimeout(() => {
+            reject(new Error("PDF解析がタイムアウトしました (pdf2json)"));
+        }, 30000);
+
+        pdfParser.on("pdfParser_dataError", (errData: any) => {
+            clearTimeout(timeout);
+            console.error("[pdf2json] Parser error:", errData.parserError);
+            reject(new Error(errData.parserError || "PDF解析エラー"));
         });
 
-        const pdfDocument = await loadingTask.promise;
-        const numPages = pdfDocument.numPages;
-
-        console.log(`[PDF] Processing ${numPages} pages...`);
-
-        const textParts: string[] = [];
-
-        // Process each page
-        for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+        pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
+            clearTimeout(timeout);
             try {
-                const page = await pdfDocument.getPage(pageNum);
-                const textContent = await page.getTextContent();
+                let text = "";
+                const rawText = pdfParser.getRawTextContent() || "";
 
-                // Extract text from items
-                let pageText = '';
-                let lastY: number | null = null;
-
-                for (const item of textContent.items) {
-                    if ('str' in item && item.str) {
-                        // Check if we need a line break (based on Y position)
-                        if (lastY !== null && Math.abs((item as any).transform[5] - lastY) > 5) {
-                            pageText += '\n';
+                if (pdfData && pdfData.Pages) {
+                    const parts: string[] = [];
+                    for (const page of pdfData.Pages) {
+                        if (page.Texts) {
+                            for (const textObj of page.Texts) {
+                                if (textObj.R) {
+                                    for (const run of textObj.R) {
+                                        if (run.T) {
+                                            try {
+                                                parts.push(decodeURIComponent(run.T));
+                                            } catch {
+                                                parts.push(run.T);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        pageText += item.str;
-                        lastY = (item as any).transform[5];
                     }
+                    const manualText = parts.join(" ");
+                    // Use longer text
+                    text = manualText.length > rawText.length ? manualText : rawText;
+                } else {
+                    text = rawText;
                 }
 
-                if (pageText.trim()) {
-                    textParts.push(pageText);
-                }
+                // Cleanup
+                text = text.replace(/[-]+Page \(\d+\) Break[-]+/g, '\n\n');
 
-                console.log(`[PDF] Page ${pageNum}: ${pageText.length} characters extracted`);
-            } catch (pageError) {
-                console.error(`[PDF] Error processing page ${pageNum}:`, pageError);
-                // Continue with other pages even if one fails
+                if (text.trim().length > 0) {
+                    resolve(text);
+                } else {
+                    reject(new Error("pdf2json: テキストを抽出できませんでした"));
+                }
+            } catch (e) {
+                console.error("[pdf2json] Processing error:", e);
+                reject(e);
             }
+        });
+
+        try {
+            pdfParser.parseBuffer(buffer);
+        } catch (e) {
+            clearTimeout(timeout);
+            console.error("[pdf2json] Parse buffer error:", e);
+            reject(e);
         }
+    });
+}
 
-        const fullText = textParts.join('\n\n');
+/**
+ * Main extraction function with fallback strategy
+ */
+export async function extractTextFromPdf(buffer: Buffer): Promise<string> {
+    console.log(`[PDF] Starting extraction, buffer size: ${buffer.length} bytes`);
 
-        console.log(`[PDF] Total extracted: ${fullText.length} characters`);
+    const errors: string[] = [];
 
-        if (!fullText || fullText.trim().length === 0) {
-            throw new Error("PDFからテキストを抽出できませんでした。このPDFはスキャナーで読み取った画像形式か、テキストレイヤーが含まれていない可能性があります。");
+    // Strategy 1: pdf-parse (Primary)
+    try {
+        console.log("[PDF] Trying pdf-parse...");
+        const text = await extractWithPdfParse(buffer);
+        if (text && text.trim().length > 0) {
+            console.log("[PDF] pdf-parse succeeded");
+            return text;
         }
-
-        return fullText;
-
-    } catch (error: any) {
-        console.error("[PDF] Extraction failed:", error);
-
-        // Provide user-friendly error messages
-        if (error.message?.includes("password") || error.message?.includes("Password")) {
-            throw new Error("このPDFはパスワードで保護されています。パスワードを解除してからアップロードしてください。");
-        }
-
-        if (error.message?.includes("Invalid") || error.message?.includes("corrupt")) {
-            throw new Error("PDFファイルが破損しているか、形式が正しくありません。別のPDFをお試しください。");
-        }
-
-        // Re-throw with the original message or a default one
-        throw new Error(error.message || "PDFの解析中にエラーが発生しました。");
+    } catch (e: any) {
+        console.error("[PDF] pdf-parse failed:", e.message);
+        errors.push(`pdf-parse: ${e.message}`);
     }
+
+    // Strategy 2: pdf2json (Backup)
+    try {
+        console.log("[PDF] Trying pdf2json (fallback)...");
+        const text = await extractWithPdf2json(buffer);
+        if (text && text.trim().length > 0) {
+            console.log("[PDF] pdf2json succeeded");
+            return text;
+        }
+    } catch (e: any) {
+        console.error("[PDF] pdf2json failed:", e.message);
+        errors.push(`pdf2json: ${e.message}`);
+    }
+
+    // Failure
+    console.error("[PDF] All extraction methods failed:", errors);
+    throw new Error(
+        "PDFからテキストを抽出できませんでした。" +
+        "ファイルが破損しているか、画像ベースのPDF（スキャンデータ）の可能性があります。" +
+        "テキスト選択が可能なPDFを使用してください。"
+    );
 }

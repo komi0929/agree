@@ -104,11 +104,12 @@ export async function extractPartiesAction(prevState: any, formData: FormData): 
 
                 try {
                     text = await extractTextFromPdf(buffer);
-                } catch (pdfError) {
+                    console.log(`[actions] Text extracted successfully: ${text.length} characters`);
+                } catch (pdfError: any) {
                     console.error("PDF extraction failed:", pdfError);
                     return {
                         success: false,
-                        message: "PDFからテキストを抽出できませんでした。スキャンされた画像ベースのPDFは現在サポートしていません。"
+                        message: pdfError.message || "PDFからテキストを抽出できませんでした。"
                     };
                 }
             } else if (url) {
