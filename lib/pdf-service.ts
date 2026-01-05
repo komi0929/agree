@@ -1,75 +1,84 @@
 // @ts-nocheck
-import PDFParser from "pdf2json";
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 /**
- * Extracts text from a PDF buffer using pdf2json.
- * This is a server-side function.
- * We're using pdf2json because it's more compatible with Vercel's Turbopack build.
+ * Extracts text from a PDF buffer using pdfjs-dist directly.
+ * This is the most reliable method for Japanese text extraction.
  */
 export async function extractTextFromPdf(buffer: Buffer): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const pdfParser = new PDFParser(null, 1); // 1 for text content
+    try {
+        // Convert Buffer to Uint8Array
+        const uint8Array = new Uint8Array(buffer);
 
-        pdfParser.on("pdfParser_dataError", (errData: any) => {
-            console.error("PDF Parser Error:", errData.parserError);
-            reject(new Error(errData.parserError || "PDFの解析中にエラーが発生しました"));
+        // Load the PDF document
+        const loadingTask = pdfjsLib.getDocument({
+            data: uint8Array,
+            useSystemFonts: true,
+            disableFontFace: true,
         });
 
-        pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
+        const pdfDocument = await loadingTask.promise;
+        const numPages = pdfDocument.numPages;
+
+        console.log(`[PDF] Processing ${numPages} pages...`);
+
+        const textParts: string[] = [];
+
+        // Process each page
+        for (let pageNum = 1; pageNum <= numPages; pageNum++) {
             try {
-                // Method 1: Get raw text content
-                let text = pdfParser.getRawTextContent() || "";
+                const page = await pdfDocument.getPage(pageNum);
+                const textContent = await page.getTextContent();
 
-                // Method 2: If raw text is too short or empty, try manual extraction from pages
-                // This is often more reliable for Japanese characters which are URL encoded in pdf2json
-                if (text.replace(/[-]+Page \(\d+\) Break[-]+/g, '').trim().length < 50 && pdfData.Pages) {
-                    const extractedParts: string[] = [];
-                    for (const page of pdfData.Pages) {
-                        if (page.Texts) {
-                            for (const textObj of page.Texts) {
-                                if (textObj.R && textObj.R[0] && textObj.R[0].T) {
-                                    // T is usually URL encoded
-                                    try {
-                                        const part = decodeURIComponent(textObj.R[0].T);
-                                        extractedParts.push(part);
-                                    } catch {
-                                        // If decoding fails, use raw text
-                                        extractedParts.push(textObj.R[0].T);
-                                    }
-                                }
-                            }
+                // Extract text from items
+                let pageText = '';
+                let lastY: number | null = null;
+
+                for (const item of textContent.items) {
+                    if ('str' in item && item.str) {
+                        // Check if we need a line break (based on Y position)
+                        if (lastY !== null && Math.abs((item as any).transform[5] - lastY) > 5) {
+                            pageText += '\n';
                         }
+                        pageText += item.str;
+                        lastY = (item as any).transform[5];
                     }
-                    if (extractedParts.length > 0) {
-                        text = extractedParts.join(" ");
-                    }
                 }
 
-                // Clean up - remove page break markers for final validation
-                const cleanText = text.replace(/[-]+Page \(\d+\) Break[-]+/g, '').trim();
-
-                if (cleanText.length === 0) {
-                    reject(new Error("PDFからテキストを抽出できませんでした。スキャナーで読み取った画像形式のPDFか、パスワード保護されている可能性があります。"));
-                    return;
+                if (pageText.trim()) {
+                    textParts.push(pageText);
                 }
 
-                resolve(text);
-            } catch (e) {
-                console.error("Error in dataReady handler:", e);
-                // Fallback to whatever raw text we might have
-                const fallbackText = pdfParser.getRawTextContent() || "";
-                if (fallbackText.trim().length > 0) {
-                    resolve(fallbackText);
-                } else {
-                    reject(new Error("PDFからテキストを抽出できませんでした"));
-                }
+                console.log(`[PDF] Page ${pageNum}: ${pageText.length} characters extracted`);
+            } catch (pageError) {
+                console.error(`[PDF] Error processing page ${pageNum}:`, pageError);
+                // Continue with other pages even if one fails
             }
-        });
-
-        try {
-            pdfParser.parseBuffer(buffer);
-        } catch (e) {
-            reject(e);
         }
-    });
+
+        const fullText = textParts.join('\n\n');
+
+        console.log(`[PDF] Total extracted: ${fullText.length} characters`);
+
+        if (!fullText || fullText.trim().length === 0) {
+            throw new Error("PDFからテキストを抽出できませんでした。このPDFはスキャナーで読み取った画像形式か、テキストレイヤーが含まれていない可能性があります。");
+        }
+
+        return fullText;
+
+    } catch (error: any) {
+        console.error("[PDF] Extraction failed:", error);
+
+        // Provide user-friendly error messages
+        if (error.message?.includes("password") || error.message?.includes("Password")) {
+            throw new Error("このPDFはパスワードで保護されています。パスワードを解除してからアップロードしてください。");
+        }
+
+        if (error.message?.includes("Invalid") || error.message?.includes("corrupt")) {
+            throw new Error("PDFファイルが破損しているか、形式が正しくありません。別のPDFをお試しください。");
+        }
+
+        // Re-throw with the original message or a default one
+        throw new Error(error.message || "PDFの解析中にエラーが発生しました。");
+    }
 }
