@@ -124,10 +124,10 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
             <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-slate-200">
                 <div className="flex items-center gap-2">
                     <FileText className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm font-medium text-slate-700">契約書原本（プレビュー）</span>
+                    <span className="text-sm font-medium text-slate-700">契約書</span>
                 </div>
                 <span className="text-xs text-slate-400">
-                    ハイライト部分にリスクが潜んでいます
+                    色付き = 要確認
                 </span>
             </div>
 

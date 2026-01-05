@@ -76,10 +76,9 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
 
             <div className="flex-1 flex flex-col space-y-4">
                 <Tabs value={tone} className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 bg-slate-100 rounded-full p-1">
-                        <TabsTrigger value="formal" disabled className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs opacity-50 cursor-not-allowed">フォーマル (準備中)</TabsTrigger>
+                    <TabsList className="grid w-full max-w-[200px] grid-cols-1 bg-slate-100 rounded-full p-1 mx-auto">
+                        {/* C-6: Hide disabled options */}
                         <TabsTrigger value="neutral" className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs">標準</TabsTrigger>
-                        <TabsTrigger value="casual" disabled className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs opacity-50 cursor-not-allowed">カジュアル (準備中)</TabsTrigger>
                     </TabsList>
                 </Tabs>
 
@@ -112,15 +111,13 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
                         {/* Finish Button - Appears after copy */}
                         {showFinish && (
                             <div className="w-full md:w-auto animate-in slide-in-from-bottom-2 fade-in duration-500">
-                                <p className="text-[10px] text-slate-400 text-center mb-2">
-                                    先方への連絡が済みましたら、終了ボタンを押してください
-                                </p>
+                                {/* C-5: Simplified button */}
                                 <Button
                                     onClick={onFinish}
                                     variant="secondary"
                                     className="w-full rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 shadow-sm"
                                 >
-                                    完了して終了する
+                                    終了
                                 </Button>
                             </div>
                         )}

@@ -196,7 +196,7 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
                                         className="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1"
                                     >
                                         <X className="w-3 h-3" />
-                                        解除
+                                        クリア
                                     </button>
                                 </div>
 
@@ -208,7 +208,7 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
                                         onClick={() => setViewMode("message")}
                                     >
                                         <Send className="w-4 h-4 mr-2" />
-                                        交渉メッセージ
+                                        相手に伝える
                                     </Button>
                                     <Button
                                         size="sm"
@@ -224,7 +224,7 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
                                         ) : (
                                             <>
                                                 <Sparkles className="w-4 h-4 mr-2" />
-                                                修正版を作成する
+                                                修正契約書を作る
                                             </>
                                         )}
                                     </Button>

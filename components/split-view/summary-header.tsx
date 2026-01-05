@@ -51,12 +51,9 @@ export function SummaryHeader({ data }: SummaryHeaderProps) {
 
                     <div className="flex-1 min-w-0">
                         <h2 className="text-sm font-semibold text-slate-800 mb-1">
-                            解析結果サマリー
-                            <span className="ml-2 text-slate-400 font-normal">{data.risks.length}件の指摘</span>
+                            チェック結果
+                            <span className="ml-2 text-slate-400 font-normal">{data.risks.length}箇所をチェック</span>
                         </h2>
-                        <p className="text-xs text-slate-500 line-clamp-2">
-                            {data.summary}
-                        </p>
                     </div>
                 </div>
 
@@ -65,24 +62,24 @@ export function SummaryHeader({ data }: SummaryHeaderProps) {
                     {criticalCount > 0 && (
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 border border-purple-200 rounded-full">
                             <AlertOctagon className="w-3.5 h-3.5 text-purple-600" />
-                            <span className="text-xs font-semibold text-purple-700">重大 {criticalCount}</span>
+                            <span className="text-xs font-semibold text-purple-700">最優先 {criticalCount}</span>
                         </div>
                     )}
                     {highCount > 0 && (
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 border border-red-200 rounded-full">
                             <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
-                            <span className="text-xs font-semibold text-red-600">HIGH {highCount}</span>
+                            <span className="text-xs font-semibold text-red-600">要注意 {highCount}</span>
                         </div>
                     )}
                     {mediumCount > 0 && (
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 border border-yellow-200 rounded-full">
                             <AlertTriangle className="w-3.5 h-3.5 text-yellow-500" />
-                            <span className="text-xs font-semibold text-yellow-700">MED {mediumCount}</span>
+                            <span className="text-xs font-semibold text-yellow-700">確認 {mediumCount}</span>
                         </div>
                     )}
                     {lowCount > 0 && (
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full">
-                            <span className="text-xs font-semibold text-green-700">提案 {lowCount}</span>
+                            <span className="text-xs font-semibold text-green-700">参考 {lowCount}</span>
                         </div>
                     )}
                 </div>

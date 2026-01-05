@@ -46,7 +46,7 @@ export function RiskPanel({
                     border: "border-l-purple-600",
                     bg: "bg-purple-50/30",
                     badge: "bg-purple-100 text-purple-700 border-purple-200",
-                    label: "重大リスク",
+                    label: "最優先",
                     icon: <AlertOctagon className="w-4 h-4 text-purple-600" />,
                 };
             case "high":
@@ -54,7 +54,7 @@ export function RiskPanel({
                     border: "border-l-red-500",
                     bg: "bg-red-50/30",
                     badge: "bg-red-100 text-red-700 border-red-200",
-                    label: "HIGH RISK",
+                    label: "要注意",
                     icon: <AlertTriangle className="w-4 h-4 text-red-500" />,
                 };
             case "medium":
@@ -62,7 +62,7 @@ export function RiskPanel({
                     border: "border-l-yellow-500",
                     bg: "bg-yellow-50/30",
                     badge: "bg-yellow-100 text-yellow-700 border-yellow-200",
-                    label: "MED RISK",
+                    label: "確認",
                     icon: <AlertTriangle className="w-4 h-4 text-yellow-500" />,
                 };
             default:
@@ -70,7 +70,7 @@ export function RiskPanel({
                     border: "border-l-green-500",
                     bg: "bg-green-50/30",
                     badge: "bg-green-100 text-green-700 border-green-200",
-                    label: "提案",
+                    label: "参考",
                     icon: <Check className="w-4 h-4 text-green-500" />,
                 };
         }
@@ -81,24 +81,24 @@ export function RiskPanel({
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-slate-200">
                 <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-slate-700">✨ AI診断レポート</span>
+                    <span className="text-sm font-medium text-slate-700">チェック項目</span>
                     <Badge variant="outline" className="rounded-full text-[10px] px-2">
-                        {risks.length}箇所を検出
+                        {risks.length}項目
                     </Badge>
                 </div>
                 {/* C-4: Color-independent design - add icons next to colors */}
                 <div className="flex items-center gap-3 text-[10px] text-slate-400">
                     <span className="flex items-center gap-1">
                         <AlertOctagon className="w-3 h-3 text-purple-600" />
-                        <span className="w-2 h-2 rounded-full bg-purple-600" />重大
+                        <span className="w-2 h-2 rounded-full bg-purple-600" />最優先
                     </span>
                     <span className="flex items-center gap-1">
                         <AlertTriangle className="w-3 h-3 text-red-500" />
-                        <span className="w-2 h-2 rounded-full bg-red-500" />HIGH
+                        <span className="w-2 h-2 rounded-full bg-red-500" />要注意
                     </span>
                     <span className="flex items-center gap-1">
                         <AlertTriangle className="w-3 h-3 text-yellow-500" />
-                        <span className="w-2 h-2 rounded-full bg-yellow-500" />MED
+                        <span className="w-2 h-2 rounded-full bg-yellow-500" />確認
                     </span>
                 </div>
             </div>
@@ -151,12 +151,12 @@ export function RiskPanel({
                                         {isSelected ? (
                                             <>
                                                 <CheckSquare className="w-3.5 h-3.5" />
-                                                採用
+                                                採用中
                                             </>
                                         ) : (
                                             <>
                                                 <Square className="w-3.5 h-3.5" />
-                                                修正案を採用
+                                                採用
                                             </>
                                         )}
                                     </button>
@@ -184,12 +184,8 @@ export function RiskPanel({
                                 {risk.section_title || "条項"}
                             </h4>
 
-                            {/* Explanation */}
+                            {/* Explanation - A-7: Removed "検出されたリスク" label as redundant */}
                             <div className="mb-3">
-                                <div className="flex items-center gap-1 text-[10px] text-slate-500 mb-1">
-                                    <AlertTriangle className="w-3 h-3" />
-                                    検出されたリスク
-                                </div>
                                 <p className="text-xs text-slate-600 leading-relaxed">
                                     {risk.explanation}
                                 </p>
@@ -207,10 +203,11 @@ export function RiskPanel({
                                         onRiskToggle(index);
                                     }}
                                 >
+                                    {/* A-8: Simplified label */}
                                     <div className={`flex items-center gap-1 text-[10px] mb-1 font-medium
                                         ${isSelected ? 'text-blue-700' : 'text-teal-700'}`}>
                                         <Lightbulb className="w-3 h-3" />
-                                        改善の提案 {isSelected && <span className="ml-1 text-blue-600 font-bold">(採用中)</span>}
+                                        💡 修正案 {isSelected && <span className="ml-1 text-blue-600 font-bold">(採用中)</span>}
                                     </div>
                                     <p className={`text-xs leading-relaxed ${isSelected ? 'text-blue-900' : 'text-teal-800'}`}>
                                         {risk.suggestion.revised_text}
@@ -233,7 +230,7 @@ export function RiskPanel({
                                 </div>
                             )}
 
-                            {/* Link to Contract */}
+                            {/* A-9: Simplified link text */}
                             <button
                                 className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors mt-2"
                                 onClick={(e) => {
@@ -241,8 +238,7 @@ export function RiskPanel({
                                     onScrollToContract(index);
                                 }}
                             >
-                                <ArrowLeft className="w-3 h-3" />
-                                原本内の該当箇所と連結
+                                📍 左で確認
                             </button>
                         </div>
                     );
