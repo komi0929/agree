@@ -32,7 +32,7 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '10mb', // Adjust as needed
     },
-    serverComponentsExternalPackages: ['pdf-parse', 'pdf2json'],
+    serverComponentsExternalPackages: ['pdf2json'],
   },
 };
 
