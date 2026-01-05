@@ -164,9 +164,13 @@ export async function extractPartiesAction(prevState: any, formData: FormData): 
             return { success: false, message: "テキストの抽出に失敗しました。PDFが空か、テキストを含んでいない可能性があります。" };
         }
 
-        // Minimum text check
-        if (text.trim().length < 100) {
-            return { success: false, message: "PDFに含まれるテキストが少なすぎます。契約書として十分な内容がありません。" };
+        // Logging for debug
+        console.log(`Extracted text length: ${text.trim().length} characters`);
+
+        // Minimum text check (Relaxed to 50 characters)
+        if (text.trim().length < 50) {
+            console.warn("Rejecting PDF due to insufficient text content:", text.substring(0, 100));
+            return { success: false, message: "PDFから十分なテキストを読み取れませんでした。画像ベースのPDF（スキャンデータ）の場合、現在テキスト解析ができません。テキスト形式のPDFをアップロードしてください。" };
         }
 
         // Fast Pass: Extract Parties

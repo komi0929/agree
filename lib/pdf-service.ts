@@ -16,12 +16,32 @@ export async function extractTextFromPdf(buffer: Buffer): Promise<string> {
 
         pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
             try {
-                // pdf2json returns raw text content in a specific format
-                // We need to parse it if we want clean text, but getRawTextContent() matches the structure
-                const text = pdfParser.getRawTextContent();
+                // Method 1: Get raw text content
+                let text = pdfParser.getRawTextContent() || "";
+
+                // Method 2: If raw text is too short or empty, try manual extraction from pages
+                // This is often more reliable for Japanese characters which are URL encoded in pdf2json
+                if (text.trim().length < 50 && pdfData.Pages) {
+                    let extractedParts = [];
+                    for (const page of pdfData.Pages) {
+                        for (const textObj of page.Texts) {
+                            if (textObj.R && textObj.R[0] && textObj.R[0].T) {
+                                // T is usually URL encoded
+                                const part = decodeURIComponent(textObj.R[0].T);
+                                extractedParts.push(part);
+                            }
+                        }
+                    }
+                    if (extractedParts.length > 0) {
+                        text = extractedParts.join(" ");
+                    }
+                }
+
                 resolve(text);
             } catch (e) {
-                reject(e);
+                console.error("Error in dataReady handler:", e);
+                // Fallback to whatever raw text we might have
+                resolve(pdfParser.getRawTextContent() || "");
             }
         });
 
