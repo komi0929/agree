@@ -18,7 +18,7 @@ export function SignatureLogo({ className = "" }: { className?: string }) {
             <img
                 src="/logo.png"
                 alt="agree"
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain brightness-0"
                 style={{
                     clipPath: isVisible
                         ? "inset(0 0% 0 0)"

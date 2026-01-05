@@ -3,26 +3,30 @@ import Link from "next/link";
 export function Footer() {
     return (
         <footer className="bg-white border-t border-slate-100 py-12 px-6 font-sans">
-            <div className="max-w-xl mx-auto flex flex-col items-center space-y-8">
-                <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-xs text-slate-400 font-light tracking-wide">
-                    <Link href="/" className="hover:text-slate-600 transition-colors">ホーム</Link>
-                    <Link href="/generate" className="hover:text-slate-600 transition-colors flex items-center gap-1">
+            <div className="max-w-3xl mx-auto flex flex-col items-center">
+
+                {/* Service Navigation (Primary) */}
+                <div className="flex flex-wrap justify-center gap-x-10 gap-y-4 mb-10">
+                    <Link href="/generate" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-2">
                         <span className="text-amber-500">✨</span>
                         契約書を作成
-                        <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">β</span>
+                        <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">β</span>
                     </Link>
-                    <Link href="/how-to-use" className="hover:text-slate-600 transition-colors">使い方</Link>
-                    <Link href="/check-policy" className="hover:text-slate-600 transition-colors">チェックポリシー</Link>
-                    <Link href="/terms" className="hover:text-slate-600 transition-colors">利用規約</Link>
-                    <Link href="/privacy" className="hover:text-slate-600 transition-colors">プライバシーポリシー</Link>
-                    <Link href="/company" className="hover:text-slate-600 transition-colors">運営会社</Link>
+                    <Link href="/how-to-use" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">使い方</Link>
+                    <Link href="/check-policy" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">チェックポリシー</Link>
                 </div>
 
+                {/* Legal & Corporate text (Secondary) */}
+                <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-12">
+                    <Link href="/terms" className="text-xs text-slate-400 hover:text-slate-600 transition-colors">利用規約</Link>
+                    <Link href="/privacy" className="text-xs text-slate-400 hover:text-slate-600 transition-colors">プライバシーポリシー</Link>
+                    <Link href="/company" className="text-xs text-slate-400 hover:text-slate-600 transition-colors">運営会社</Link>
+                </div>
+
+                {/* Brand */}
                 <div className="flex flex-col items-center space-y-4">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/logo.png" alt="agree" className="h-6 w-auto opacity-50 grayscale hover:grayscale-0 transition-all duration-500" />
-                    <div className="text-[10px] text-slate-300 tracking-widest uppercase">
-                        © 2025 agree
+                    <div className="text-[10px] text-slate-300 tracking-widest uppercase font-medium">
+                        © 2026 株式会社ヒトコト
                     </div>
                 </div>
             </div>

@@ -156,3 +156,12 @@
   opacity: 0;
   animation: signature-fade-in 0.8s ease-out 2s forwards;
 }
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}

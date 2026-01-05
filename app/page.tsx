@@ -91,36 +91,41 @@ export default function Home() {
       <div className="min-h-screen flex flex-col bg-white text-slate-600 font-sans selection:bg-slate-100 selection:text-slate-900">
         <section className="flex-1 flex flex-col items-center pt-32 pb-20 px-6 max-w-2xl mx-auto w-full">
           {/* Minimalist Logo with Signature Animation */}
-          <div className="mb-12 flex flex-col items-center">
-            <SignatureLogo className="w-32 h-16" />
+          <div className="mb-20 flex flex-col items-center">
+            {/* Logo matches text color exactly (black) */}
+            <SignatureLogo className="w-64 h-32 text-black" />
           </div>
 
           {/* Quiet Introduction */}
           {!hasStarted ? (
             <div className="text-center space-y-12 animate-fade-in-delayed">
               <div className="space-y-8">
-                <p className="text-lg leading-loose max-w-lg mx-auto font-medium">
+                <p className="text-lg leading-loose max-w-lg mx-auto font-medium text-black text-balance tracking-wide">
                   お仕事の契約の、はじまりから終わりまで。<br />
                   あなたの立場をそっと、確かに守ります。
                 </p>
-                <p className="text-lg leading-loose max-w-lg mx-auto text-slate-500">
+                <p className="text-lg leading-loose max-w-lg mx-auto font-medium text-black text-balance tracking-wide">
                   面倒な登録も、煩わしい通知もありません。<br />
                   契約書をアップして、ただ待つだけ。
                 </p>
               </div>
 
-              <Button
-                onClick={() => {
-                  trackEvent(ANALYTICS_EVENTS.STARTED_CLICKED);
-                  setHasStarted(true);
-                }}
-                className="rounded-full px-10 py-7 bg-slate-900 border border-slate-900 text-white hover:bg-slate-800 shadow-xl hover:shadow-2xl transition-all text-lg font-medium tracking-wide"
-              >
-                契約書をチェックする
-              </Button>
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-slate-200 to-slate-100 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                <Button
+                  onClick={() => {
+                    trackEvent(ANALYTICS_EVENTS.STARTED_CLICKED);
+                    setHasStarted(true);
+                  }}
+                  className="relative rounded-full px-12 py-8 bg-slate-900 border border-slate-900 text-white hover:bg-slate-800 shadow-xl hover:shadow-2xl transition-all duration-300 text-lg font-medium tracking-wide overflow-hidden"
+                >
+                  <span className="relative z-10">契約書をチェックする</span>
+                  <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent z-0" />
+                </Button>
+              </div>
 
               <div className="pt-8">
-                <Link href="#" className="text-sm text-slate-400 hover:text-slate-600 border-b border-dashed border-slate-300 pb-0.5 transition-colors">
+                <Link href="/how-to-use" className="text-sm text-slate-400 hover:text-slate-600 border-b border-dashed border-slate-300 pb-0.5 transition-colors">
                   できることを見る
                 </Link>
               </div>
