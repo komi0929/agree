@@ -36,7 +36,7 @@ export function RoleSelector({ extractionData, onSelectRole }: RoleSelectorProps
                 </h2>
                 <p className="text-sm text-slate-500 leading-relaxed">
                     あなたは「甲」「乙」どちらですか？<br />
-                    選択に応じて、あなたの立場から見たリスクを優先的に解析します。
+                    契約書から検出された名称を表示しています。自身の該当する方を選択してください。
                 </p>
             </div>
 
@@ -60,9 +60,10 @@ export function RoleSelector({ extractionData, onSelectRole }: RoleSelectorProps
                     `}>
                         甲
                     </div>
-                    <div className="text-center">
-                        <p className="text-sm font-medium text-slate-800 line-clamp-2">
-                            {extractionData.party_a || "名称不明"}
+                    <div className="text-center w-full bg-slate-50 rounded-lg py-3 px-2 mt-2 border border-slate-100">
+                        <p className="text-xs text-slate-400 mb-1">検出された名称</p>
+                        <p className="text-base font-bold text-slate-800 line-clamp-2 break-all leading-snug">
+                            {extractionData.party_a || "（名称不明）"}
                         </p>
                     </div>
                     {selected === "party_a" && (
@@ -90,9 +91,10 @@ export function RoleSelector({ extractionData, onSelectRole }: RoleSelectorProps
                     `}>
                         乙
                     </div>
-                    <div className="text-center">
-                        <p className="text-sm font-medium text-slate-800 line-clamp-2">
-                            {extractionData.party_b || "名称不明"}
+                    <div className="text-center w-full bg-slate-50 rounded-lg py-3 px-2 mt-2 border border-slate-100">
+                        <p className="text-xs text-slate-400 mb-1">検出された名称</p>
+                        <p className="text-base font-bold text-slate-800 line-clamp-2 break-all leading-snug">
+                            {extractionData.party_b || "（名称不明）"}
                         </p>
                     </div>
                     {selected === "party_b" && (

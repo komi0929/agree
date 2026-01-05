@@ -136,13 +136,23 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
                 ref={containerRef}
                 className="flex-1 overflow-auto p-8 bg-white"
             >
-                <div className="max-w-none prose prose-sm prose-slate">
+                <div className="max-w-none prose prose-sm prose-slate leading-loose">
                     {regions.map((region, idx) => {
+                        // 読みやすさのために句点の後に改行を入れる処理（ハイライトされていない部分のみ）
+                        // ただし、元々改行がある場合はそのままにする
+                        const displayContent = !region.isHighlight
+                            ? region.text.split(/(?<=。)/).map((segment, i, arr) => (
+                                <span key={i}>
+                                    {segment}
+                                    {i < arr.length - 1 && !segment.endsWith('\n') && <br className="mb-2 block content-['']" />}
+                                </span>
+                            ))
+                            : region.text;
+
                         if (!region.isHighlight) {
-                            // Normal text - preserve line breaks
                             return (
-                                <span key={idx} className="whitespace-pre-wrap">
-                                    {region.text}
+                                <span key={idx} className="whitespace-pre-wrap text-slate-600">
+                                    {displayContent}
                                 </span>
                             );
                         }
@@ -159,17 +169,17 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
                                     if (el) highlightRefs.current.set(riskIndex, el as any);
                                 }}
                                 className={`
-                                    relative inline cursor-pointer transition-all duration-300
-                                    ${colors.bg} ${isActive ? `ring-2 ${colors.border} ring-offset-1` : ""}
-                                    border-l-4 ${colors.border} pl-1 pr-1 py-0.5
-                                    hover:ring-2 hover:ring-offset-1
+                                    relative inline cursor-pointer transition-all duration-300 rounded-sm
+                                    ${colors.bg} ${isActive ? `ring-4 ${colors.border} ring-offset-2 z-10 font-bold shadow-sm` : "hover:brightness-95"}
+                                    border-b-2 ${colors.border} px-1 py-0.5 mx-0.5
                                 `}
                                 onClick={() => onHighlightClick?.(riskIndex)}
                             >
                                 {/* Risk number badge */}
                                 <span className={`
-                                    absolute -left-6 top-0 w-5 h-5 rounded-full flex items-center justify-center
-                                    text-[10px] font-bold ${colors.bg} ${colors.text} ${colors.border} border
+                                    absolute -left-3 -top-3 w-5 h-5 rounded-full flex items-center justify-center
+                                    text-[10px] font-bold ${colors.bg} ${colors.text} ${colors.border} border shadow-sm
+                                    transition-transform duration-300 ${isActive ? 'scale-125' : 'scale-100'}
                                 `}>
                                     {riskIndex + 1}
                                 </span>

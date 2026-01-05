@@ -75,11 +75,11 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
             </div>
 
             <div className="flex-1 flex flex-col space-y-4">
-                <Tabs value={tone} onValueChange={(v) => setTone(v as any)} className="w-full">
+                <Tabs value={tone} className="w-full">
                     <TabsList className="grid w-full grid-cols-3 bg-slate-100 rounded-full p-1">
-                        <TabsTrigger value="formal" className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs">フォーマル</TabsTrigger>
+                        <TabsTrigger value="formal" disabled className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs opacity-50 cursor-not-allowed">フォーマル (準備中)</TabsTrigger>
                         <TabsTrigger value="neutral" className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs">標準</TabsTrigger>
-                        <TabsTrigger value="casual" className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs">カジュアル</TabsTrigger>
+                        <TabsTrigger value="casual" disabled className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs opacity-50 cursor-not-allowed">カジュアル (準備中)</TabsTrigger>
                     </TabsList>
                 </Tabs>
 

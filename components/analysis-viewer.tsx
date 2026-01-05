@@ -184,7 +184,7 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
                     {/* Checkbox Floating Action Bar */}
                     {selectedRiskIndices.length > 0 && (
                         <div className="absolute bottom-6 left-6 right-6 z-20 animate-in slide-in-from-bottom-4 fade-in duration-300">
-                            <div className="bg-slate-900/95 backdrop-blur-md text-white p-4 rounded-xl shadow-2xl border border-slate-700 flex items-center justify-between gap-4">
+                            <div className="bg-slate-900/95 backdrop-blur-md text-white p-4 rounded-xl shadow-2xl border border-slate-700 flex flex-wrap items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-2 px-3 py-1 bg-slate-800 rounded-full border border-slate-700">
                                         <CheckSquareIcon className="w-4 h-4 text-blue-400" />
@@ -200,7 +200,7 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
                                     </button>
                                 </div>
 
-                                <div className="flex items-center gap-2">
+                                <div className="flex flex-wrap items-center gap-2 justify-end">
                                     <Button
                                         size="sm"
                                         variant="outline"

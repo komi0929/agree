@@ -102,7 +102,12 @@ export function RiskPanel({
                     const styling = getRiskStyling(risk.risk_level);
                     const isHighlighted = highlightedRiskIndex === index;
                     const isSelected = selectedRiskIndices.includes(index);
-                    const canAdopt = !!risk.suggestion.revised_text;
+                    // 無意味な提案かどうかを判定
+                    const isUselessSuggestion = risk.suggestion.revised_text
+                        ? (risk.suggestion.revised_text.includes("専門家") && risk.suggestion.revised_text.length < 60)
+                        : true;
+
+                    const canAdopt = !!risk.suggestion.revised_text && !isUselessSuggestion;
 
                     return (
                         <div
@@ -139,7 +144,7 @@ export function RiskPanel({
                                         {isSelected ? (
                                             <>
                                                 <CheckSquare className="w-3.5 h-3.5" />
-                                                採用する
+                                                採用
                                             </>
                                         ) : (
                                             <>
@@ -184,7 +189,7 @@ export function RiskPanel({
                             </div>
 
                             {/* Suggestion Box */}
-                            {risk.suggestion.revised_text && (
+                            {risk.suggestion.revised_text && !isUselessSuggestion && (
                                 <div
                                     className={`
                                         border rounded-lg p-3 mb-3 cursor-pointer transition-colors
@@ -195,8 +200,8 @@ export function RiskPanel({
                                         onRiskToggle(index);
                                     }}
                                 >
-                                    <div className="flex items-center gap-1 text-[10px] mb-1 font-medium
-                                        ${isSelected ? 'text-blue-700' : 'text-teal-700'}">
+                                    <div className={`flex items-center gap-1 text-[10px] mb-1 font-medium
+                                        ${isSelected ? 'text-blue-700' : 'text-teal-700'}`}>
                                         <Lightbulb className="w-3 h-3" />
                                         改善の提案 {isSelected && <span className="ml-1 text-blue-600 font-bold">(採用中)</span>}
                                     </div>

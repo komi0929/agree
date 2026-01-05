@@ -66,15 +66,14 @@ export default function Home() {
     if (deepAnalysisPromiseRef.current) {
       try {
         const result = await deepAnalysisPromiseRef.current;
-        if (result.success && result.data) {
+        // 緩和策: dataが存在すれば、successがfalseでも表示する（部分的な解析結果でもユーザーに見せる）
+        if (result.data) {
           setAnalysisData(result.data);
           trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED);
-          // Here we would ideally filter results based on 'role', but for now we just show everything
-          // In next phase, we pass 'role' to the viewer to contextualize
           setStep("complete");
         } else {
           trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "analysis_failed" });
-          alert("詳細解析に失敗しました");
+          alert("詳細解析に失敗しました。もう一度お試しください。");
           setStep("upload");
         }
       } catch (e) {
@@ -98,15 +97,15 @@ export default function Home() {
 
           {/* Quiet Introduction */}
           {!hasStarted ? (
-            <div className="text-center space-y-10 animate-fade-in-delayed">
-              <div className="space-y-6">
-                <p className="text-base leading-loose max-w-md mx-auto">
+            <div className="text-center space-y-12 animate-fade-in-delayed">
+              <div className="space-y-8">
+                <p className="text-lg leading-loose max-w-lg mx-auto font-medium">
                   お仕事の契約の、はじまりから終わりまで。<br />
                   あなたの立場をそっと、確かに守ります。
                 </p>
-                <p className="text-base leading-loose max-w-md mx-auto">
+                <p className="text-lg leading-loose max-w-lg mx-auto text-slate-500">
                   面倒な登録も、煩わしい通知もありません。<br />
-                  ただ、あなたのあんしんのために。
+                  契約書をアップして、ただ待つだけ。
                 </p>
               </div>
 
@@ -115,12 +114,12 @@ export default function Home() {
                   trackEvent(ANALYTICS_EVENTS.STARTED_CLICKED);
                   setHasStarted(true);
                 }}
-                className="rounded-full px-8 py-6 bg-white border border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-300 shadow-sm transition-all text-base font-normal"
+                className="rounded-full px-10 py-7 bg-slate-900 border border-slate-900 text-white hover:bg-slate-800 shadow-xl hover:shadow-2xl transition-all text-lg font-medium tracking-wide"
               >
-                はじめる
+                契約書をチェックする
               </Button>
 
-              <div className="pt-12">
+              <div className="pt-8">
                 <Link href="#" className="text-sm text-slate-400 hover:text-slate-600 border-b border-dashed border-slate-300 pb-0.5 transition-colors">
                   できることを見る
                 </Link>
@@ -192,7 +191,7 @@ export default function Home() {
       <header className="h-20 px-8 flex items-center justify-between max-w-5xl mx-auto w-full">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => setAnalysisData(null)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="agree" className="h-8 w-auto" />
+          <img src="/logo.png" alt="agree" className="h-12 w-auto" />
         </div>
         {analysisData && (
           <Button
