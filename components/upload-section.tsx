@@ -44,7 +44,13 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
             if (result.success && result.data) {
                 onAnalysisComplete(result.data, result.text);
             } else {
-                const errorMessage = result.message || "解析に失敗しました";
+                // A-3: More specific error messages
+                let errorMessage = result.message || "解析に失敗しました";
+                if (errorMessage.includes("テキストが少な") || errorMessage.includes("text")) {
+                    errorMessage = "このPDFはスキャン画像の可能性があります。テキストが埋め込まれたPDFをお使いください。";
+                } else if (errorMessage.includes("抽出")) {
+                    errorMessage = "PDFからテキストを抽出できませんでした。別のPDFファイルをお試しください。";
+                }
                 setError(errorMessage);
                 trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "server_error", message: errorMessage });
                 onAnalysisComplete(null);
@@ -174,7 +180,9 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                                 <UploadCloud className="h-6 w-6 text-slate-300 group-hover:text-slate-400 transition-colors" />
                                 <div className="text-center space-y-2">
                                     <p className="text-sm text-slate-600 font-light">ここにファイルをドロップ</p>
-                                    <p className="text-[10px] text-slate-400 tracking-wide">PDF / 4.5MBまで</p>
+                                    {/* A-4: Clearer prerequisites */}
+                                    <p className="text-[10px] text-slate-400 tracking-wide">PDF形式 / 4.5MBまで / テキストPDF限定</p>
+                                    <p className="text-[9px] text-slate-300">※スキャン・画像PDFは非対応</p>
                                 </div>
                             </>
                         )}
@@ -192,6 +200,8 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                 <TabsContent value="url">
                     <div className="space-y-6 max-w-sm mx-auto pt-4">
                         <div className="space-y-2">
+                            {/* A-3: Clearer URL input label */}
+                            <p className="text-xs text-slate-500 text-center">PDFファイルの直接URL</p>
                             <Input
                                 placeholder="https://example.com/contract.pdf"
                                 value={url}
@@ -200,6 +210,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                                 className="rounded-lg border-slate-200 focus-visible:ring-0 focus-visible:border-slate-400 bg-slate-50/50 text-center font-light placeholder:text-slate-300"
                             />
                         </div>
+                        {/* B-2: Specific button label */}
                         <Button
                             className="w-full h-10 rounded-full bg-slate-900 hover:bg-slate-800 text-white shadow-none transition-all font-normal text-sm"
                             disabled={isUploading || !url}
@@ -210,7 +221,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                                     <Loader2 className="h-3 w-3 animate-spin" />
                                     <span className="text-xs">解析中</span>
                                 </div>
-                            ) : "解析する"}
+                            ) : "このPDFを解析"}
                         </Button>
                     </div>
                 </TabsContent>

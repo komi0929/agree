@@ -86,11 +86,18 @@ export function RiskPanel({
                         {risks.length}箇所を検出
                     </Badge>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                {/* C-4: Color-independent design - add icons next to colors */}
+                <div className="flex items-center gap-3 text-[10px] text-slate-400">
                     <span className="flex items-center gap-1">
+                        <AlertOctagon className="w-3 h-3 text-purple-600" />
+                        <span className="w-2 h-2 rounded-full bg-purple-600" />重大
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3 text-red-500" />
                         <span className="w-2 h-2 rounded-full bg-red-500" />HIGH
                     </span>
                     <span className="flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3 text-yellow-500" />
                         <span className="w-2 h-2 rounded-full bg-yellow-500" />MED
                     </span>
                 </div>

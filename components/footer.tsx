@@ -5,14 +5,14 @@ export function Footer() {
         <footer className="bg-white border-t border-slate-100 py-12 px-6 font-sans">
             <div className="max-w-3xl mx-auto flex flex-col items-center">
 
-                {/* Service Navigation (Primary) */}
+                {/* Service Navigation (Primary) - C-7: Use noun form */}
                 <div className="flex flex-wrap justify-center gap-x-10 gap-y-4 mb-10">
                     <Link href="/generate" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-2">
                         <span className="text-amber-500">✨</span>
-                        契約書を作成
+                        契約書作成
                         <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">β</span>
                     </Link>
-                    <Link href="/how-to-use" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">使い方</Link>
+                    <Link href="/how-to-use" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">ガイド</Link>
                     <Link href="/check-policy" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">チェックポリシー</Link>
                 </div>
 

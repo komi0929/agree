@@ -10,19 +10,21 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Footer } from "@/components/footer";
 import { SignatureLogo } from "@/components/signature-logo";
-import { RoleSelector } from "@/components/role-selector";
-import { UserContextForm } from "@/components/user-context-form";
+import { UnifiedContextForm } from "@/components/unified-context-form";
 import { analyzeDeepAction, AnalysisState } from "@/app/actions";
 import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
+import { FileText, Shield, MessageSquare } from "lucide-react";
 
 export default function Home() {
   const [analysisData, setAnalysisData] = useState<EnhancedAnalysisResult | null>(null);
   const [extractionData, setExtractionData] = useState<ExtractionResult | null>(null);
   const [contractText, setContractText] = useState<string>("");
-  const [userContext, setUserContext] = useState<UserContext>(DEFAULT_USER_CONTEXT);
   const [loading, setLoading] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
-  const [step, setStep] = useState<"upload" | "user_context" | "role_selection" | "analyzing" | "complete">("upload");
+  // A-1: Simplified flow - only 3 steps now: upload -> unified_context -> analyzing -> complete
+  const [step, setStep] = useState<"upload" | "unified_context" | "analyzing" | "complete">("upload");
+  // A-2: Progressive loading messages
+  const [loadingMessage, setLoadingMessage] = useState("契約書を読み込んでいます...");
 
   // Store the promise of the deep analysis so we can await it later
   const deepAnalysisPromiseRef = useRef<Promise<AnalysisState> | null>(null);
@@ -45,44 +47,83 @@ export default function Home() {
     if (result && text) {
       setExtractionData(result);
       setContractText(text);
-      // Go to user context collection first
-      setStep("user_context");
+      // A-1: Go directly to unified context (combines user context + role selection)
+      setStep("unified_context");
     }
   };
 
-  const handleUserContextComplete = (ctx: UserContext) => {
-    setUserContext(ctx);
-    setStep("role_selection");
-    // 🚀 START DEEP ANALYSIS IN BACKGROUND with user context!
-    deepAnalysisPromiseRef.current = analyzeDeepAction(contractText, ctx);
+  // A-1: Unified handler for context + role completion
+  const handleUnifiedComplete = async (ctx: UserContext, role: "party_a" | "party_b") => {
     trackEvent(ANALYTICS_EVENTS.USER_CONTEXT_COMPLETED);
-  };
-
-  const handleRoleSelect = async (role: "party_a" | "party_b") => {
     trackEvent(ANALYTICS_EVENTS.ROLE_SELECTED, { role });
-    setStep("analyzing");
 
-    // Await the background analysis that (hopefully) started seconds ago
-    if (deepAnalysisPromiseRef.current) {
-      try {
-        const result = await deepAnalysisPromiseRef.current;
-        // 緩和策: dataが存在すれば、successがfalseでも表示する（部分的な解析結果でもユーザーに見せる）
-        if (result.data) {
-          setAnalysisData(result.data);
-          trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED);
-          setStep("complete");
-        } else {
-          trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "analysis_failed" });
-          alert("詳細解析に失敗しました。もう一度お試しください。");
-          setStep("upload");
+    // A-2: Progressive loading messages
+    setStep("analyzing");
+    setLoadingMessage("契約書を読み込んでいます...");
+
+    // Start analysis
+    deepAnalysisPromiseRef.current = analyzeDeepAction(contractText, ctx);
+
+    // A-2: Update loading messages progressively
+    const messages = [
+      "契約書を読み込んでいます...",
+      "当事者を検出しています...",
+      "リスクを解析しています...",
+      "修正提案を生成しています..."
+    ];
+    let msgIndex = 0;
+    const interval = setInterval(() => {
+      msgIndex = Math.min(msgIndex + 1, messages.length - 1);
+      setLoadingMessage(messages[msgIndex]);
+    }, 2000);
+
+    try {
+      const result = await deepAnalysisPromiseRef.current;
+      clearInterval(interval);
+
+      if (result.data) {
+        setAnalysisData(result.data);
+        trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED);
+        setStep("complete");
+
+        // C-3: Auto-save analysis results for prospective memory
+        try {
+          localStorage.setItem("agreeLastAnalysis", JSON.stringify({
+            timestamp: new Date().toISOString(),
+            data: result.data,
+            text: contractText,
+          }));
+        } catch {
+          // Ignore storage errors (quota exceeded, etc.)
         }
-      } catch (e) {
-        console.error(e);
-        trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "exception" });
-        alert("エラーが発生しました");
+      } else {
+        trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "analysis_failed" });
+        alert("詳細解析に失敗しました。もう一度お試しください。");
         setStep("upload");
       }
+    } catch (e) {
+      clearInterval(interval);
+      console.error(e);
+      trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "exception" });
+      alert("エラーが発生しました");
+      setStep("upload");
     }
+  };
+
+  // A-1: Quick start handler (skip detailed settings)
+  const handleQuickStart = async () => {
+    if (!extractionData) return;
+
+    // Use defaults
+    const defaultContext: UserContext = {
+      ...DEFAULT_USER_CONTEXT,
+      userRole: "vendor",
+      userEntityType: "individual",
+      counterpartyCapital: "unknown",
+    };
+
+    // Default to party_b (most freelancers are 乙)
+    await handleUnifiedComplete(defaultContext, "party_b");
   };
 
   // Initially show the minimalist hero with optional upload reveal
@@ -124,9 +165,24 @@ export default function Home() {
                 </Button>
               </div>
 
-              <div className="pt-8">
-                <Link href="/how-to-use" className="text-sm text-slate-400 hover:text-slate-600 border-b border-dashed border-slate-300 pb-0.5 transition-colors">
-                  できることを見る
+              {/* C-6: Clarify what the app can do */}
+              <div className="pt-8 space-y-4">
+                <div className="flex justify-center gap-8 text-sm text-slate-500">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-slate-400" />
+                    <span>リスク検出</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-slate-400" />
+                    <span>修正文提案</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-slate-400" />
+                    <span>交渉メッセージ</span>
+                  </div>
+                </div>
+                <Link href="/how-to-use" className="inline-block text-sm text-slate-400 hover:text-slate-600 border-b border-dashed border-slate-300 pb-0.5 transition-colors">
+                  詳しく見る
                 </Link>
               </div>
             </div>
@@ -154,36 +210,28 @@ export default function Home() {
     );
   }
 
-  // User Context Collection Step
-  if (step === "user_context") {
+  // A-1: Unified Context Collection Step (combines user context + role selection)
+  if (step === "unified_context" && extractionData) {
     return (
       <div className="min-h-screen flex flex-col bg-white font-sans">
-        <div className="flex-1 flex flex-col items-center justify-center p-6">
-          <UserContextForm onComplete={handleUserContextComplete} />
-        </div>
-      </div>
-    );
-  }
-
-  if (step === "role_selection" && extractionData) {
-    return (
-      <div className="min-h-screen flex flex-col bg-white font-sans">
-        <div className="flex-1 flex flex-col items-center justify-center p-6">
-          <RoleSelector
+        <div className="flex-1 flex flex-col items-center justify-start py-8 px-4 overflow-y-auto">
+          <UnifiedContextForm
             extractionData={extractionData}
-            onSelectRole={handleRoleSelect}
+            onComplete={handleUnifiedComplete}
+            onSkip={handleQuickStart}
           />
         </div>
       </div>
     );
   }
 
+  // A-2: Progressive loading screen
   if (step === "analyzing") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-white space-y-6 animate-in fade-in">
         <div className="relative flex flex-col items-center gap-4">
           <div className="h-16 w-16 border-2 border-slate-100 border-t-slate-900 rounded-full animate-spin" />
-          <p className="text-slate-600 font-medium">詳細なリスクを解析しています...</p>
+          <p className="text-slate-600 font-medium">{loadingMessage}</p>
           <p className="text-slate-400 text-xs">もう間もなく完了します</p>
         </div>
       </div>
