@@ -161,16 +161,19 @@ export async function extractPartiesAction(prevState: any, formData: FormData): 
         }
 
         if (!text || text.trim().length === 0) {
-            return { success: false, message: "テキストの抽出に失敗しました。PDFが空か、テキストを含んでいない可能性があります。" };
+            return { success: false, message: "テキストの抽出に失敗しました。PDFが空か、パスワード保護されている、または画像ベースのPDFである可能性があります。" };
         }
 
-        // Logging for debug
-        console.log(`Extracted text length: ${text.trim().length} characters`);
+        // Filter out system markers to check real content length
+        const realContent = text.replace(/[-]+Page \(\d+\) Break[-]+/g, '').trim();
 
-        // Minimum text check (Relaxed to 50 characters)
-        if (text.trim().length < 50) {
-            console.warn("Rejecting PDF due to insufficient text content:", text.substring(0, 100));
-            return { success: false, message: "PDFから十分なテキストを読み取れませんでした。画像ベースのPDF（スキャンデータ）の場合、現在テキスト解析ができません。テキスト形式のPDFをアップロードしてください。" };
+        // Logging for debug
+        console.log(`Extracted total length: ${text.length}, Real content length: ${realContent.length}`);
+
+        // Minimum text check (Relaxed to 50 characters of real content)
+        if (realContent.length < 50) {
+            console.warn("Rejecting PDF due to insufficient real content:", realContent.substring(0, 100));
+            return { success: false, message: "PDFから十分なテキスト内容を読み取れませんでした。テキスト形式のPDFであることを確認してください（スキャナーで読み取った画像ベースのPDFには対応しておりません）。" };
         }
 
         // Fast Pass: Extract Parties
