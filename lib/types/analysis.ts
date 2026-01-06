@@ -34,6 +34,9 @@ export type EnhancedRisk = {
 
     explanation: string;
 
+    // 具体的な実害（例：「ポートフォリオに載せられなくなる」）
+    practical_impact?: string;
+
     suggestion: {
         revised_text: string;
         negotiation_message: NegotiationMessage;

@@ -18,9 +18,10 @@ import { ContractInput, DEFAULT_CONTRACT_OPTIONS } from "@/lib/types/contract-in
 interface AnalysisViewerProps {
     data: EnhancedAnalysisResult;
     text: string;
+    contractType?: string;
 }
 
-export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
+export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps) {
     const router = useRouter();
     const [highlightedRiskIndex, setHighlightedRiskIndex] = useState<number | null>(null);
     const [selectedRiskIndex, setSelectedRiskIndex] = useState<number | null>(null);
@@ -134,7 +135,7 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
     return (
         <div className="h-screen w-full flex flex-col font-sans bg-slate-100">
             {/* Summary Header */}
-            <SummaryHeader data={data} />
+            <SummaryHeader data={data} contractType={contractType} />
 
             {/* Guide Bar - Onboarding */}
             <GuideBar />

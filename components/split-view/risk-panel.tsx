@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, AlertOctagon, Check, ArrowRight, ArrowLeft, Lightbulb, CheckSquare, Square } from "lucide-react";
+import { AlertTriangle, AlertOctagon, Check, ChevronDown, ChevronUp, Lightbulb, CheckSquare, Square, FileText, HelpCircle, Sparkles } from "lucide-react";
 import { VIOLATED_LAW_EXPLANATIONS, ViolatedLaw } from "@/lib/types/clause-tags";
 
 interface RiskPanelProps {
@@ -27,16 +27,29 @@ export function RiskPanel({
     onScrollToContract
 }: RiskPanelProps) {
     const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+    const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
 
     // Scroll to highlighted card when highlightedRiskIndex changes
     useEffect(() => {
-        if (highlightedRiskIndex !== null && highlightedRiskIndex !== -1) { // -1 check just in case
+        if (highlightedRiskIndex !== null && highlightedRiskIndex !== -1) {
             const element = cardRefs.current.get(highlightedRiskIndex);
             if (element) {
                 element.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         }
     }, [highlightedRiskIndex]);
+
+    const toggleExpanded = (index: number) => {
+        setExpandedCards(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(index)) {
+                newSet.delete(index);
+            } else {
+                newSet.add(index);
+            }
+            return newSet;
+        });
+    };
 
     // Get risk styling based on level
     const getRiskStyling = (riskLevel: string) => {
@@ -46,7 +59,8 @@ export function RiskPanel({
                     border: "border-l-purple-600",
                     bg: "bg-purple-50/30",
                     badge: "bg-purple-100 text-purple-700 border-purple-200",
-                    label: "最優先",
+                    label: "🔥 ここは特に大事",
+                    labelShort: "特に大事",
                     icon: <AlertOctagon className="w-4 h-4 text-purple-600" />,
                 };
             case "high":
@@ -54,7 +68,8 @@ export function RiskPanel({
                     border: "border-l-red-500",
                     bg: "bg-red-50/30",
                     badge: "bg-red-100 text-red-700 border-red-200",
-                    label: "要注意",
+                    label: "⚠️ 確認推奨",
+                    labelShort: "確認推奨",
                     icon: <AlertTriangle className="w-4 h-4 text-red-500" />,
                 };
             case "medium":
@@ -62,7 +77,8 @@ export function RiskPanel({
                     border: "border-l-yellow-500",
                     bg: "bg-yellow-50/30",
                     badge: "bg-yellow-100 text-yellow-700 border-yellow-200",
-                    label: "確認",
+                    label: "💡 ご参考",
+                    labelShort: "ご参考",
                     icon: <AlertTriangle className="w-4 h-4 text-yellow-500" />,
                 };
             default:
@@ -70,10 +86,40 @@ export function RiskPanel({
                     border: "border-l-green-500",
                     bg: "bg-green-50/30",
                     badge: "bg-green-100 text-green-700 border-green-200",
-                    label: "参考",
+                    label: "✅ 問題なし",
+                    labelShort: "問題なし",
                     icon: <Check className="w-4 h-4 text-green-500" />,
                 };
         }
+    };
+
+    // Parse explanation to extract "why dangerous" context
+    const parseWhyDangerous = (explanation: string): string => {
+        // The explanation already contains the "why" - make it more conversational
+        return explanation;
+    };
+
+    // Generate "what to do" recommendation based on suggestion
+    const getWhatToDo = (risk: EnhancedAnalysisResult["risks"][0]): string => {
+        if (risk.suggestion.revised_text) {
+            return `この条項を以下のように修正することをおすすめします。`;
+        }
+        return "専門家に相談して、この条項について確認することをおすすめします。";
+    };
+
+    // Get alternative options
+    const getAlternatives = (risk: EnhancedAnalysisResult["risks"][0]): string[] => {
+        const alternatives: string[] = [];
+
+        if (risk.suggestion.revised_text) {
+            alternatives.push("修正案を採用する");
+        }
+        alternatives.push("そのまま受け入れる（リスク承知で）");
+        if (risk.violated_laws && risk.violated_laws.length > 0) {
+            alternatives.push("専門家に相談する");
+        }
+
+        return alternatives;
     };
 
     return (
@@ -81,24 +127,21 @@ export function RiskPanel({
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-slate-200">
                 <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-slate-700">チェック項目</span>
+                    <span className="text-sm font-medium text-slate-700">気になる箇所</span>
                     <Badge variant="outline" className="rounded-full text-[10px] px-2">
-                        {risks.length}項目
+                        {risks.length}件
                     </Badge>
                 </div>
-                {/* C-4: Color-independent design - add icons next to colors */}
+                {/* Legend */}
                 <div className="flex items-center gap-3 text-[10px] text-slate-400">
                     <span className="flex items-center gap-1">
-                        <AlertOctagon className="w-3 h-3 text-purple-600" />
-                        <span className="w-2 h-2 rounded-full bg-purple-600" />最優先
+                        <span className="w-2 h-2 rounded-full bg-purple-600" />特に大事
                     </span>
                     <span className="flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3 text-red-500" />
-                        <span className="w-2 h-2 rounded-full bg-red-500" />要注意
+                        <span className="w-2 h-2 rounded-full bg-red-500" />確認推奨
                     </span>
                     <span className="flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3 text-yellow-500" />
-                        <span className="w-2 h-2 rounded-full bg-yellow-500" />確認
+                        <span className="w-2 h-2 rounded-full bg-yellow-500" />ご参考
                     </span>
                 </div>
             </div>
@@ -109,12 +152,15 @@ export function RiskPanel({
                     const styling = getRiskStyling(risk.risk_level);
                     const isHighlighted = highlightedRiskIndex === index;
                     const isSelected = selectedRiskIndices.includes(index);
+                    const isExpanded = expandedCards.has(index);
+
                     // 無意味な提案かどうかを判定
                     const isUselessSuggestion = risk.suggestion.revised_text
                         ? (risk.suggestion.revised_text.includes("専門家") && risk.suggestion.revised_text.length < 60)
                         : true;
 
                     const canAdopt = !!risk.suggestion.revised_text && !isUselessSuggestion;
+                    const alternatives = getAlternatives(risk);
 
                     return (
                         <div
@@ -123,123 +169,194 @@ export function RiskPanel({
                                 if (el) cardRefs.current.set(index, el);
                             }}
                             className={`
-                                relative p-4 rounded-lg border shadow-sm transition-all duration-300
+                                relative rounded-xl border shadow-sm transition-all duration-300
                                 border-l-4 ${styling.border} 
                                 ${isSelected ? "bg-blue-50/50 border-blue-200 ring-1 ring-blue-300" : styling.bg}
                                 ${isHighlighted ? "ring-2 ring-slate-400 shadow-md" : (!isSelected && "border-slate-200 hover:shadow-md")}
                             `}
                             onMouseEnter={() => onRiskHover(index)}
                             onMouseLeave={() => onRiskHover(null)}
-                            onClick={() => onRiskSelect(index)}
                         >
-                            {/* Selection Checkbox (Only if adoptable) */}
-                            {canAdopt && (
-                                <div className="absolute top-4 right-4 z-10">
+                            {/* Compact Header - Always Visible */}
+                            <div
+                                className="p-4 cursor-pointer"
+                                onClick={() => toggleExpanded(index)}
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex-1 min-w-0">
+                                        {/* Risk Level Badge */}
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${styling.badge}`}>
+                                                {styling.label}
+                                            </span>
+                                            <span className="text-[10px] text-slate-400">#{index + 1}</span>
+                                        </div>
+
+                                        {/* Title */}
+                                        <h4 className="text-sm font-bold text-slate-800 mb-1">
+                                            {risk.section_title || "条項"}
+                                        </h4>
+
+                                        {/* Quick Summary - First line of explanation */}
+                                        <p className="text-xs text-slate-600 line-clamp-2">
+                                            {risk.explanation.split("。")[0]}。
+                                        </p>
+                                    </div>
+
+                                    {/* Expand/Collapse */}
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        {canAdopt && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onRiskToggle(index);
+                                                }}
+                                                className={`
+                                                    flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all
+                                                    ${isSelected
+                                                        ? "bg-blue-600 text-white shadow-md hover:bg-blue-700"
+                                                        : "bg-white text-slate-500 border border-slate-200 hover:border-blue-400 hover:text-blue-600"
+                                                    }
+                                                `}
+                                            >
+                                                {isSelected ? (
+                                                    <>
+                                                        <CheckSquare className="w-3.5 h-3.5" />
+                                                        選択中 ✓
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Square className="w-3.5 h-3.5" />
+                                                        これにする
+                                                    </>
+                                                )}
+                                            </button>
+                                        )}
+                                        <button className="p-1 text-slate-400 hover:text-slate-600">
+                                            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Expanded Content - Nani-style Rationale */}
+                            {isExpanded && (
+                                <div className="px-4 pb-4 space-y-4 border-t border-slate-100 pt-4 animate-in slide-in-from-top-2 duration-200">
+
+                                    {/* Section: なぜ危険？ */}
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2 text-xs font-semibold text-orange-700">
+                                            <HelpCircle className="w-4 h-4" />
+                                            なぜ気をつけるべき？
+                                        </div>
+                                        <div className="bg-orange-50 rounded-lg p-3 text-xs text-orange-900 leading-relaxed">
+                                            {parseWhyDangerous(risk.explanation)}
+                                        </div>
+                                    </div>
+
+                                    {/* Section: 具体的にどうなる？ */}
+                                    {risk.practical_impact && (
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-2 text-xs font-semibold text-rose-700">
+                                                <AlertTriangle className="w-4 h-4" />
+                                                具体的にどうなる？
+                                            </div>
+                                            <div className="bg-rose-50 rounded-lg p-3 text-xs text-rose-900 leading-relaxed border border-rose-100">
+                                                {risk.practical_impact}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Section: おすすめの対処法 */}
+                                    {canAdopt && (
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-2 text-xs font-semibold text-teal-700">
+                                                <Lightbulb className="w-4 h-4" />
+                                                おすすめの対処法
+                                            </div>
+                                            <div className="bg-teal-50 rounded-lg p-3 space-y-2">
+                                                <p className="text-xs text-teal-800">{getWhatToDo(risk)}</p>
+                                                <div className="bg-white rounded-lg p-3 border border-teal-100">
+                                                    <p className="text-xs font-medium text-teal-900 mb-1">💡 修正案</p>
+                                                    <p className="text-xs text-teal-800 leading-relaxed">
+                                                        {risk.suggestion.revised_text}
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onRiskToggle(index);
+                                                    }}
+                                                    className={`
+                                                        w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium transition-all
+                                                        ${isSelected
+                                                            ? "bg-blue-600 text-white"
+                                                            : "bg-teal-600 text-white hover:bg-teal-700"
+                                                        }
+                                                    `}
+                                                >
+                                                    {isSelected ? (
+                                                        <>
+                                                            <CheckSquare className="w-4 h-4" />
+                                                            この修正案を採用中
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Sparkles className="w-4 h-4" />
+                                                            この修正案を採用する
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Section: 他の選択肢 */}
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                                            <FileText className="w-4 h-4" />
+                                            他の選択肢
+                                        </div>
+                                        <div className="bg-slate-50 rounded-lg p-3">
+                                            <ul className="space-y-1.5">
+                                                {alternatives.map((alt, i) => (
+                                                    <li key={i} className="text-xs text-slate-600 flex items-start gap-2">
+                                                        <span className="text-slate-400">•</span>
+                                                        {alt}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    {/* Violated Laws */}
+                                    {risk.violated_laws && risk.violated_laws.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 pt-2 border-t border-slate-100">
+                                            <span className="text-[10px] text-slate-400 mr-1">関連法令:</span>
+                                            {risk.violated_laws.map((law, i) => (
+                                                <Badge
+                                                    key={i}
+                                                    variant="secondary"
+                                                    className="text-[9px] bg-slate-100 text-slate-600 rounded-full"
+                                                >
+                                                    {VIOLATED_LAW_EXPLANATIONS[law as ViolatedLaw]?.split("（")[0] || law}
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Contract Link */}
                                     <button
+                                        className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            onRiskToggle(index);
+                                            onScrollToContract(index);
                                         }}
-                                        className={`
-                                            flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all
-                                            ${isSelected
-                                                ? "bg-blue-600 text-white shadow-md hover:bg-blue-700"
-                                                : "bg-white text-slate-500 border border-slate-200 hover:border-blue-400 hover:text-blue-600"
-                                            }
-                                        `}
                                     >
-                                        {isSelected ? (
-                                            <>
-                                                <CheckSquare className="w-3.5 h-3.5" />
-                                                選択中 ✓
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Square className="w-3.5 h-3.5" />
-                                                これにする
-                                            </>
-                                        )}
+                                        📍 契約書で確認
                                     </button>
                                 </div>
                             )}
-
-                            {/* Header Row */}
-                            <div className="flex items-start justify-between mb-3 pr-24">
-                                <div className="flex items-center gap-2">
-                                    <span className={`
-                                        w-6 h-6 rounded-full flex items-center justify-center
-                                        text-xs font-bold ${styling.badge} border
-                                    `}>
-                                        {index + 1}
-                                    </span>
-                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${styling.badge}`}>
-                                        {styling.label}
-                                    </span>
-                                </div>
-                                {!canAdopt && styling.icon}
-                            </div>
-
-                            {/* Title */}
-                            <h4 className="text-sm font-bold text-slate-800 mb-2">
-                                {risk.section_title || "条項"}
-                            </h4>
-
-                            {/* Explanation - A-7: Removed "検出されたリスク" label as redundant */}
-                            <div className="mb-3">
-                                <p className="text-xs text-slate-600 leading-relaxed">
-                                    {risk.explanation}
-                                </p>
-                            </div>
-
-                            {/* Suggestion Box */}
-                            {risk.suggestion.revised_text && !isUselessSuggestion && (
-                                <div
-                                    className={`
-                                        border rounded-lg p-3 mb-3 cursor-pointer transition-colors
-                                        ${isSelected ? "bg-blue-100/50 border-blue-200" : "bg-teal-50 border-teal-100 hover:bg-teal-100/50"}
-                                    `}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onRiskToggle(index);
-                                    }}
-                                >
-                                    {/* A-8: Simplified label */}
-                                    <div className={`flex items-center gap-1 text-[10px] mb-1 font-medium
-                                        ${isSelected ? 'text-blue-700' : 'text-teal-700'}`}>
-                                        <Lightbulb className="w-3 h-3" />
-                                        💡 修正案 {isSelected && <span className="ml-1 text-blue-600 font-bold">(採用中)</span>}
-                                    </div>
-                                    <p className={`text-xs leading-relaxed ${isSelected ? 'text-blue-900' : 'text-teal-800'}`}>
-                                        {risk.suggestion.revised_text}
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Violated Laws */}
-                            {risk.violated_laws && risk.violated_laws.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mb-3">
-                                    {risk.violated_laws.map((law, i) => (
-                                        <Badge
-                                            key={i}
-                                            variant="secondary"
-                                            className="text-[9px] bg-slate-100 text-slate-600 rounded-full"
-                                        >
-                                            {VIOLATED_LAW_EXPLANATIONS[law as ViolatedLaw]?.split("（")[0] || law}
-                                        </Badge>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* A-9: Simplified link text */}
-                            <button
-                                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors mt-2"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onScrollToContract(index);
-                                }}
-                            >
-                                📍 契約書で確認
-                            </button>
                         </div>
                     );
                 })}

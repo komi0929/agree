@@ -63,6 +63,9 @@ const EnhancedRiskSchema = z.object({
 
     explanation: z.string(),
 
+    // 具体的な実害（例：「ポートフォリオに載せられなくなる可能性があります」）
+    practical_impact: z.string().optional(),
+
     suggestion: z.object({
         revised_text: z.string(),
         negotiation_message: NegotiationMessageSchema,
@@ -193,6 +196,7 @@ ${lawContext}
       "risk_level": "critical | high | medium | low",
       "violated_laws": ["該当する法律のコード"],
       "explanation": "なぜこの条項にリスクがあるのかの説明",
+      "practical_impact": "【重要】具体的な実害を平易な言葉で説明（例：「ポートフォリオに載せられなくなる」「2ヶ月間報酬が入らない可能性がある」）",
       "suggestion": {
         "revised_text": "修正案の文面",
         "negotiation_message": {
@@ -341,6 +345,7 @@ export async function analyzeContractText(
                 risk_level: r.risk_level || "medium",
                 violated_laws: Array.isArray(r.violated_laws) ? r.violated_laws : [],
                 explanation: r.explanation || "",
+                practical_impact: r.practical_impact || undefined,
                 suggestion: r.suggestion || {
                     revised_text: "",
                     negotiation_message: { formal: "", neutral: "", casual: "" },

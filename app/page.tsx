@@ -211,14 +211,28 @@ export default function Home() {
     );
   }
 
-  // A-2: Progressive loading screen
+  // A-2: Progressive loading screen with playful design
   if (step === "analyzing") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-white space-y-6 animate-in fade-in">
-        <div className="relative flex flex-col items-center gap-4">
-          <div className="h-16 w-16 border-2 border-slate-100 border-t-slate-900 rounded-full animate-spin" />
-          <p className="text-slate-600 font-medium">{loadingMessage}</p>
-          <p className="text-slate-400 text-xs">もう間もなく完了します</p>
+        <div className="relative flex flex-col items-center gap-6">
+          {/* Animated logo */}
+          <div className="relative">
+            <div className="h-20 w-20 border-2 border-slate-100 border-t-slate-900 rounded-full animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-2xl">📄</span>
+            </div>
+          </div>
+          <div className="text-center space-y-2">
+            <p className="text-slate-800 font-medium text-lg">{loadingMessage}</p>
+            <p className="text-slate-400 text-sm">あなたの契約書を丁寧に確認しています</p>
+          </div>
+          {/* Progress dots */}
+          <div className="flex gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-slate-300 animate-pulse" style={{ animationDelay: "0ms" }} />
+            <div className="w-2 h-2 rounded-full bg-slate-300 animate-pulse" style={{ animationDelay: "150ms" }} />
+            <div className="w-2 h-2 rounded-full bg-slate-300 animate-pulse" style={{ animationDelay: "300ms" }} />
+          </div>
         </div>
       </div>
     );
@@ -251,7 +265,7 @@ export default function Home() {
       <div className="flex-1 max-w-5xl mx-auto w-full px-8 pb-20">
         {step === "complete" && analysisData ? (
           <div className="h-[calc(100vh-5rem)] -mx-8 bg-slate-50">
-            <AnalysisViewer data={analysisData} text={contractText} />
+            <AnalysisViewer data={analysisData} text={contractText} contractType={extractionData?.contract_type} />
           </div>
         ) : (
           <div className="py-20">
