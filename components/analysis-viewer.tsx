@@ -8,8 +8,10 @@ import { ContractViewer } from "@/components/split-view/contract-viewer";
 import { RiskPanel } from "@/components/split-view/risk-panel";
 import { MessageCrafter } from "@/components/split-view/message-crafter";
 import { EngagementModal } from "@/components/engagement-modal";
+import { GuideBar } from "@/components/onboarding/guide-bar";
+import { WelcomeModal } from "@/components/onboarding/welcome-modal";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileText, Send, Sparkles, Loader2, X } from "lucide-react";
+import { ArrowLeft, FileText, Send, Sparkles, Loader2, X, Lightbulb } from "lucide-react";
 import { modifyContractAction } from "@/app/generate/actions";
 import { ContractInput, DEFAULT_CONTRACT_OPTIONS } from "@/lib/types/contract-input";
 
@@ -25,6 +27,7 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
     const [selectedRiskIndices, setSelectedRiskIndices] = useState<number[]>([]);
     const [viewMode, setViewMode] = useState<"contract" | "message">("contract");
     const [showEngagement, setShowEngagement] = useState(false);
+    const [showWelcome, setShowWelcome] = useState(true);
     const [isGenerating, setIsGenerating] = useState(false);
 
     // Toggle risk selection
@@ -133,6 +136,9 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
             {/* Summary Header */}
             <SummaryHeader data={data} />
 
+            {/* Guide Bar - Onboarding */}
+            <GuideBar />
+
             {/* Main Split View */}
             <div className="flex-1 flex overflow-hidden relative">
                 {/* Left Pane */}
@@ -181,15 +187,16 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
                         onScrollToContract={handleScrollToContract}
                     />
 
-                    {/* Checkbox Floating Action Bar */}
-                    {selectedRiskIndices.length > 0 && (
-                        <div className="absolute bottom-6 left-6 right-6 z-20 animate-in slide-in-from-bottom-4 fade-in duration-300">
+                    {/* Floating Action Bar - Always visible */}
+                    <div className="absolute bottom-6 left-6 right-6 z-20 animate-in slide-in-from-bottom-4 fade-in duration-300">
+                        {selectedRiskIndices.length > 0 ? (
+                            // Selected state - full action bar
                             <div className="bg-slate-900/95 backdrop-blur-md text-white p-4 rounded-xl shadow-2xl border border-slate-700 flex flex-wrap items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-2 px-3 py-1 bg-slate-800 rounded-full border border-slate-700">
                                         <CheckSquareIcon className="w-4 h-4 text-blue-400" />
                                         <span className="text-sm font-bold">{selectedRiskIndices.length}</span>
-                                        <span className="text-xs text-slate-400">個を選択中</span>
+                                        <span className="text-xs text-slate-400">件選択中</span>
                                     </div>
                                     <button
                                         onClick={handleClearSelection}
@@ -230,8 +237,41 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
                                     </Button>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        ) : (
+                            // Empty state - hint with disabled buttons
+                            <div className="bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-xl border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+                                <div className="flex items-center gap-3 text-slate-600">
+                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <Lightbulb className="w-4 h-4 text-blue-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium">気になる項目の「採用」を押すと...</p>
+                                        <p className="text-xs text-slate-400">まとめて修正依頼や契約書作成ができます</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-2 justify-end">
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="border-slate-300 text-slate-400 cursor-not-allowed"
+                                        disabled
+                                    >
+                                        <Send className="w-4 h-4 mr-2" />
+                                        相手に伝える
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        className="bg-slate-300 text-slate-500 cursor-not-allowed"
+                                        disabled
+                                    >
+                                        <Sparkles className="w-4 h-4 mr-2" />
+                                        修正契約書を作る
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -239,6 +279,19 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
                 open={showEngagement}
                 onClose={() => setShowEngagement(false)}
             />
+
+            {/* Welcome Modal - First time onboarding */}
+            {showWelcome && (
+                <WelcomeModal
+                    onClose={() => setShowWelcome(false)}
+                    onSelectAction={(action) => {
+                        if (action === "message") {
+                            setViewMode("message");
+                        }
+                        // For "view" and "contract", just close the modal
+                    }}
+                />
+            )}
         </div>
     );
 }
