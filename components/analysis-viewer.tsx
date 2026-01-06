@@ -215,7 +215,7 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
                                         onClick={() => setViewMode("message")}
                                     >
                                         <Send className="w-4 h-4 mr-2" />
-                                        相手に伝える
+                                        メールで伝える
                                     </Button>
                                     <Button
                                         size="sm"
@@ -231,7 +231,7 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
                                         ) : (
                                             <>
                                                 <Sparkles className="w-4 h-4 mr-2" />
-                                                修正契約書を作る
+                                                新しい契約書を作る
                                             </>
                                         )}
                                     </Button>
@@ -245,7 +245,7 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
                                         <Lightbulb className="w-4 h-4 text-blue-600" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium">気になる項目の「採用」を押すと...</p>
+                                        <p className="text-sm font-medium">気になるところを選ぶと...</p>
                                         <p className="text-xs text-slate-400">まとめて修正依頼や契約書作成ができます</p>
                                     </div>
                                 </div>
@@ -258,7 +258,7 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
                                         disabled
                                     >
                                         <Send className="w-4 h-4 mr-2" />
-                                        相手に伝える
+                                        メールで伝える
                                     </Button>
                                     <Button
                                         size="sm"
@@ -266,7 +266,7 @@ export function AnalysisViewer({ data, text }: AnalysisViewerProps) {
                                         disabled
                                     >
                                         <Sparkles className="w-4 h-4 mr-2" />
-                                        修正契約書を作る
+                                        新しい契約書を作る
                                     </Button>
                                 </div>
                             </div>

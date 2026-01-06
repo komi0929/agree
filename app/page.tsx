@@ -64,12 +64,12 @@ export default function Home() {
     // Start analysis
     deepAnalysisPromiseRef.current = analyzeDeepAction(contractText, ctx);
 
-    // A-2: Update loading messages progressively
+    // A-2: Update loading messages progressively - Playful version
     const messages = [
-      "契約書を読み込んでいます...",
-      "当事者を確認しています...",
-      "気になる箇所を探しています...",
-      "修正案を考えています..."
+      "契約書を読んでいます...",
+      "確認していますね...",
+      "気になる点がないか見ています...",
+      "改善のヒントを準備中..."
     ];
     let msgIndex = 0;
     const interval = setInterval(() => {
@@ -142,12 +142,12 @@ export default function Home() {
             <div className="text-center space-y-12 animate-fade-in-delayed">
               <div className="space-y-8">
                 <p className="text-lg leading-loose max-w-lg mx-auto font-medium text-black text-balance tracking-wide">
-                  お仕事の契約の、はじまりから終わりまで。<br />
-                  あなたの立場をそっと、確かに守ります。
+                  契約書、ちょっと不安じゃないですか？<br />
+                  難しいことは、AIにおまかせ。
                 </p>
                 <p className="text-lg leading-loose max-w-lg mx-auto font-medium text-black text-balance tracking-wide">
-                  面倒な登録も、煩わしい通知もありません。<br />
-                  契約書をアップして、ただ待つだけ。
+                  登録も通知もいりません。<br />
+                  契約書をアップして、ちょっと待つだけ。
                 </p>
               </div>
 
@@ -160,7 +160,7 @@ export default function Home() {
                   }}
                   className="relative rounded-full px-12 py-8 bg-slate-900 border border-slate-900 text-white hover:bg-slate-800 shadow-xl hover:shadow-2xl transition-all duration-300 text-lg font-medium tracking-wide overflow-hidden cursor-pointer"
                 >
-                  <span className="relative z-10">契約書をチェックする</span>
+                  <span className="relative z-10">さっそく見てもらう</span>
                   <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent z-0" />
                 </Button>
               </div>
@@ -168,7 +168,7 @@ export default function Home() {
               {/* Link to why we made this */}
               <div className="pt-8">
                 <Link href="/how-to-use" className="inline-block text-sm text-slate-400 hover:text-slate-600 border-b border-dashed border-slate-300 pb-0.5 transition-colors">
-                  なぜつくったのか？
+                  agreeについて
                 </Link>
               </div>
             </div>

@@ -151,12 +151,12 @@ export function RiskPanel({
                                         {isSelected ? (
                                             <>
                                                 <CheckSquare className="w-3.5 h-3.5" />
-                                                採用中
+                                                選択中 ✓
                                             </>
                                         ) : (
                                             <>
                                                 <Square className="w-3.5 h-3.5" />
-                                                採用
+                                                これにする
                                             </>
                                         )}
                                     </button>
@@ -238,7 +238,7 @@ export function RiskPanel({
                                     onScrollToContract(index);
                                 }}
                             >
-                                📍 左で確認
+                                📍 契約書で確認
                             </button>
                         </div>
                     );

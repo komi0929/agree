@@ -195,6 +195,15 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                             disabled={isUploading}
                         />
                     </div>
+
+                    {/* Privacy Notice */}
+                    <div className="mt-6 flex items-center justify-center gap-4 text-[10px] text-slate-400">
+                        <span className="flex items-center gap-1">🔒 サーバー保存なし</span>
+                        <span>•</span>
+                        <span>AI学習に使用しません</span>
+                        <span>•</span>
+                        <span>SSL暗号化</span>
+                    </div>
                 </TabsContent>
 
                 <TabsContent value="url">

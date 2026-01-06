@@ -123,8 +123,8 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                                     <Zap className="w-5 h-5 text-slate-600" />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-slate-800">すぐにチェックする</p>
-                                    <p className="text-xs text-slate-400">設定をスキップして開始</p>
+                                    <p className="font-medium text-slate-800">今すぐチェック！</p>
+                                    <p className="text-xs text-slate-400">おまかせ設定でスタート</p>
                                 </div>
                             </div>
                             <ArrowRight className="w-5 h-5 text-slate-400 group-hover:translate-x-1 transition-transform" />
@@ -147,8 +147,7 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
                         <StepBadge number={1} />
-                        <h3 className="text-sm font-medium text-slate-700">あなたはどちら？</h3>
-                        <span className="text-xs text-red-500 font-medium">必須</span>
+                        <h3 className="text-sm font-medium text-slate-700">あなたは？</h3>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">

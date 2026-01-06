@@ -44,17 +44,17 @@ export function GuideBar({ onDismiss }: GuideBarProps) {
                         {" "}
                         <span className="inline-flex items-center gap-1">
                             <span className="w-5 h-5 rounded-full bg-blue-200 text-blue-700 text-xs font-bold inline-flex items-center justify-center">1</span>
-                            気になる項目を確認
+                            内容をチェック
                         </span>
                         {" → "}
                         <span className="inline-flex items-center gap-1">
                             <span className="w-5 h-5 rounded-full bg-blue-200 text-blue-700 text-xs font-bold inline-flex items-center justify-center">2</span>
-                            「採用」で選択
+                            気になるものを選ぶ
                         </span>
                         {" → "}
                         <span className="inline-flex items-center gap-1">
                             <span className="w-5 h-5 rounded-full bg-blue-200 text-blue-700 text-xs font-bold inline-flex items-center justify-center">3</span>
-                            下のボタンで次のアクション
+                            次のアクションへ
                         </span>
                     </p>
                 </div>
