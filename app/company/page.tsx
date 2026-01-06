@@ -16,13 +16,9 @@ export default function CompanyPage() {
 
                         <div className="flex flex-col sm:flex-row sm:gap-8">
                             <dt className="text-sm font-medium text-slate-900 sm:w-32 mb-1 sm:mb-0">代表者</dt>
-                            <dd className="text-sm text-slate-500 font-light">代表取締役 小南優作</dd>
+                            <dd className="text-sm text-slate-500 font-light">小南優作</dd>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row sm:gap-8">
-                            <dt className="text-sm font-medium text-slate-900 sm:w-32 mb-1 sm:mb-0">所在地</dt>
-                            <dd className="text-sm text-slate-500 font-light">非公開</dd>
-                        </div>
 
                         <div className="flex flex-col sm:flex-row sm:gap-8">
                             <dt className="text-sm font-medium text-slate-900 sm:w-32 mb-1 sm:mb-0">事業内容</dt>
