@@ -158,31 +158,17 @@ export default function Home() {
                     trackEvent(ANALYTICS_EVENTS.STARTED_CLICKED);
                     setHasStarted(true);
                   }}
-                  className="relative rounded-full px-12 py-8 bg-slate-900 border border-slate-900 text-white hover:bg-slate-800 shadow-xl hover:shadow-2xl transition-all duration-300 text-lg font-medium tracking-wide overflow-hidden"
+                  className="relative rounded-full px-12 py-8 bg-slate-900 border border-slate-900 text-white hover:bg-slate-800 shadow-xl hover:shadow-2xl transition-all duration-300 text-lg font-medium tracking-wide overflow-hidden cursor-pointer"
                 >
                   <span className="relative z-10">契約書をチェックする</span>
                   <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent z-0" />
                 </Button>
               </div>
 
-              {/* C-6: Clarify what the app can do */}
-              <div className="pt-8 space-y-4">
-                <div className="flex justify-center gap-8 text-sm text-slate-500">
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-slate-400" />
-                    <span>リスク検出</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-slate-400" />
-                    <span>修正文提案</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4 text-slate-400" />
-                    <span>交渉メッセージ</span>
-                  </div>
-                </div>
+              {/* Link to why we made this */}
+              <div className="pt-8">
                 <Link href="/how-to-use" className="inline-block text-sm text-slate-400 hover:text-slate-600 border-b border-dashed border-slate-300 pb-0.5 transition-colors">
-                  詳しく見る
+                  なぜつくったのか？
                 </Link>
               </div>
             </div>
