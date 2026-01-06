@@ -60,11 +60,12 @@ function OptionCard({
 export function UnifiedContextForm({ extractionData, onComplete, onSkip }: UnifiedContextFormProps) {
     const [context, setContext] = useState<UserContext>({
         ...DEFAULT_USER_CONTEXT,
-        userRole: "vendor",
+        userRole: "vendor", // Default: 受注者
         userEntityType: "individual",
         counterpartyCapital: "unknown",
     });
-    const [selectedRole, setSelectedRole] = useState<"party_a" | "party_b" | null>(null);
+    // Default to 乙 (party_b) since most users are vendors/受注者
+    const [selectedRole, setSelectedRole] = useState<"party_a" | "party_b" | null>("party_b");
 
     // Restore previous settings
     useEffect(() => {
@@ -142,11 +143,12 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
             {/* Main Form */}
             <div className="space-y-6">
 
-                {/* Section 1: Role Selection - Same height as others */}
+                {/* Section 1: Role Selection */}
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
                         <StepBadge number={1} />
                         <h3 className="text-sm font-medium text-slate-700">あなたはどちら？</h3>
+                        <span className="text-xs text-red-500 font-medium">必須</span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
