@@ -14,6 +14,57 @@ interface UnifiedContextFormProps {
     onSkip?: () => void;
 }
 
+// Consistent step number badge component
+function StepBadge({ number, isRequired }: { number: number; isRequired?: boolean }) {
+    return (
+        <span className={`
+            flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold
+            ${isRequired ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-600"}
+        `}>
+            {number}
+        </span>
+    );
+}
+
+// Consistent option card for 2-column layout
+function OptionCard({
+    isSelected,
+    onClick,
+    icon,
+    title,
+    subtitle,
+    className = ""
+}: {
+    isSelected: boolean;
+    onClick: () => void;
+    icon: React.ReactNode;
+    title: string;
+    subtitle?: string;
+    className?: string;
+}) {
+    return (
+        <div
+            className={`
+                relative p-4 rounded-xl border cursor-pointer transition-all
+                flex items-center gap-3 min-h-[56px]
+                ${isSelected
+                    ? "border-blue-400 bg-blue-50/50 shadow-sm ring-1 ring-blue-200"
+                    : "border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/50"
+                }
+                ${className}
+            `}
+            onClick={onClick}
+        >
+            <div className="shrink-0">{icon}</div>
+            <div className="flex-1 min-w-0">
+                <p className="font-medium text-slate-800 text-sm">{title}</p>
+                {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+            </div>
+            {isSelected && <Check className="w-4 h-4 text-blue-600 shrink-0" />}
+        </div>
+    );
+}
+
 /**
  * A-1: Unified Context Form
  * Combines user context (3 steps) + role selection into a single screen
@@ -85,30 +136,35 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 </p>
             </div>
 
-            {/* Quick Start Option - A-1: Skip option */}
+            {/* Quick Start Option - Unified styling with other sections */}
             {onSkip && (
-                <div className="mb-8 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <Zap className="w-5 h-5 text-amber-500" aria-hidden="true" />
-                            <div>
-                                <p className="text-sm font-medium text-slate-700">クイックスタート</p>
-                                <p className="text-xs text-slate-500">設定をスキップしてすぐに解析を開始</p>
+                <div className="mb-8">
+                    <div
+                        className="p-4 rounded-xl border-2 border-dashed border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 cursor-pointer hover:border-amber-300 transition-all group"
+                        onClick={onSkip}
+                    >
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center group-hover:bg-amber-200 transition-colors">
+                                    <Zap className="w-5 h-5 text-amber-600" aria-hidden="true" />
+                                </div>
+                                <div>
+                                    <p className="font-medium text-slate-800">クイックスタート</p>
+                                    <p className="text-xs text-slate-500">デフォルト設定ですぐに解析開始</p>
+                                </div>
                             </div>
+                            <ArrowRight className="w-5 h-5 text-amber-500 group-hover:translate-x-1 transition-transform" />
                         </div>
-                        {/* C-2: Ensure minimum touch target size */}
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={onSkip}
-                            className="rounded-full text-xs min-h-[44px] px-4"
-                            aria-label="設定をスキップしてすぐに解析を開始"
-                        >
-                            スキップして解析
-                        </Button>
                     </div>
                 </div>
             )}
+
+            {/* Divider */}
+            <div className="flex items-center gap-4 mb-8">
+                <div className="flex-1 h-px bg-slate-200" />
+                <span className="text-xs text-slate-400">または、詳細を設定</span>
+                <div className="flex-1 h-px bg-slate-200" />
+            </div>
 
             {/* Main Form - All sections in one view */}
             <div className="space-y-8">
@@ -116,39 +172,39 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 {/* Section 1: Role (甲/乙) Selection - Most Important */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-800 text-white text-xs font-bold">1</span>
+                        <StepBadge number={1} isRequired />
                         <h3 className="font-medium text-slate-800">あなたはどちらですか？</h3>
-                        <span className="text-xs text-red-500">*必須</span>
+                        <span className="text-xs text-red-500 font-medium">必須</span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         {/* Party A Card */}
                         <div
                             className={`
-                                relative p-4 rounded-xl border cursor-pointer transition-all 
-                                flex flex-col items-center gap-2
+                                relative p-5 rounded-xl border-2 cursor-pointer transition-all 
+                                flex flex-col items-center gap-3 min-h-[140px]
                                 ${selectedRole === "party_a"
-                                    ? "border-slate-400 bg-white shadow-sm ring-2 ring-slate-200"
-                                    : "border-slate-200 hover:border-slate-300 bg-white"
+                                    ? "border-blue-400 bg-blue-50/50 shadow-md"
+                                    : "border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/50"
                                 }
                             `}
                             onClick={() => setSelectedRole("party_a")}
                         >
                             <div className={`
-                                w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors
-                                ${selectedRole === "party_a" ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-500"}
+                                w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-colors
+                                ${selectedRole === "party_a" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"}
                             `}>
                                 甲
                             </div>
-                            <div className="text-center w-full bg-slate-50 rounded-lg py-2 px-2 border border-slate-100">
-                                <p className="text-xs text-slate-400 mb-0.5">検出された名称</p>
-                                <p className="text-sm font-bold text-slate-800 line-clamp-2 break-all leading-snug">
-                                    {extractionData.party_a || "（名称不明）"}
+                            <div className="text-center w-full">
+                                <p className="text-xs text-slate-400 mb-1">検出された名称</p>
+                                <p className="text-sm font-medium text-slate-800 line-clamp-2 break-all leading-snug">
+                                    {extractionData.party_a || "不明"}
                                 </p>
                             </div>
                             {selectedRole === "party_a" && (
-                                <div className="absolute top-2 right-2 text-slate-600">
-                                    <Check className="w-4 h-4" />
+                                <div className="absolute top-3 right-3">
+                                    <Check className="w-5 h-5 text-blue-600" />
                                 </div>
                             )}
                         </div>
@@ -156,30 +212,30 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                         {/* Party B Card */}
                         <div
                             className={`
-                                relative p-4 rounded-xl border cursor-pointer transition-all 
-                                flex flex-col items-center gap-2
+                                relative p-5 rounded-xl border-2 cursor-pointer transition-all 
+                                flex flex-col items-center gap-3 min-h-[140px]
                                 ${selectedRole === "party_b"
-                                    ? "border-slate-400 bg-white shadow-sm ring-2 ring-slate-200"
-                                    : "border-slate-200 hover:border-slate-300 bg-white"
+                                    ? "border-blue-400 bg-blue-50/50 shadow-md"
+                                    : "border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/50"
                                 }
                             `}
                             onClick={() => setSelectedRole("party_b")}
                         >
                             <div className={`
-                                w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors
-                                ${selectedRole === "party_b" ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-500"}
+                                w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-colors
+                                ${selectedRole === "party_b" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"}
                             `}>
                                 乙
                             </div>
-                            <div className="text-center w-full bg-slate-50 rounded-lg py-2 px-2 border border-slate-100">
-                                <p className="text-xs text-slate-400 mb-0.5">検出された名称</p>
-                                <p className="text-sm font-bold text-slate-800 line-clamp-2 break-all leading-snug">
-                                    {extractionData.party_b || "（名称不明）"}
+                            <div className="text-center w-full">
+                                <p className="text-xs text-slate-400 mb-1">検出された名称</p>
+                                <p className="text-sm font-medium text-slate-800 line-clamp-2 break-all leading-snug">
+                                    {extractionData.party_b || "不明"}
                                 </p>
                             </div>
                             {selectedRole === "party_b" && (
-                                <div className="absolute top-2 right-2 text-slate-600">
-                                    <Check className="w-4 h-4" />
+                                <div className="absolute top-3 right-3">
+                                    <Check className="w-5 h-5 text-blue-600" />
                                 </div>
                             )}
                         </div>
@@ -189,184 +245,112 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 {/* Section 2: User Role (受注者/発注者) */}
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-xs font-bold">2</span>
+                        <StepBadge number={2} />
                         <h3 className="font-medium text-slate-800">あなたの立場</h3>
-                        <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">デフォルト設定済</span>
+                        <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">任意</span>
                     </div>
 
-                    <RadioGroup
-                        value={context.userRole}
-                        onValueChange={(v) => updateContext({ userRole: v as "vendor" | "client" })}
-                        className="grid grid-cols-2 gap-3"
-                    >
-                        <Label
-                            htmlFor="vendor"
-                            className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${context.userRole === "vendor"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
-                                }`}
-                        >
-                            <RadioGroupItem value="vendor" id="vendor" className="sr-only" />
-                            <User className="w-5 h-5 text-slate-500 shrink-0" />
-                            <div>
-                                <div className="font-medium text-slate-800 text-sm">受注者</div>
-                                <div className="text-xs text-slate-400">仕事を請ける側</div>
-                            </div>
-                            {context.userRole === "vendor" && <Check className="w-4 h-4 text-slate-600 ml-auto" />}
-                        </Label>
-
-                        <Label
-                            htmlFor="client"
-                            className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${context.userRole === "client"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
-                                }`}
-                        >
-                            <RadioGroupItem value="client" id="client" className="sr-only" />
-                            <Building2 className="w-5 h-5 text-slate-500 shrink-0" />
-                            <div>
-                                <div className="font-medium text-slate-800 text-sm">発注者</div>
-                                <div className="text-xs text-slate-400">仕事を依頼する側</div>
-                            </div>
-                            {context.userRole === "client" && <Check className="w-4 h-4 text-slate-600 ml-auto" />}
-                        </Label>
-                    </RadioGroup>
+                    <div className="grid grid-cols-2 gap-3">
+                        <OptionCard
+                            isSelected={context.userRole === "vendor"}
+                            onClick={() => updateContext({ userRole: "vendor" })}
+                            icon={<User className="w-5 h-5 text-slate-500" />}
+                            title="受注者"
+                            subtitle="仕事を請ける側"
+                        />
+                        <OptionCard
+                            isSelected={context.userRole === "client"}
+                            onClick={() => updateContext({ userRole: "client" })}
+                            icon={<Building2 className="w-5 h-5 text-slate-500" />}
+                            title="発注者"
+                            subtitle="仕事を依頼する側"
+                        />
+                    </div>
                 </div>
 
                 {/* Section 3: Entity Type */}
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-xs font-bold">3</span>
+                        <StepBadge number={3} />
                         <h3 className="font-medium text-slate-800">事業形態</h3>
-                        <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">デフォルト設定済</span>
+                        <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">任意</span>
                     </div>
 
-                    <RadioGroup
-                        value={context.userEntityType}
-                        onValueChange={(v) => updateContext({ userEntityType: v as UserEntityType })}
-                        className="space-y-2"
-                    >
-                        <Label
-                            htmlFor="individual-unified"
-                            className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${context.userEntityType === "individual"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
-                                }`}
-                        >
-                            <RadioGroupItem value="individual" id="individual-unified" className="sr-only" />
-                            <User className="w-4 h-4 text-slate-500 shrink-0" />
-                            <span className="text-sm text-slate-800">個人事業主 / フリーランス</span>
-                            {context.userEntityType === "individual" && <Check className="w-4 h-4 text-slate-600 ml-auto" />}
-                        </Label>
-
-                        <Label
-                            htmlFor="one_person_corp-unified"
-                            className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${context.userEntityType === "one_person_corp"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
-                                }`}
-                        >
-                            <RadioGroupItem value="one_person_corp" id="one_person_corp-unified" className="sr-only" />
-                            <Building2 className="w-4 h-4 text-slate-500 shrink-0" />
-                            <span className="text-sm text-slate-800">一人法人（従業員なし）</span>
-                            {context.userEntityType === "one_person_corp" && <Check className="w-4 h-4 text-slate-600 ml-auto" />}
-                        </Label>
-
-                        <Label
-                            htmlFor="corp_with_employees-unified"
-                            className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${context.userEntityType === "corp_with_employees"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
-                                }`}
-                        >
-                            <RadioGroupItem value="corp_with_employees" id="corp_with_employees-unified" className="sr-only" />
-                            <Users className="w-4 h-4 text-slate-500 shrink-0" />
-                            <span className="text-sm text-slate-800">従業員がいる法人</span>
-                            {context.userEntityType === "corp_with_employees" && <Check className="w-4 h-4 text-slate-600 ml-auto" />}
-                        </Label>
-                    </RadioGroup>
+                    <div className="space-y-2">
+                        <OptionCard
+                            isSelected={context.userEntityType === "individual"}
+                            onClick={() => updateContext({ userEntityType: "individual" })}
+                            icon={<User className="w-5 h-5 text-slate-500" />}
+                            title="個人事業主 / フリーランス"
+                        />
+                        <OptionCard
+                            isSelected={context.userEntityType === "one_person_corp"}
+                            onClick={() => updateContext({ userEntityType: "one_person_corp" })}
+                            icon={<Building2 className="w-5 h-5 text-slate-500" />}
+                            title="一人法人（従業員なし）"
+                        />
+                        <OptionCard
+                            isSelected={context.userEntityType === "corp_with_employees"}
+                            onClick={() => updateContext({ userEntityType: "corp_with_employees" })}
+                            icon={<Users className="w-5 h-5 text-slate-500" />}
+                            title="従業員がいる法人"
+                        />
+                    </div>
                 </div>
 
                 {/* Section 4: Counterparty Capital */}
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-xs font-bold">4</span>
+                        <StepBadge number={4} />
                         <h3 className="font-medium text-slate-800">取引先の資本金</h3>
-                        <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">デフォルト設定済</span>
+                        <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">任意</span>
                     </div>
 
-                    <RadioGroup
-                        value={context.counterpartyCapital}
-                        onValueChange={(v) => updateContext({ counterpartyCapital: v as CapitalRange | "unknown" })}
-                        className="grid grid-cols-2 gap-2"
-                    >
-                        <Label
-                            htmlFor="unknown-unified"
-                            className={`flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${context.counterpartyCapital === "unknown"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
-                                }`}
-                        >
-                            <RadioGroupItem value="unknown" id="unknown-unified" className="sr-only" />
-                            <HelpCircle className="w-4 h-4 text-slate-500 shrink-0" />
-                            <span className="text-sm text-slate-800">わからない</span>
-                            {context.counterpartyCapital === "unknown" && <Check className="w-4 h-4 text-slate-600 ml-auto" />}
-                        </Label>
-
-                        <Label
-                            htmlFor="under_10m-unified"
-                            className={`flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${context.counterpartyCapital === "under_10m"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
-                                }`}
-                        >
-                            <RadioGroupItem value="under_10m" id="under_10m-unified" className="sr-only" />
-                            <span className="text-sm text-slate-800">1,000万円以下</span>
-                            {context.counterpartyCapital === "under_10m" && <Check className="w-4 h-4 text-slate-600 ml-auto" />}
-                        </Label>
-
-                        <Label
-                            htmlFor="10m_to_300m-unified"
-                            className={`flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${context.counterpartyCapital === "10m_to_300m"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
-                                }`}
-                        >
-                            <RadioGroupItem value="10m_to_300m" id="10m_to_300m-unified" className="sr-only" />
-                            <span className="text-sm text-slate-800">1,000万〜3億円</span>
-                            {context.counterpartyCapital === "10m_to_300m" && <Check className="w-4 h-4 text-slate-600 ml-auto" />}
-                        </Label>
-
-                        <Label
-                            htmlFor="over_300m-unified"
-                            className={`flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${context.counterpartyCapital === "over_300m"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
-                                }`}
-                        >
-                            <RadioGroupItem value="over_300m" id="over_300m-unified" className="sr-only" />
-                            <span className="text-sm text-slate-800">3億円超</span>
-                            {context.counterpartyCapital === "over_300m" && <Check className="w-4 h-4 text-slate-600 ml-auto" />}
-                        </Label>
-                    </RadioGroup>
+                    <div className="grid grid-cols-2 gap-2">
+                        <OptionCard
+                            isSelected={context.counterpartyCapital === "unknown"}
+                            onClick={() => updateContext({ counterpartyCapital: "unknown" })}
+                            icon={<HelpCircle className="w-5 h-5 text-slate-500" />}
+                            title="わからない"
+                        />
+                        <OptionCard
+                            isSelected={context.counterpartyCapital === "under_10m"}
+                            onClick={() => updateContext({ counterpartyCapital: "under_10m" })}
+                            icon={<span className="w-5 h-5 flex items-center justify-center text-xs text-slate-500 font-medium">¥</span>}
+                            title="1,000万円以下"
+                        />
+                        <OptionCard
+                            isSelected={context.counterpartyCapital === "10m_to_300m"}
+                            onClick={() => updateContext({ counterpartyCapital: "10m_to_300m" })}
+                            icon={<span className="w-5 h-5 flex items-center justify-center text-xs text-slate-500 font-medium">¥¥</span>}
+                            title="1,000万〜3億円"
+                        />
+                        <OptionCard
+                            isSelected={context.counterpartyCapital === "over_300m"}
+                            onClick={() => updateContext({ counterpartyCapital: "over_300m" })}
+                            icon={<span className="w-5 h-5 flex items-center justify-center text-xs text-slate-500 font-medium">¥¥¥</span>}
+                            title="3億円超"
+                        />
+                    </div>
                 </div>
             </div>
 
             {/* Actions - B-2: Specific button labels */}
-            <div className="mt-10 sticky bottom-6 bg-white/80 backdrop-blur-sm p-4 -mx-4 rounded-xl border border-slate-100 shadow-lg">
+            <div className="mt-10 sticky bottom-6 bg-white/90 backdrop-blur-sm p-4 -mx-4 rounded-xl border border-slate-100 shadow-lg">
                 <Button
                     onClick={handleComplete}
                     disabled={!isComplete}
-                    className="w-full h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-white border-0 disabled:opacity-40 disabled:cursor-not-allowed text-base font-medium"
+                    className="w-full h-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white border-0 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-base font-medium transition-colors"
                 >
-                    リスクを解析する
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    {isComplete ? (
+                        <>
+                            リスクを解析する
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                        </>
+                    ) : (
+                        "上の「甲」または「乙」を選択してください"
+                    )}
                 </Button>
-                {!isComplete && (
-                    <p className="text-center text-xs text-slate-400 mt-3">
-                        「甲」または「乙」を選択してください
-                    </p>
-                )}
                 {isComplete && (
                     <p className="text-center text-xs text-slate-400 mt-3">
                         Enterキーでも開始できます
