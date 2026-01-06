@@ -57,10 +57,10 @@ export function UserContextForm({ onComplete, initialContext }: UserContextFormP
                     <div
                         key={s}
                         className={`w-2 h-2 rounded-full transition-all duration-300 ${s === step
-                                ? "bg-slate-800 w-4"
-                                : s < step
-                                    ? "bg-slate-400"
-                                    : "bg-slate-200"
+                            ? "bg-slate-800 w-4"
+                            : s < step
+                                ? "bg-slate-400"
+                                : "bg-slate-200"
                             }`}
                     />
                 ))}
@@ -86,8 +86,8 @@ export function UserContextForm({ onComplete, initialContext }: UserContextFormP
                     <Label
                         htmlFor="vendor"
                         className={`flex flex-col items-center gap-3 p-6 rounded-xl border cursor-pointer transition-all ${context.userRole === "vendor"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
+                            ? "border-slate-400 bg-white shadow-sm"
+                            : "border-slate-200 hover:border-slate-300 bg-white"
                             }`}
                     >
                         <RadioGroupItem value="vendor" id="vendor" className="sr-only" />
@@ -101,8 +101,8 @@ export function UserContextForm({ onComplete, initialContext }: UserContextFormP
                     <Label
                         htmlFor="client"
                         className={`flex flex-col items-center gap-3 p-6 rounded-xl border cursor-pointer transition-all ${context.userRole === "client"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
+                            ? "border-slate-400 bg-white shadow-sm"
+                            : "border-slate-200 hover:border-slate-300 bg-white"
                             }`}
                     >
                         <RadioGroupItem value="client" id="client" className="sr-only" />
@@ -125,8 +125,8 @@ export function UserContextForm({ onComplete, initialContext }: UserContextFormP
                     <Label
                         htmlFor="individual"
                         className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${context.userEntityType === "individual"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
+                            ? "border-slate-400 bg-white shadow-sm"
+                            : "border-slate-200 hover:border-slate-300 bg-white"
                             }`}
                     >
                         <RadioGroupItem value="individual" id="individual" className="sr-only" />
@@ -140,8 +140,8 @@ export function UserContextForm({ onComplete, initialContext }: UserContextFormP
                     <Label
                         htmlFor="one_person_corp"
                         className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${context.userEntityType === "one_person_corp"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
+                            ? "border-slate-400 bg-white shadow-sm"
+                            : "border-slate-200 hover:border-slate-300 bg-white"
                             }`}
                     >
                         <RadioGroupItem value="one_person_corp" id="one_person_corp" className="sr-only" />
@@ -155,8 +155,8 @@ export function UserContextForm({ onComplete, initialContext }: UserContextFormP
                     <Label
                         htmlFor="corp_with_employees"
                         className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${context.userEntityType === "corp_with_employees"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
+                            ? "border-slate-400 bg-white shadow-sm"
+                            : "border-slate-200 hover:border-slate-300 bg-white"
                             }`}
                     >
                         <RadioGroupItem value="corp_with_employees" id="corp_with_employees" className="sr-only" />
@@ -179,8 +179,8 @@ export function UserContextForm({ onComplete, initialContext }: UserContextFormP
                     <Label
                         htmlFor="unknown"
                         className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${context.counterpartyCapital === "unknown"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
+                            ? "border-slate-400 bg-white shadow-sm"
+                            : "border-slate-200 hover:border-slate-300 bg-white"
                             }`}
                     >
                         <RadioGroupItem value="unknown" id="unknown" className="sr-only" />
@@ -194,8 +194,8 @@ export function UserContextForm({ onComplete, initialContext }: UserContextFormP
                     <Label
                         htmlFor="under_10m"
                         className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${context.counterpartyCapital === "under_10m"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
+                            ? "border-slate-400 bg-white shadow-sm"
+                            : "border-slate-200 hover:border-slate-300 bg-white"
                             }`}
                     >
                         <RadioGroupItem value="under_10m" id="under_10m" className="sr-only" />
@@ -208,8 +208,8 @@ export function UserContextForm({ onComplete, initialContext }: UserContextFormP
                     <Label
                         htmlFor="10m_to_300m"
                         className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${context.counterpartyCapital === "10m_to_300m"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
+                            ? "border-slate-400 bg-white shadow-sm"
+                            : "border-slate-200 hover:border-slate-300 bg-white"
                             }`}
                     >
                         <RadioGroupItem value="10m_to_300m" id="10m_to_300m" className="sr-only" />
@@ -222,8 +222,8 @@ export function UserContextForm({ onComplete, initialContext }: UserContextFormP
                     <Label
                         htmlFor="over_300m"
                         className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${context.counterpartyCapital === "over_300m"
-                                ? "border-slate-400 bg-white shadow-sm"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
+                            ? "border-slate-400 bg-white shadow-sm"
+                            : "border-slate-200 hover:border-slate-300 bg-white"
                             }`}
                     >
                         <RadioGroupItem value="over_300m" id="over_300m" className="sr-only" />
@@ -241,7 +241,7 @@ export function UserContextForm({ onComplete, initialContext }: UserContextFormP
                     onClick={handleNext}
                     className="w-full h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-white border-0"
                 >
-                    {step < 3 ? "次へ" : "解析を開始"}
+                    {step < 3 ? "次へ" : "チェック開始"}
                     <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
 

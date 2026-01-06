@@ -27,7 +27,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
         // Client-side size validation
         const MAX_FILE_SIZE = 4.5 * 1024 * 1024; // 4.5MB
         if (file.size > MAX_FILE_SIZE) {
-            setError("ファイルサイズが大きすぎます（最大4.5MB）。これより大きいファイルは解析できません。");
+            setError("ファイルサイズが大きすぎます（最大4.5MB）。これより大きいファイルはチェックできません。");
             trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "file_too_large", size: file.size });
             return;
         }
@@ -45,7 +45,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                 onAnalysisComplete(result.data, result.text);
             } else {
                 // A-3: More specific error messages
-                let errorMessage = result.message || "解析に失敗しました";
+                let errorMessage = result.message || "チェックに失敗しました";
                 if (errorMessage.includes("テキストが少な") || errorMessage.includes("text")) {
                     errorMessage = "このPDFはスキャン画像の可能性があります。テキストが埋め込まれたPDFをお使いください。";
                 } else if (errorMessage.includes("抽出")) {
@@ -89,7 +89,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
             if (result.success && result.data) {
                 onAnalysisComplete(result.data, result.text);
             } else {
-                const errorMessage = result.message || "解析に失敗しました";
+                const errorMessage = result.message || "チェックに失敗しました";
                 setError(errorMessage);
                 onAnalysisComplete(null);
             }
@@ -219,9 +219,9 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                             {isUploading ? (
                                 <div className="flex items-center gap-2">
                                     <Loader2 className="h-3 w-3 animate-spin" />
-                                    <span className="text-xs">解析中</span>
+                                    <span className="text-xs">チェック中</span>
                                 </div>
-                            ) : "このPDFを解析"}
+                            ) : "このPDFをチェック"}
                         </Button>
                     </div>
                 </TabsContent>

@@ -121,13 +121,13 @@ export function RoleSelector({ extractionData, onSelectRole }: RoleSelectorProps
                     disabled={!selected}
                     className="w-full h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-white border-0 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                    解析結果を見る
+                    チェック結果を見る
                     <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
             </div>
 
             <p className="text-center text-xs text-slate-400 mt-6">
-                ※ バックグラウンドで解析を進めています
+                ※ バックグラウンドでチェックを進めています
             </p>
         </div>
     );

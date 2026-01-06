@@ -67,9 +67,9 @@ export default function Home() {
     // A-2: Update loading messages progressively
     const messages = [
       "契約書を読み込んでいます...",
-      "当事者を検出しています...",
-      "リスクを解析しています...",
-      "修正提案を生成しています..."
+      "当事者を確認しています...",
+      "気になる箇所を探しています...",
+      "修正案を考えています..."
     ];
     let msgIndex = 0;
     const interval = setInterval(() => {
@@ -98,7 +98,7 @@ export default function Home() {
         }
       } else {
         trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "analysis_failed" });
-        alert("詳細解析に失敗しました。もう一度お試しください。");
+        alert("チェックできませんでした。もう一度お試しください。");
         setStep("upload");
       }
     } catch (e) {
