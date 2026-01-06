@@ -73,7 +73,7 @@ export function SummaryHeader({ data, contractType }: SummaryHeaderProps) {
                         </div>
                         <p className="text-sm text-slate-600">
                             {scoreMessage.text}
-                            <span className="ml-2 text-slate-400">— {data.risks.length}件の気になる箇所</span>
+                            <span className="ml-2 text-slate-400">— {data.risks.filter(r => r.risk_level !== "low").length}件の要確認</span>
                         </p>
                         {/* Contract Type Badge */}
                         {contractType && contractType !== "不明" && (

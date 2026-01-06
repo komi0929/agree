@@ -216,7 +216,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                         onClick={() => setViewMode("message")}
                                     >
                                         <Send className="w-4 h-4 mr-2" />
-                                        メールで伝える
+                                        修正依頼の文章作成
                                     </Button>
                                     <Button
                                         size="sm"
@@ -232,7 +232,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                         ) : (
                                             <>
                                                 <Sparkles className="w-4 h-4 mr-2" />
-                                                新しい契約書を作る
+                                                選択した修正を反映
                                             </>
                                         )}
                                     </Button>
@@ -259,7 +259,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                         disabled
                                     >
                                         <Send className="w-4 h-4 mr-2" />
-                                        メールで伝える
+                                        修正依頼の文章作成
                                     </Button>
                                     <Button
                                         size="sm"
@@ -267,7 +267,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                         disabled
                                     >
                                         <Sparkles className="w-4 h-4 mr-2" />
-                                        新しい契約書を作る
+                                        選択した修正を反映
                                     </Button>
                                 </div>
                             </div>

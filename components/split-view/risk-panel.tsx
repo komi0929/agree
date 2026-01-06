@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,13 +27,41 @@ export function RiskPanel({
     onScrollToContract
 }: RiskPanelProps) {
     const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
 
+    // Track if user is manually scrolling to prevent auto-scroll interference
+    const isUserScrolling = useRef(false);
+    const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const lastProgrammaticScrollIndex = useRef<number | null>(null);
+
+    // Handle user scroll detection
+    const handleScrollStart = useCallback(() => {
+        isUserScrolling.current = true;
+        if (scrollTimeoutRef.current) {
+            clearTimeout(scrollTimeoutRef.current);
+        }
+        // Reset user scrolling flag after 1 second of no scrolling
+        scrollTimeoutRef.current = setTimeout(() => {
+            isUserScrolling.current = false;
+        }, 1000);
+    }, []);
+
     // Scroll to highlighted card when highlightedRiskIndex changes
+    // Only scroll programmatically when it's triggered by clicking on contract highlights
     useEffect(() => {
         if (highlightedRiskIndex !== null && highlightedRiskIndex !== -1) {
+            // Don't scroll if user is manually scrolling or if we just scrolled to this index
+            if (isUserScrolling.current) {
+                return;
+            }
+            // Only scroll if this is a new index (not from hover)
+            if (lastProgrammaticScrollIndex.current === highlightedRiskIndex) {
+                return;
+            }
             const element = cardRefs.current.get(highlightedRiskIndex);
             if (element) {
+                lastProgrammaticScrollIndex.current = highlightedRiskIndex;
                 element.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         }
@@ -127,9 +155,9 @@ export function RiskPanel({
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-slate-200">
                 <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-slate-700">気になる箇所</span>
+                    <span className="text-sm font-medium text-slate-700">要確認</span>
                     <Badge variant="outline" className="rounded-full text-[10px] px-2">
-                        {risks.length}件
+                        {risks.filter(r => r.risk_level !== "low").length}件
                     </Badge>
                 </div>
                 {/* Legend */}
@@ -147,7 +175,11 @@ export function RiskPanel({
             </div>
 
             {/* Cards */}
-            <div className="flex-1 overflow-auto p-4 space-y-4 pb-24">
+            <div
+                ref={scrollContainerRef}
+                className="flex-1 overflow-auto p-4 space-y-4 pb-24"
+                onScroll={handleScrollStart}
+            >
                 {risks.map((risk, index) => {
                     const styling = getRiskStyling(risk.risk_level);
                     const isHighlighted = highlightedRiskIndex === index;
@@ -227,7 +259,7 @@ export function RiskPanel({
                                                 ) : (
                                                     <>
                                                         <Square className="w-3.5 h-3.5" />
-                                                        これにする
+                                                        この修正を選択
                                                     </>
                                                 )}
                                             </button>
@@ -242,17 +274,6 @@ export function RiskPanel({
                             {/* Expanded Content - Nani-style Rationale */}
                             {isExpanded && (
                                 <div className="px-4 pb-4 space-y-4 border-t border-slate-100 pt-4 animate-in slide-in-from-top-2 duration-200">
-
-                                    {/* Section: なぜ危険？ */}
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-2 text-xs font-semibold text-orange-700">
-                                            <HelpCircle className="w-4 h-4" />
-                                            なぜ気をつけるべき？
-                                        </div>
-                                        <div className="bg-orange-50 rounded-lg p-3 text-xs text-orange-900 leading-relaxed">
-                                            {parseWhyDangerous(risk.explanation)}
-                                        </div>
-                                    </div>
 
                                     {/* Section: 具体的にどうなる？ */}
                                     {risk.practical_impact && (

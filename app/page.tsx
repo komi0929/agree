@@ -244,7 +244,7 @@ export default function Home() {
       <header className="h-20 px-8 flex items-center justify-between max-w-5xl mx-auto w-full">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => setAnalysisData(null)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="agree" className="h-12 w-auto" />
+          <img src="/logo.png" alt="agree" className="h-16 w-auto" />
         </div>
         {analysisData && (
           <Button

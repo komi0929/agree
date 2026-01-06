@@ -27,24 +27,78 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
         // Find all risk matches in the text
         const matches: Array<{ start: number; end: number; riskIndex: number }> = [];
 
+        // Normalize function to handle whitespace differences
+        const normalizeText = (str: string) => str.replace(/\s+/g, ' ').trim();
+        const normalizedContractText = normalizeText(text);
+
         risks.forEach((risk, index) => {
-            if (risk.original_text && risk.original_text.length > 10) {
-                // Try to find exact match
-                const pos = text.indexOf(risk.original_text);
-                if (pos !== -1) {
+            if (!risk.original_text || risk.original_text.length < 5) return;
+
+            const normalizedOriginal = normalizeText(risk.original_text);
+
+            // Strategy 1: Try direct match in original text
+            let pos = text.indexOf(risk.original_text);
+            if (pos !== -1) {
+                matches.push({
+                    start: pos,
+                    end: pos + risk.original_text.length,
+                    riskIndex: index,
+                });
+                return;
+            }
+
+            // Strategy 2: Try normalized match
+            const normalizedPos = normalizedContractText.indexOf(normalizedOriginal);
+            if (normalizedPos !== -1) {
+                // Map back to original text position (approximate)
+                let originalPos = 0;
+                let normalizedIdx = 0;
+                while (normalizedIdx < normalizedPos && originalPos < text.length) {
+                    if (!/\s/.test(text[originalPos]) || normalizedContractText[normalizedIdx] === text[originalPos]) {
+                        normalizedIdx++;
+                    }
+                    originalPos++;
+                }
+                matches.push({
+                    start: originalPos,
+                    end: Math.min(originalPos + risk.original_text.length, text.length),
+                    riskIndex: index,
+                });
+                return;
+            }
+
+            // Strategy 3: Try partial match (first 30 chars)
+            if (normalizedOriginal.length > 30) {
+                const partial = normalizedOriginal.substring(0, 30);
+                const partialPos = normalizedContractText.indexOf(partial);
+                if (partialPos !== -1) {
+                    // Map back to approximate position
+                    let ratio = partialPos / normalizedContractText.length;
+                    let approxPos = Math.floor(ratio * text.length);
                     matches.push({
-                        start: pos,
-                        end: pos + risk.original_text.length,
+                        start: approxPos,
+                        end: Math.min(approxPos + risk.original_text.length, text.length),
                         riskIndex: index,
                     });
-                } else {
-                    // Try partial match (first 50 chars)
-                    const partial = risk.original_text.substring(0, 50);
-                    const partialPos = text.indexOf(partial);
-                    if (partialPos !== -1) {
+                    return;
+                }
+            }
+
+            // Strategy 4: Try to find by section title (e.g., "第3条")
+            if (risk.section_title) {
+                const titleMatch = risk.section_title.match(/第\s*(\d+)\s*条/);
+                if (titleMatch) {
+                    const searchPattern = `第${titleMatch[1]}条`;
+                    const titlePos = text.indexOf(searchPattern);
+                    if (titlePos !== -1) {
+                        // Find the end of this section (next 第X条 or 300 chars)
+                        const nextSectionMatch = text.substring(titlePos + searchPattern.length).match(/第\d+条/);
+                        const endPos = nextSectionMatch
+                            ? titlePos + searchPattern.length + (nextSectionMatch.index ?? 300)
+                            : titlePos + 300;
                         matches.push({
-                            start: partialPos,
-                            end: partialPos + risk.original_text.length,
+                            start: titlePos,
+                            end: Math.min(endPos, text.length),
                             riskIndex: index,
                         });
                     }
