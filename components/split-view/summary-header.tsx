@@ -170,7 +170,7 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
                                 default: "border-green-200 hover:scale-105"
                             })}`}
                         >
-                            <span className="text-xs font-semibold text-green-700">✅ 問題なし {lowCount}</span>
+                            <span className="text-xs font-semibold text-green-700">📝 あると良い {lowCount}</span>
                         </button>
                     )}
                 </div>

@@ -117,8 +117,8 @@ export function RiskPanel({
                     border: "border-l-green-500",
                     bg: "bg-green-50/30",
                     badge: "bg-green-100 text-green-700 border-green-200",
-                    label: "✅ 問題なし",
-                    labelShort: "問題なし",
+                    label: "📝 あると良い",
+                    labelShort: "あると良い",
                     icon: <Check className="w-4 h-4 text-green-500" />,
                 };
         }
@@ -194,10 +194,13 @@ export function RiskPanel({
                     const isSelected = selectedRiskIndices.includes(index);
                     const isExpanded = expandedCards.has(index);
 
-                    // 無意味な提案かどうかを判定
-                    const isUselessSuggestion = risk.suggestion.revised_text
+                    // 問題なし（low）の場合は採択ボタンを表示しない
+                    const isLowRisk = risk.risk_level === "low";
+
+                    // 無意味な提案かどうかを判定（問題なしは常に採択不可）
+                    const isUselessSuggestion = isLowRisk || (risk.suggestion.revised_text
                         ? (risk.suggestion.revised_text.includes("専門家") && risk.suggestion.revised_text.length < 60)
-                        : true;
+                        : true);
 
                     const canAdopt = !!risk.suggestion.revised_text && !isUselessSuggestion;
                     const alternatives = getAlternatives(risk);
