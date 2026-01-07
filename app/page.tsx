@@ -14,6 +14,13 @@ import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
 import { FileText, Shield, MessageSquare, Loader2 } from "lucide-react";
 import { AnalyzingProgress } from "@/components/analyzing-progress";
 import { useLocalHistory } from "@/hooks/use-local-history";
+import {
+  SpeculativeAnalysisCache,
+  startSpeculativeAnalysis,
+  isContextMatch,
+  getContextDiff,
+  SPECULATIVE_DEFAULT_CONTEXT
+} from "@/lib/speculative-analysis";
 
 // Phase 5: Dynamic imports for heavy components (reduces initial bundle)
 const AnalysisViewer = dynamic(
@@ -57,6 +64,10 @@ export default function Home() {
   // Store the promise of the deep analysis so we can await it later
   const deepAnalysisPromiseRef = useRef<Promise<AnalysisState> | null>(null);
 
+  // SPECULATIVE EXECUTION: Cache for pre-computed analysis
+  const speculativeCacheRef = useRef<SpeculativeAnalysisCache | null>(null);
+  const speculativePromiseRef = useRef<Promise<SpeculativeAnalysisCache | null> | null>(null);
+
   // Track page view on mount
   useEffect(() => {
     trackPageView();
@@ -68,6 +79,9 @@ export default function Home() {
     setExtractionData(null);
     setContractText("");
     setStep("upload");
+    // Clear speculative cache
+    speculativeCacheRef.current = null;
+    speculativePromiseRef.current = null;
   };
 
   const handleExtractionComplete = (result: ExtractionResult | null, text?: string) => {
@@ -75,14 +89,25 @@ export default function Home() {
     if (result && text) {
       setExtractionData(result);
       setContractText(text);
+
+      // SPECULATIVE EXECUTION: Start background analysis immediately!
+      // This runs while user is filling out the context form
+      console.log("[Speculative] Starting background analysis...");
+      speculativePromiseRef.current = startSpeculativeAnalysis(text, analyzeDeepAction);
+      speculativePromiseRef.current.then(cache => {
+        if (cache) {
+          speculativeCacheRef.current = cache;
+          console.log("[Speculative] Background analysis completed!");
+        }
+      });
+
       // A-1: Go directly to unified context (combines user context + role selection)
       setStep("unified_context");
     }
   };
 
   // A-1: Unified handler for context + role completion
-  // CRITICAL: Must use analyzeDeepAction which includes BOTH rule-based checks AND LLM analysis
-  // DO NOT use streaming API alone - it lacks rule-based checks (runRuleBasedChecks)
+  // SPECULATIVE EXECUTION: Use pre-computed results if available and context matches
   const handleUnifiedComplete = async (ctx: UserContext, role: "party_a" | "party_b") => {
     trackEvent(ANALYTICS_EVENTS.USER_CONTEXT_COMPLETED);
     trackEvent(ANALYTICS_EVENTS.ROLE_SELECTED, { role });
@@ -104,11 +129,52 @@ export default function Home() {
     }, 2000);
 
     try {
-      // MUST use analyzeDeepAction - it includes:
-      // 1. runRuleBasedChecks (rule-based detection)
-      // 2. analyzeContractText (LLM analysis)
-      // 3. mergeAnalysisResults (combines both sources)
-      const result = await analyzeDeepAction(contractText, ctx);
+      let result: AnalysisState;
+
+      // SPECULATIVE EXECUTION: Check if we can use pre-computed results
+      // First, wait for the speculative promise if it's still running
+      if (speculativePromiseRef.current) {
+        console.log("[Speculative] Waiting for background analysis...");
+        const cache = await speculativePromiseRef.current;
+        if (cache) {
+          speculativeCacheRef.current = cache;
+        }
+      }
+
+      const cache = speculativeCacheRef.current;
+
+      if (cache && isContextMatch(ctx, cache.usedContext)) {
+        // FAST PATH: Context matches! Use cached results immediately
+        console.log("[Speculative] Context matches! Using cached results (INSTANT)");
+        clearInterval(interval);
+        setAnalysisData(cache.analysisResult);
+        trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED, { speculative: true });
+        setStep("complete");
+        try {
+          localStorage.setItem("agreeLastAnalysis", JSON.stringify({
+            timestamp: new Date().toISOString(),
+            data: cache.analysisResult,
+            text: contractText,
+          }));
+        } catch { }
+        return;
+      }
+
+      // SLOW PATH: Context differs, need to re-analyze
+      if (cache) {
+        const diff = getContextDiff(ctx, cache.usedContext);
+        console.log("[Speculative] Context differs:", diff);
+
+        if (!diff.needsFullReanalysis) {
+          // Minor differences - could potentially adapt results
+          // For now, fall through to full re-analysis for accuracy
+          console.log("[Speculative] Minor diff but re-analyzing for accuracy");
+        }
+      }
+
+      // Full re-analysis with actual context
+      console.log("[Speculative] Running full analysis with actual context...");
+      result = await analyzeDeepAction(contractText, ctx);
       clearInterval(interval);
 
       if (result.data) {
