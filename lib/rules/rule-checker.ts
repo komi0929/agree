@@ -6,7 +6,7 @@
 // 設計判断: Layer 1として、LLM解析の前に必ず実行
 // [精度向上ログ: 2024-12-25 更新] 28チェックポイント対応で推奨条項チェックを追加
 
-import { checkDangerPatterns, DangerPattern } from "./danger-patterns";
+import { checkDangerPatterns, DangerPatternMatch } from "./danger-patterns";
 import { checkRequiredClauses, RequiredClause } from "./required-clauses";
 import { checkRecommendedClauses, RecommendedClause } from "./recommended-clauses";
 import { analyzePaymentTerms, PaymentTermAnalysis } from "./payment-calculator";
@@ -28,6 +28,7 @@ export interface RuleBasedRisk {
     law?: ViolatedLaw;
     suggested_fix?: string;
     negotiation_point?: string;
+    matched_text?: string; // Contract text that triggered this risk (for highlighting)
 }
 
 /**
@@ -59,7 +60,7 @@ export interface RuleBasedCheckResult {
 /**
  * DangerPatternをRuleBasedRiskに変換
  */
-function convertDangerPattern(pattern: DangerPattern): RuleBasedRisk {
+function convertDangerPattern(pattern: DangerPatternMatch): RuleBasedRisk {
     return {
         id: pattern.id,
         source: "danger_pattern",
@@ -68,6 +69,7 @@ function convertDangerPattern(pattern: DangerPattern): RuleBasedRisk {
         explanation: pattern.explanation,
         details: pattern.note,
         law: pattern.law,
+        matched_text: pattern.matched_text, // Include matched text for highlighting
     };
 }
 

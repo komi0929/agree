@@ -364,14 +364,54 @@ export function getAllDangerPatterns(): DangerPattern[] {
 }
 
 /**
- * テキストに対して全パターンをチェック
+ * マッチした危険パターンとそのテキストを含む結果
  */
-export function checkDangerPatterns(text: string): DangerPattern[] {
-    const matches: DangerPattern[] = [];
+export interface DangerPatternMatch extends DangerPattern {
+    matched_text: string;
+}
+
+/**
+ * テキストに対して全パターンをチェックし、マッチしたテキストも返す
+ */
+export function checkDangerPatterns(text: string): DangerPatternMatch[] {
+    const matches: DangerPatternMatch[] = [];
 
     for (const pattern of getAllDangerPatterns()) {
-        if (pattern.pattern.test(text)) {
-            matches.push(pattern);
+        // グローバルフラグなしの正規表現を使ってマッチを探す
+        const match = text.match(pattern.pattern);
+        if (match && match.index !== undefined) {
+            // マッチした箇所の前後のコンテキストを含める（約100文字ずつ）
+            const start = Math.max(0, match.index - 50);
+            const end = Math.min(text.length, match.index + match[0].length + 50);
+
+            // 単語の途中で切れないよう調整
+            let contextStart = start;
+            let contextEnd = end;
+
+            // 先頭を句読点まで戻す（可能であれば）
+            if (start > 0) {
+                const beforeMatch = text.substring(start - 20, start);
+                const sentenceStart = beforeMatch.lastIndexOf("。");
+                if (sentenceStart !== -1) {
+                    contextStart = start - 20 + sentenceStart + 1;
+                }
+            }
+
+            // 末尾を句読点まで進める（可能であれば）
+            if (end < text.length) {
+                const afterMatch = text.substring(end, end + 30);
+                const sentenceEnd = afterMatch.indexOf("。");
+                if (sentenceEnd !== -1) {
+                    contextEnd = end + sentenceEnd + 1;
+                }
+            }
+
+            const matchedText = text.substring(contextStart, contextEnd).trim();
+
+            matches.push({
+                ...pattern,
+                matched_text: matchedText,
+            });
         }
     }
 

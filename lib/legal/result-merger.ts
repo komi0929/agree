@@ -107,7 +107,7 @@ function convertRuleBasedRisk(risk: RuleBasedRisk): MergedRisk {
         clause_tag: guessClauseTagFromRisk(risk),
         risk_level: risk.risk_level,
         section_title: risk.title,
-        original_text: undefined,
+        original_text: risk.matched_text, // Use matched text for highlighting
         explanation: risk.explanation,
         violated_laws: risk.law ? [risk.law] : [],
         suggestion: {
