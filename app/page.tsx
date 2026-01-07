@@ -103,45 +103,58 @@ export default function Home() {
   };
 
   // A-1: Unified handler for context + role completion
+  // CRITICAL: Must use analyzeDeepAction which includes BOTH rule-based checks AND LLM analysis
+  // DO NOT use streaming API alone - it lacks rule-based checks (runRuleBasedChecks)
   const handleUnifiedComplete = async (ctx: UserContext, role: "party_a" | "party_b") => {
     trackEvent(ANALYTICS_EVENTS.USER_CONTEXT_COMPLETED);
     trackEvent(ANALYTICS_EVENTS.ROLE_SELECTED, { role });
 
     setStep("analyzing");
+    setLoadingMessage("契約書を読み込んでいます...");
 
-    // Try streaming first for faster perceived performance
+    // Progressive loading messages
+    const messages = [
+      "契約書を読んでいます...",
+      "確認していますね...",
+      "気になる点がないか見ています...",
+      "改善のヒントを準備中..."
+    ];
+    let msgIndex = 0;
+    const interval = setInterval(() => {
+      msgIndex = Math.min(msgIndex + 1, messages.length - 1);
+      setLoadingMessage(messages[msgIndex]);
+    }, 2000);
+
     try {
-      await streaming.startAnalysis(contractText, ctx.userRole);
-      // Success is handled by onComplete callback
-    } catch (streamError) {
-      console.error("Streaming failed, using fallback:", streamError);
+      // MUST use analyzeDeepAction - it includes:
+      // 1. runRuleBasedChecks (rule-based detection)
+      // 2. analyzeContractText (LLM analysis)
+      // 3. mergeAnalysisResults (combines both sources)
+      const result = await analyzeDeepAction(contractText, ctx);
+      clearInterval(interval);
 
-      // Fallback to traditional analysis
-      setLoadingMessage("契約書を読み込んでいます...");
-      try {
-        const result = await analyzeDeepAction(contractText, ctx);
-        if (result.data) {
-          setAnalysisData(result.data);
-          trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED);
-          setStep("complete");
-          try {
-            localStorage.setItem("agreeLastAnalysis", JSON.stringify({
-              timestamp: new Date().toISOString(),
-              data: result.data,
-              text: contractText,
-            }));
-          } catch { }
-        } else {
-          trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "analysis_failed" });
-          alert("チェックできませんでした。もう一度お試しください。");
-          setStep("upload");
-        }
-      } catch (e) {
-        console.error(e);
-        trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "exception" });
-        alert("エラーが発生しました");
+      if (result.data) {
+        setAnalysisData(result.data);
+        trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED);
+        setStep("complete");
+        try {
+          localStorage.setItem("agreeLastAnalysis", JSON.stringify({
+            timestamp: new Date().toISOString(),
+            data: result.data,
+            text: contractText,
+          }));
+        } catch { }
+      } else {
+        trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "analysis_failed" });
+        alert("チェックできませんでした。もう一度お試しください。");
         setStep("upload");
       }
+    } catch (e) {
+      clearInterval(interval);
+      console.error(e);
+      trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "exception" });
+      alert("エラーが発生しました");
+      setStep("upload");
     }
   };
 
