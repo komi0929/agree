@@ -138,21 +138,6 @@ export function RiskPanel({
         return "専門家に相談して、この条項について確認することをおすすめします。";
     };
 
-    // Get alternative options
-    const getAlternatives = (risk: EnhancedAnalysisResult["risks"][0]): string[] => {
-        const alternatives: string[] = [];
-
-        if (risk.suggestion.revised_text) {
-            alternatives.push("修正案を採用する");
-        }
-        alternatives.push("そのまま受け入れる（リスク承知で）");
-        if (risk.violated_laws && risk.violated_laws.length > 0) {
-            alternatives.push("専門家に相談する");
-        }
-
-        return alternatives;
-    };
-
     return (
         <div className="h-full flex flex-col bg-slate-50">
             {/* Header */}
@@ -203,7 +188,6 @@ export function RiskPanel({
                         : true);
 
                     const canAdopt = !!risk.suggestion.revised_text && !isUselessSuggestion;
-                    const alternatives = getAlternatives(risk);
 
                     return (
                         <div
@@ -343,23 +327,7 @@ export function RiskPanel({
                                         </div>
                                     )}
 
-                                    {/* Section: 他の選択肢 */}
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
-                                            <FileText className="w-4 h-4" />
-                                            他の選択肢
-                                        </div>
-                                        <div className="bg-slate-50 rounded-lg p-3">
-                                            <ul className="space-y-1.5">
-                                                {alternatives.map((alt, i) => (
-                                                    <li key={i} className="text-xs text-slate-600 flex items-start gap-2">
-                                                        <span className="text-slate-400">•</span>
-                                                        {alt}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    </div>
+
 
                                     {/* Violated Laws */}
                                     {risk.violated_laws && risk.violated_laws.length > 0 && (
