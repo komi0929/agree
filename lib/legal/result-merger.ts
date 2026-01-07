@@ -57,6 +57,50 @@ export interface MergedAnalysisResult {
  * ルールベースのリスクをMergedRiskに変換
  */
 function convertRuleBasedRisk(risk: RuleBasedRisk): MergedRisk {
+    // Generate context-specific messages using the risk title
+    const contextTitle = risk.title.replace(/[がありませんの規定]/g, "").trim();
+
+    const generateMessages = () => {
+        if (risk.negotiation_point) {
+            return {
+                formal: risk.negotiation_point,
+                neutral: risk.negotiation_point,
+                casual: risk.negotiation_point,
+            };
+        }
+
+        // Generate diverse messages based on risk source and title
+        if (risk.source === "recommended_clause" || risk.source === "missing_clause") {
+            return {
+                formal: `${contextTitle}について、追加をご検討いただけますでしょうか。`,
+                neutral: `${contextTitle}の条項を追加していただけると安心です。`,
+                casual: `${contextTitle}について一文追加していただけると助かります。`,
+            };
+        }
+
+        if (risk.source === "payment_rule") {
+            return {
+                formal: "支払条件について、法令に準拠した内容への修正をご検討いただけますでしょうか。",
+                neutral: "支払いサイクルについて、60日以内に調整いただけますか。",
+                casual: "支払い日について相談させていただけますか。",
+            };
+        }
+
+        if (risk.source === "danger_pattern") {
+            return {
+                formal: `「${contextTitle}」の条項について、修正をご検討いただけますでしょうか。`,
+                neutral: `この「${contextTitle}」部分、条件の調整は可能でしょうか。`,
+                casual: `「${contextTitle}」の部分、少し相談してもいいですか。`,
+            };
+        }
+
+        return {
+            formal: `${contextTitle}について、条件のご調整をお願いできますでしょうか。`,
+            neutral: `${contextTitle}について、相談させてください。`,
+            casual: `${contextTitle}のところ、少し話し合えますか。`,
+        };
+    };
+
     return {
         id: risk.id,
         source: "rule",
@@ -68,11 +112,7 @@ function convertRuleBasedRisk(risk: RuleBasedRisk): MergedRisk {
         violated_laws: risk.law ? [risk.law] : [],
         suggestion: {
             revised_text: risk.suggested_fix || "具体的な修正案については専門家にご相談ください。",
-            negotiation_message: {
-                formal: risk.negotiation_point || "本条項について、修正をご検討いただけますでしょうか。",
-                neutral: risk.negotiation_point || "この部分について、条件の調整をお願いできますか。",
-                casual: risk.negotiation_point || "この点について、少し相談させてください。",
-            },
+            negotiation_message: generateMessages(),
             legal_basis: risk.details || (risk.law ? VIOLATED_LAW_EXPLANATIONS[risk.law] : ""),
         },
     };
