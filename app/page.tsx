@@ -12,8 +12,7 @@ import { SignatureLogo } from "@/components/signature-logo";
 import { analyzeDeepAction, AnalysisState } from "@/app/actions";
 import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
 import { FileText, Shield, MessageSquare, Loader2 } from "lucide-react";
-import { useStreamingAnalysis } from "@/hooks/use-streaming-analysis";
-import { StreamingProgress } from "@/components/streaming-progress";
+import { AnalyzingProgress } from "@/components/analyzing-progress";
 import { useLocalHistory } from "@/hooks/use-local-history";
 
 // Phase 5: Dynamic imports for heavy components (reduces initial bundle)
@@ -57,27 +56,6 @@ export default function Home() {
 
   // Store the promise of the deep analysis so we can await it later
   const deepAnalysisPromiseRef = useRef<Promise<AnalysisState> | null>(null);
-
-  // Streaming analysis hook for faster perceived performance
-  const streaming = useStreamingAnalysis({
-    onComplete: (result) => {
-      setAnalysisData(result);
-      trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED);
-      setStep("complete");
-      // Save to localStorage
-      try {
-        localStorage.setItem("agreeLastAnalysis", JSON.stringify({
-          timestamp: new Date().toISOString(),
-          data: result,
-          text: contractText,
-        }));
-      } catch { }
-    },
-    onError: (error) => {
-      console.error("Streaming error, falling back to standard API:", error);
-      // Fallback to traditional analysis will be handled
-    },
-  });
 
   // Track page view on mount
   useEffect(() => {
@@ -259,35 +237,15 @@ export default function Home() {
     );
   }
 
-  // A-2: Progressive loading screen with streaming progress
+  // A-2: Progressive loading screen with step indicators
   if (step === "analyzing") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-6 animate-in fade-in">
         <div className="w-full max-w-md">
-          <StreamingProgress
-            state={streaming.state}
-            progress={streaming.progress}
-            elapsedTime={streaming.elapsedTime}
-            rawContent={streaming.rawContent}
+          <AnalyzingProgress
+            isActive={true}
+            loadingMessage={loadingMessage}
           />
-
-          {/* Fallback display when streaming is idle (using traditional analysis) */}
-          {streaming.state === "idle" && (
-            <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-6">
-              <div className="flex flex-col items-center gap-4">
-                <div className="relative">
-                  <div className="h-16 w-16 border-2 border-slate-100 border-t-blue-500 rounded-full animate-spin" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xl">📄</span>
-                  </div>
-                </div>
-                <div className="text-center space-y-1">
-                  <p className="text-slate-800 font-medium">{loadingMessage}</p>
-                  <p className="text-slate-400 text-sm">しばらくお待ちください...</p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     );
