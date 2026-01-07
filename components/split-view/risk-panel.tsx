@@ -51,14 +51,20 @@ export function RiskPanel({
     }, []);
 
     // Scroll to highlighted card when highlightedRiskIndex changes
-    // Only scroll programmatically when it's triggered by clicking on contract highlights
     useEffect(() => {
         if (highlightedRiskIndex !== null && highlightedRiskIndex !== -1) {
+            // Auto-expand the highlighted card
+            setExpandedCards(prev => {
+                if (prev.has(highlightedRiskIndex)) return prev;
+                const next = new Set(prev);
+                next.add(highlightedRiskIndex);
+                return next;
+            });
+
             // Don't scroll if user is manually scrolling or if we just scrolled to this index
             if (isUserScrolling.current) {
                 return;
             }
-            // Only scroll if this is a new index (not from hover)
             if (lastProgrammaticScrollIndex.current === highlightedRiskIndex) {
                 return;
             }
@@ -345,16 +351,18 @@ export function RiskPanel({
                                         </div>
                                     )}
 
-                                    {/* Contract Link */}
-                                    <button
-                                        className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onScrollToContract(index);
-                                        }}
-                                    >
-                                        📍 契約書で確認
-                                    </button>
+                                    {/* Contract Link - hide for low risk (missing clauses don't exist in text) */}
+                                    {!isLowRisk && (
+                                        <button
+                                            className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onScrollToContract(index);
+                                            }}
+                                        >
+                                            📍 契約書で確認
+                                        </button>
+                                    )}
                                 </div>
                             )}
                         </div>

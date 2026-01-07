@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useMemo } from "react";
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 import { FileText } from "lucide-react";
 
@@ -11,130 +11,168 @@ interface ContractViewerProps {
     onHighlightClick?: (index: number) => void;
 }
 
+interface Match {
+    start: number;
+    end: number;
+    riskIndex: number;
+}
+
 export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightClick }: ContractViewerProps) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const highlightRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+    const highlightRef = useRef<HTMLSpanElement>(null);
 
-    // Create highlighted text with matching regions
-    const createHighlightedContent = useCallback(() => {
-        // Build a list of text regions with their risk associations
-        const regions: Array<{
-            text: string;
-            riskIndices: number[];
-            isHighlight: boolean;
-        }> = [];
-
-        // Find all risk matches in the text
-        const matches: Array<{ start: number; end: number; riskIndex: number }> = [];
-
-        // Normalize function to handle whitespace differences
+    // Find all matches for all risks
+    const matches = useMemo(() => {
+        const foundMatches: Match[] = [];
         const normalizeText = (str: string) => str.replace(/\s+/g, ' ').trim();
         const normalizedContractText = normalizeText(text);
 
         risks.forEach((risk, index) => {
-            if (!risk.original_text || risk.original_text.length < 5) return;
+            if (!risk?.original_text || risk.original_text.length < 5) return;
+            // Skip low risk (missing clauses) as they don't exist in text
+            if (risk.risk_level === "low") return;
 
-            const normalizedOriginal = normalizeText(risk.original_text);
-
-            // Strategy 1: Try direct match in original text
+            // Strategy 1: Direct match
             let pos = text.indexOf(risk.original_text);
             if (pos !== -1) {
-                matches.push({
-                    start: pos,
-                    end: pos + risk.original_text.length,
-                    riskIndex: index,
-                });
+                // Limit highlight length to avoid "meaningless" huge highlights
+                // If it's too long, it's often the whole article which isn't helpful
+                const maxLength = Math.min(risk.original_text.length, 180);
+                foundMatches.push({ start: pos, end: pos + maxLength, riskIndex: index });
                 return;
             }
 
-            // Strategy 2: Try normalized match (handles whitespace differences)
+            // Strategy 2: Normalized match (handles whitespace differences)
+            const normalizedOriginal = normalizeText(risk.original_text);
+            if (normalizedOriginal.length < 5) return;
+
             const normalizedPos = normalizedContractText.indexOf(normalizedOriginal);
             if (normalizedPos !== -1) {
-                // Map back to original text position
                 let originalPos = 0;
                 let normalizedIdx = 0;
+
+                // Map back normalized position to original text position
                 while (normalizedIdx < normalizedPos && originalPos < text.length) {
-                    if (!/\s/.test(text[originalPos]) || normalizedContractText[normalizedIdx] === text[originalPos]) {
+                    const char = text[originalPos];
+                    if (/\s/.test(char)) {
+                        originalPos++;
+                        continue;
+                    }
+                    if (normalizedContractText[normalizedIdx] === char) {
                         normalizedIdx++;
                     }
                     originalPos++;
                 }
-                matches.push({
+
+                const maxLength = Math.min(risk.original_text.length, 180);
+                foundMatches.push({
                     start: originalPos,
-                    end: Math.min(originalPos + risk.original_text.length, text.length),
-                    riskIndex: index,
-                });
-                return;
-            }
-
-            // No match found - don't highlight to avoid incorrect positions
-            // (Previously had Strategy 3 and 4 which caused wrong highlights)
-        });
-
-        // Sort matches by start position
-        matches.sort((a, b) => a.start - b.start);
-
-        // Build regions
-        let lastEnd = 0;
-        matches.forEach((match) => {
-            // Add non-highlighted region before this match
-            if (match.start > lastEnd) {
-                regions.push({
-                    text: text.slice(lastEnd, match.start),
-                    riskIndices: [],
-                    isHighlight: false,
+                    end: Math.min(originalPos + maxLength, text.length),
+                    riskIndex: index
                 });
             }
-
-            // Add highlighted region
-            regions.push({
-                text: text.slice(match.start, match.end),
-                riskIndices: [match.riskIndex],
-                isHighlight: true,
-            });
-
-            lastEnd = match.end;
         });
 
-        // Add any remaining text
-        if (lastEnd < text.length) {
-            regions.push({
-                text: text.slice(lastEnd),
-                riskIndices: [],
-                isHighlight: false,
-            });
-        }
+        // Sort matches by start position and remove overlaps
+        return foundMatches
+            .sort((a, b) => a.start - b.start)
+            .reduce((acc, current) => {
+                if (acc.length === 0) return [current];
+                const last = acc[acc.length - 1];
+                // If they overlap, keep the one that matches the currently selected risk, 
+                // or just keep the first one
+                if (current.start >= last.end) {
+                    acc.push(current);
+                } else if (current.riskIndex === highlightedRiskIndex) {
+                    // Replace previous with this one if this is the active selection
+                    acc[acc.length - 1] = current;
+                }
+                return acc;
+            }, [] as Match[]);
+    }, [text, risks, highlightedRiskIndex]);
 
-        return regions;
-    }, [text, risks]);
-
-    const regions = createHighlightedContent();
-
-    // Scroll to highlighted risk
+    // Scroll to highlighted text when selection changes
     useEffect(() => {
-        if (highlightedRiskIndex !== null) {
-            const element = highlightRefs.current.get(highlightedRiskIndex);
-            if (element) {
-                element.scrollIntoView({ behavior: "smooth", block: "center" });
-            }
+        if (highlightedRiskIndex !== null && highlightRef.current) {
+            highlightRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
         }
     }, [highlightedRiskIndex]);
 
-    // Get risk level color
-    const getRiskColor = (riskIndex: number) => {
+    // Color styling for highlights
+    const getHighlightStyles = (riskIndex: number) => {
         const risk = risks[riskIndex];
-        if (!risk) return { bg: "bg-slate-100", border: "border-slate-300", text: "text-slate-600" };
+        const isActive = highlightedRiskIndex === riskIndex;
 
-        switch (risk.risk_level) {
-            case "critical":
-                return { bg: "bg-purple-50", border: "border-purple-400", text: "text-purple-700" };
-            case "high":
-                return { bg: "bg-red-50", border: "border-red-400", text: "text-red-700" };
-            case "medium":
-                return { bg: "bg-yellow-50", border: "border-yellow-400", text: "text-yellow-700" };
-            default:
-                return { bg: "bg-green-50", border: "border-green-400", text: "text-green-700" };
+        const base = "inline cursor-pointer transition-all duration-200 rounded px-1 py-0.5 border-b-2 font-medium";
+
+        if (isActive) {
+            const activeBase = `${base} font-bold ring-4 ring-offset-1 shadow-lg z-10 scale-[1.03] animate-in fade-in zoom-in-95 duration-300`;
+            switch (risk?.risk_level) {
+                case "critical": return `${activeBase} bg-purple-200 border-purple-500 text-purple-900 ring-purple-300`;
+                case "high": return `${activeBase} bg-red-200 border-red-500 text-red-900 ring-red-300`;
+                case "medium": return `${activeBase} bg-yellow-200 border-yellow-500 text-yellow-900 ring-yellow-300`;
+                default: return `${activeBase} bg-green-200 border-green-500 text-green-900 ring-green-300`;
+            }
+        } else {
+            const inactiveBase = `${base} opacity-70 hover:opacity-100 hover:scale-[1.01]`;
+            switch (risk?.risk_level) {
+                case "critical": return `${inactiveBase} bg-purple-100/50 border-purple-200 text-purple-800`;
+                case "high": return `${inactiveBase} bg-red-100/50 border-red-200 text-red-800`;
+                case "medium": return `${inactiveBase} bg-yellow-100/50 border-yellow-200 text-yellow-800`;
+                default: return `${inactiveBase} bg-green-100/50 border-green-200 text-green-800`;
+            }
         }
+    };
+
+    const renderContent = () => {
+        if (matches.length === 0) {
+            return text.split(/(\n)/).map((segment, i) => (
+                <span key={i} className="whitespace-pre-wrap text-slate-600">
+                    {segment}
+                </span>
+            ));
+        }
+
+        const elements: React.ReactNode[] = [];
+        let lastIdx = 0;
+
+        matches.forEach((match, i) => {
+            // Text before match
+            if (match.start > lastIdx) {
+                const beforeText = text.slice(lastIdx, match.start);
+                elements.push(
+                    <span key={`text-before-${i}`} className="whitespace-pre-wrap text-slate-600">
+                        {beforeText}
+                    </span>
+                );
+            }
+
+            // The highlight
+            const isActive = highlightedRiskIndex === match.riskIndex;
+            elements.push(
+                <span
+                    key={`match-${i}`}
+                    ref={isActive ? highlightRef : undefined}
+                    onClick={() => onHighlightClick?.(match.riskIndex)}
+                    className={getHighlightStyles(match.riskIndex)}
+                >
+                    {text.slice(match.start, match.end)}
+                </span>
+            );
+
+            lastIdx = match.end;
+        });
+
+        // Remaining text
+        if (lastIdx < text.length) {
+            elements.push(
+                <span key="text-remaining" className="whitespace-pre-wrap text-slate-600">
+                    {text.slice(lastIdx)}
+                </span>
+            );
+        }
+
+        return elements;
     };
 
     return (
@@ -145,67 +183,23 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
                     <FileText className="w-4 h-4 text-slate-500" />
                     <span className="text-sm font-medium text-slate-700">契約書</span>
                 </div>
-                <span className="text-xs text-slate-400">
-                    色付き = 要確認
-                </span>
+                <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                        ハイライトをクリックしてリスクを確認
+                    </span>
+                </div>
             </div>
 
-            {/* Content */}
-            <div
-                ref={containerRef}
-                className="flex-1 overflow-auto p-8 bg-white"
-            >
-                <div className="max-w-none prose prose-sm prose-slate leading-loose">
-                    {regions.map((region, idx) => {
-                        // 読みやすさのために句点の後に改行を入れる処理（ハイライトされていない部分のみ）
-                        // ただし、元々改行がある場合はそのままにする
-                        const displayContent = !region.isHighlight
-                            ? region.text.split(/(?<=。)/).map((segment, i, arr) => (
-                                <span key={i}>
-                                    {segment}
-                                    {i < arr.length - 1 && !segment.endsWith('\n') && <br className="mb-2 block content-['']" />}
-                                </span>
-                            ))
-                            : region.text;
-
-                        if (!region.isHighlight) {
-                            return (
-                                <span key={idx} className="whitespace-pre-wrap text-slate-600">
-                                    {displayContent}
-                                </span>
-                            );
-                        }
-
-                        // Highlighted region
-                        const riskIndex = region.riskIndices[0];
-                        const colors = getRiskColor(riskIndex);
-                        const isActive = highlightedRiskIndex === riskIndex;
-
-                        return (
-                            <span
-                                key={idx}
-                                ref={(el) => {
-                                    if (el) highlightRefs.current.set(riskIndex, el as any);
-                                }}
-                                className={`
-                                    relative inline cursor-pointer transition-all duration-300 rounded-sm
-                                    ${colors.bg} ${isActive ? `ring-4 ${colors.border} ring-offset-2 z-10 font-bold shadow-sm` : "hover:brightness-95"}
-                                    border-b-2 ${colors.border} px-1 py-0.5 mx-0.5
-                                `}
-                                onClick={() => onHighlightClick?.(riskIndex)}
-                            >
-                                {/* Risk number badge */}
-                                <span className={`
-                                    absolute -left-3 -top-3 w-5 h-5 rounded-full flex items-center justify-center
-                                    text-[10px] font-bold ${colors.bg} ${colors.text} ${colors.border} border shadow-sm
-                                    transition-transform duration-300 ${isActive ? 'scale-125' : 'scale-100'}
-                                `}>
-                                    {riskIndex + 1}
-                                </span>
-                                {region.text}
-                            </span>
-                        );
-                    })}
+            {/* Content Container */}
+            <div className="flex-1 overflow-auto bg-white">
+                <div
+                    ref={containerRef}
+                    className="max-w-3xl mx-auto p-12 lg:p-16 min-h-full shadow-inner bg-white font-serif leading-relaxed"
+                    style={{ fontSize: "15px" }}
+                >
+                    <div className="space-y-1">
+                        {renderContent()}
+                    </div>
                 </div>
             </div>
         </div>
