@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
-import { SummaryHeader } from "@/components/split-view/summary-header";
+import { SummaryHeader, RiskLevelFilter } from "@/components/split-view/summary-header";
 import { ContractViewer } from "@/components/split-view/contract-viewer";
 import { RiskPanel } from "@/components/split-view/risk-panel";
 import { MessageCrafter } from "@/components/split-view/message-crafter";
@@ -30,6 +30,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
     const [showEngagement, setShowEngagement] = useState(false);
     const [showWelcome, setShowWelcome] = useState(true);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [riskFilter, setRiskFilter] = useState<RiskLevelFilter>(null);
 
     // Toggle risk selection
     const handleRiskToggle = useCallback((index: number) => {
@@ -135,7 +136,12 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
     return (
         <div className="h-screen w-full flex flex-col font-sans bg-slate-100">
             {/* Summary Header */}
-            <SummaryHeader data={data} contractType={contractType} />
+            <SummaryHeader
+                data={data}
+                contractType={contractType}
+                activeFilter={riskFilter}
+                onFilterChange={setRiskFilter}
+            />
 
             {/* Guide Bar - Onboarding */}
             <GuideBar />
@@ -182,6 +188,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                         risks={data.risks}
                         highlightedRiskIndex={highlightedRiskIndex}
                         selectedRiskIndices={selectedRiskIndices}
+                        activeFilter={riskFilter}
                         onRiskHover={setHighlightedRiskIndex}
                         onRiskSelect={handleRiskSelect}
                         onRiskToggle={handleRiskToggle}

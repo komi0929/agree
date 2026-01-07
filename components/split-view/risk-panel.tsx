@@ -6,11 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, AlertOctagon, Check, ChevronDown, ChevronUp, Lightbulb, CheckSquare, Square, FileText, HelpCircle, Sparkles } from "lucide-react";
 import { VIOLATED_LAW_EXPLANATIONS, ViolatedLaw } from "@/lib/types/clause-tags";
+import { RiskLevelFilter } from "./summary-header";
 
 interface RiskPanelProps {
     risks: EnhancedAnalysisResult["risks"];
     highlightedRiskIndex: number | null;
     selectedRiskIndices: number[];
+    activeFilter?: RiskLevelFilter;
     onRiskHover: (index: number | null) => void;
     onRiskSelect: (index: number) => void;
     onRiskToggle: (index: number) => void;
@@ -21,6 +23,7 @@ export function RiskPanel({
     risks,
     highlightedRiskIndex,
     selectedRiskIndices,
+    activeFilter,
     onRiskHover,
     onRiskSelect,
     onRiskToggle,
@@ -181,6 +184,11 @@ export function RiskPanel({
                 onScroll={handleScrollStart}
             >
                 {risks.map((risk, index) => {
+                    // Filter: skip cards that don't match activeFilter
+                    if (activeFilter && risk.risk_level !== activeFilter) {
+                        return null;
+                    }
+
                     const styling = getRiskStyling(risk.risk_level);
                     const isHighlighted = highlightedRiskIndex === index;
                     const isSelected = selectedRiskIndices.includes(index);

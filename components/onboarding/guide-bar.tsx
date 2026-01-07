@@ -40,22 +40,9 @@ export function GuideBar({ onDismiss }: GuideBarProps) {
                 <div className="flex items-center gap-3 text-blue-800">
                     <Info className="w-4 h-4 text-blue-500 shrink-0" />
                     <p className="text-sm">
-                        <span className="font-medium">使い方:</span>
+                        <span className="font-medium">ヒント:</span>
                         {" "}
-                        <span className="inline-flex items-center gap-1">
-                            <span className="w-5 h-5 rounded-full bg-blue-200 text-blue-700 text-xs font-bold inline-flex items-center justify-center">1</span>
-                            内容をチェック
-                        </span>
-                        {" → "}
-                        <span className="inline-flex items-center gap-1">
-                            <span className="w-5 h-5 rounded-full bg-blue-200 text-blue-700 text-xs font-bold inline-flex items-center justify-center">2</span>
-                            気になるものを選ぶ
-                        </span>
-                        {" → "}
-                        <span className="inline-flex items-center gap-1">
-                            <span className="w-5 h-5 rounded-full bg-blue-200 text-blue-700 text-xs font-bold inline-flex items-center justify-center">3</span>
-                            次のアクションへ
-                        </span>
+                        気になるリスクは「この修正を選択」→ 下の「修正依頼の文章作成」で相手に伝える文章を作れます
                     </p>
                 </div>
                 <button
