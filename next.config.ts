@@ -31,8 +31,17 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['pdf2json'],
   experimental: {
     serverActions: {
-      bodySizeLimit: '10mb', // Adjust as needed
+      bodySizeLimit: '10mb',
     },
+    // Nani Phase 5: Bundle size optimization through tree shaking
+    optimizePackageImports: [
+      'lucide-react',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-label',
+      '@radix-ui/react-radio-group',
+      '@radix-ui/react-slot',
+    ],
   },
 };
 

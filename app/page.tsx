@@ -1,21 +1,48 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { UploadSection } from "@/components/upload-section";
 import { trackEvent, trackPageView, ANALYTICS_EVENTS } from "@/lib/analytics/client";
-import { AnalysisResultPlaceholder } from "@/components/analysis-result-placeholder";
-import { AnalysisViewer } from "@/components/analysis-viewer";
 import { EnhancedAnalysisResult, ExtractionResult } from "@/lib/types/analysis";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Footer } from "@/components/footer";
 import { SignatureLogo } from "@/components/signature-logo";
-import { UnifiedContextForm } from "@/components/unified-context-form";
 import { analyzeDeepAction, AnalysisState } from "@/app/actions";
 import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
-import { FileText, Shield, MessageSquare } from "lucide-react";
+import { FileText, Shield, MessageSquare, Loader2 } from "lucide-react";
 import { useStreamingAnalysis } from "@/hooks/use-streaming-analysis";
 import { StreamingProgress } from "@/components/streaming-progress";
+import { useLocalHistory } from "@/hooks/use-local-history";
+
+// Phase 5: Dynamic imports for heavy components (reduces initial bundle)
+const AnalysisViewer = dynamic(
+  () => import("@/components/analysis-viewer").then(m => ({ default: m.AnalysisViewer })),
+  {
+    loading: () => (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="flex items-center gap-3">
+          <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+          <span className="text-slate-500">結果を表示中...</span>
+        </div>
+      </div>
+    ),
+    ssr: false
+  }
+);
+
+const UnifiedContextForm = dynamic(
+  () => import("@/components/unified-context-form").then(m => ({ default: m.UnifiedContextForm })),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+      </div>
+    ),
+    ssr: false
+  }
+);
 
 export default function Home() {
   const [analysisData, setAnalysisData] = useState<EnhancedAnalysisResult | null>(null);
@@ -283,8 +310,9 @@ export default function Home() {
             <AnalysisViewer data={analysisData} text={contractText} contractType={extractionData?.contract_type} />
           </div>
         ) : (
-          <div className="py-20">
-            <AnalysisResultPlaceholder />
+          <div className="py-20 flex flex-col items-center justify-center text-center">
+            <Loader2 className="w-8 h-8 animate-spin text-slate-300 mb-4" />
+            <p className="text-slate-400">結果を読み込んでいます...</p>
           </div>
         )}
       </div>
