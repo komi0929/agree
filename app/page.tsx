@@ -321,7 +321,17 @@ export default function Home() {
   return (
     <main className="min-h-screen flex flex-col bg-white">
       <header className="h-20 px-8 flex items-center justify-between max-w-5xl mx-auto w-full">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setAnalysisData(null)}>
+        <div
+          className="flex items-center gap-3 cursor-pointer"
+          onClick={() => {
+            setAnalysisData(null);
+            setStep("upload");
+            setHasStarted(false);
+            // Clear speculative cache
+            speculativeCacheRef.current = null;
+            speculativePromiseRef.current = null;
+          }}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="agree" className="h-16 w-auto" />
         </div>
