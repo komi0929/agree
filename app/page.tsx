@@ -14,6 +14,8 @@ import { UnifiedContextForm } from "@/components/unified-context-form";
 import { analyzeDeepAction, AnalysisState } from "@/app/actions";
 import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
 import { FileText, Shield, MessageSquare } from "lucide-react";
+import { useStreamingAnalysis } from "@/hooks/use-streaming-analysis";
+import { StreamingProgress } from "@/components/streaming-progress";
 
 export default function Home() {
   const [analysisData, setAnalysisData] = useState<EnhancedAnalysisResult | null>(null);
@@ -28,6 +30,27 @@ export default function Home() {
 
   // Store the promise of the deep analysis so we can await it later
   const deepAnalysisPromiseRef = useRef<Promise<AnalysisState> | null>(null);
+
+  // Streaming analysis hook for faster perceived performance
+  const streaming = useStreamingAnalysis({
+    onComplete: (result) => {
+      setAnalysisData(result);
+      trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED);
+      setStep("complete");
+      // Save to localStorage
+      try {
+        localStorage.setItem("agreeLastAnalysis", JSON.stringify({
+          timestamp: new Date().toISOString(),
+          data: result,
+          text: contractText,
+        }));
+      } catch { }
+    },
+    onError: (error) => {
+      console.error("Streaming error, falling back to standard API:", error);
+      // Fallback to traditional analysis will be handled
+    },
+  });
 
   // Track page view on mount
   useEffect(() => {
@@ -57,56 +80,41 @@ export default function Home() {
     trackEvent(ANALYTICS_EVENTS.USER_CONTEXT_COMPLETED);
     trackEvent(ANALYTICS_EVENTS.ROLE_SELECTED, { role });
 
-    // A-2: Progressive loading messages
     setStep("analyzing");
-    setLoadingMessage("契約書を読み込んでいます...");
 
-    // Start analysis
-    deepAnalysisPromiseRef.current = analyzeDeepAction(contractText, ctx);
-
-    // A-2: Update loading messages progressively - Playful version
-    const messages = [
-      "契約書を読んでいます...",
-      "確認していますね...",
-      "気になる点がないか見ています...",
-      "改善のヒントを準備中..."
-    ];
-    let msgIndex = 0;
-    const interval = setInterval(() => {
-      msgIndex = Math.min(msgIndex + 1, messages.length - 1);
-      setLoadingMessage(messages[msgIndex]);
-    }, 2000);
-
+    // Try streaming first for faster perceived performance
     try {
-      const result = await deepAnalysisPromiseRef.current;
-      clearInterval(interval);
+      await streaming.startAnalysis(contractText, ctx.userRole);
+      // Success is handled by onComplete callback
+    } catch (streamError) {
+      console.error("Streaming failed, using fallback:", streamError);
 
-      if (result.data) {
-        setAnalysisData(result.data);
-        trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED);
-        setStep("complete");
-
-        // C-3: Auto-save analysis results for prospective memory
-        try {
-          localStorage.setItem("agreeLastAnalysis", JSON.stringify({
-            timestamp: new Date().toISOString(),
-            data: result.data,
-            text: contractText,
-          }));
-        } catch {
-          // Ignore storage errors (quota exceeded, etc.)
+      // Fallback to traditional analysis
+      setLoadingMessage("契約書を読み込んでいます...");
+      try {
+        const result = await analyzeDeepAction(contractText, ctx);
+        if (result.data) {
+          setAnalysisData(result.data);
+          trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED);
+          setStep("complete");
+          try {
+            localStorage.setItem("agreeLastAnalysis", JSON.stringify({
+              timestamp: new Date().toISOString(),
+              data: result.data,
+              text: contractText,
+            }));
+          } catch { }
+        } else {
+          trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "analysis_failed" });
+          alert("チェックできませんでした。もう一度お試しください。");
+          setStep("upload");
         }
-      } else {
-        trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "analysis_failed" });
-        alert("チェックできませんでした。もう一度お試しください。");
+      } catch (e) {
+        console.error(e);
+        trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "exception" });
+        alert("エラーが発生しました");
         setStep("upload");
       }
-    } catch (e) {
-      clearInterval(interval);
-      console.error(e);
-      trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "exception" });
-      alert("エラーが発生しました");
-      setStep("upload");
     }
   };
 
@@ -211,28 +219,35 @@ export default function Home() {
     );
   }
 
-  // A-2: Progressive loading screen with playful design
+  // A-2: Progressive loading screen with streaming progress
   if (step === "analyzing") {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white space-y-6 animate-in fade-in">
-        <div className="relative flex flex-col items-center gap-6">
-          {/* Animated logo */}
-          <div className="relative">
-            <div className="h-20 w-20 border-2 border-slate-100 border-t-slate-900 rounded-full animate-spin" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-2xl">📄</span>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-6 animate-in fade-in">
+        <div className="w-full max-w-md">
+          <StreamingProgress
+            state={streaming.state}
+            progress={streaming.progress}
+            elapsedTime={streaming.elapsedTime}
+            rawContent={streaming.rawContent}
+          />
+
+          {/* Fallback display when streaming is idle (using traditional analysis) */}
+          {streaming.state === "idle" && (
+            <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-6">
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative">
+                  <div className="h-16 w-16 border-2 border-slate-100 border-t-blue-500 rounded-full animate-spin" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xl">📄</span>
+                  </div>
+                </div>
+                <div className="text-center space-y-1">
+                  <p className="text-slate-800 font-medium">{loadingMessage}</p>
+                  <p className="text-slate-400 text-sm">しばらくお待ちください...</p>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="text-center space-y-2">
-            <p className="text-slate-800 font-medium text-lg">{loadingMessage}</p>
-            <p className="text-slate-400 text-sm">あなたの契約書を丁寧に確認しています</p>
-          </div>
-          {/* Progress dots */}
-          <div className="flex gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-slate-300 animate-pulse" style={{ animationDelay: "0ms" }} />
-            <div className="w-2 h-2 rounded-full bg-slate-300 animate-pulse" style={{ animationDelay: "150ms" }} />
-            <div className="w-2 h-2 rounded-full bg-slate-300 animate-pulse" style={{ animationDelay: "300ms" }} />
-          </div>
+          )}
         </div>
       </div>
     );
