@@ -75,17 +75,64 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
         };
 
         if (isMultiple && selectedRisks) {
-            const points = selectedRisks.map((r, i) => {
-                const suggestion = r.suggestion.revised_text || "（修正内容を記載）";
-                if (purpose === "question") {
-                    return `${i + 1}. ${r.section_title}\n   質問: この条項の意図を教えていただけますか？`;
-                } else if (purpose === "negotiate") {
-                    return `${i + 1}. ${r.section_title}\n   希望条件: ${suggestion}`;
-                }
-                return `${i + 1}. ${r.section_title}\n   修正希望: ${suggestion}`;
-            }).join("\n\n");
+            // 優先度別にグルーピング
+            const mustChange = selectedRisks.filter(r => r.risk_level === "critical" || r.risk_level === "high");
+            const wouldAppreciate = selectedRisks.filter(r => r.risk_level === "medium" || r.risk_level === "low");
 
-            return `${preamble[tone][purpose]}${points}${closing[tone][purpose]}`;
+            let body = "";
+
+            // 「必ず修正いただきたい点」セクション
+            if (mustChange.length > 0) {
+                const sectionHeader = {
+                    formal: "【必ず修正をお願いしたい点】\n以下の点につきましては、契約を進める上で重要な問題となる可能性がございます。\n\n",
+                    neutral: "【必ず修正いただきたい点】\n以下は契約を進める上で重要な点です。\n\n",
+                    casual: "【ここは必ず直してほしいです】\n\n",
+                };
+                body += sectionHeader[tone];
+
+                mustChange.forEach((r, i) => {
+                    const suggestion = r.suggestion.revised_text || "（修正案をご提案）";
+                    const reason = r.practical_impact || r.explanation;
+
+                    if (purpose === "question") {
+                        body += `${i + 1}. 「${r.section_title}」について\n`;
+                        body += `   この条項の意図をお聞かせいただけますでしょうか。\n`;
+                        body += `   懸念点：${reason}\n\n`;
+                    } else if (purpose === "negotiate") {
+                        body += `${i + 1}. 「${r.section_title}」について\n`;
+                        body += `   理由：${reason}\n`;
+                        body += `   希望条件：${suggestion}\n\n`;
+                    } else {
+                        body += `${i + 1}. 「${r.section_title}」について\n`;
+                        body += `   理由：${reason}\n`;
+                        body += `   修正希望：${suggestion}\n\n`;
+                    }
+                });
+            }
+
+            // 「ご検討いただけると助かる点」セクション
+            if (wouldAppreciate.length > 0) {
+                const sectionHeader = {
+                    formal: "【ご検討いただけますと幸いな点】\n以下の点につきましては、可能であればご調整いただけると大変助かります。\n\n",
+                    neutral: "【できればご検討いただきたい点】\n以下は必須ではありませんが、調整いただけると助かります。\n\n",
+                    casual: "【できれば相談したい点】\n\n",
+                };
+                body += sectionHeader[tone];
+
+                wouldAppreciate.forEach((r, i) => {
+                    const suggestion = r.suggestion.revised_text || "（柔軟にご相談）";
+
+                    if (purpose === "question") {
+                        body += `${i + 1}. 「${r.section_title}」について\n`;
+                        body += `   こちらについてもご意向をお聞かせいただけると助かります。\n\n`;
+                    } else {
+                        body += `${i + 1}. 「${r.section_title}」について\n`;
+                        body += `   ご希望：${suggestion}\n\n`;
+                    }
+                });
+            }
+
+            return `${preamble[tone][purpose]}${body.trim()}${closing[tone][purpose]}`;
         } else if (risk) {
             if (purpose === "question") {
                 return `${preamble[tone][purpose]}「${risk.section_title}」について\n\nこの条項の意図を確認させてください。${risk.explanation}${closing[tone][purpose]}`;
