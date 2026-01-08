@@ -218,7 +218,7 @@
 
 /* Soft Gradient Backgrounds */
 .bg-playful-gradient {
-  background: linear-gradient(135deg, #fef9f3 0%, #f0f9ff 50%, #fdf4ff 100%);
+  background: linear-gradient(135deg, #fafafa 0%, #f8fafc 50%, #f9fafb 100%);
 }
 
 .bg-success-gradient {

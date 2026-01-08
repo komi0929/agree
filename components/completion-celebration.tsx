@@ -84,7 +84,7 @@ export function CompletionCelebration({ show, onComplete }: CompletionCelebratio
                                 <PartyPopper className="w-5 h-5 text-pink-500 animate-gentle-rotate" style={{ animationDelay: "0.5s" }} />
                             </h3>
                             <p className="text-sm text-slate-500">
-                                チェックが完了しました
+                                確認が完了しました
                             </p>
                         </div>
                     </div>
@@ -111,7 +111,6 @@ export function LearningSummary({ risks, className = "" }: LearningSummaryProps)
     return (
         <div className={`bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-100 ${className}`}>
             <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">📚</span>
                 <h4 className="font-semibold text-slate-800">今回学べたこと</h4>
             </div>
             <ul className="space-y-2">
@@ -129,11 +128,11 @@ export function LearningSummary({ risks, className = "" }: LearningSummaryProps)
 function generateLearningPoints(risks: Array<{ section_title: string; clause_tag: string }>): string[] {
     const clauseToLearning: Record<string, string> = {
         "CLAUSE_PAYMENT": "支払条件は必ず確認しましょう（60日ルールなど）",
-        "CLAUSE_IP": "著作権の帰属条項は慎重にチェック",
+        "CLAUSE_IP": "著作権の帰属条項は慎重に確認",
         "CLAUSE_LIABILITY": "損害賠償の上限設定は重要です",
         "CLAUSE_TERMINATION": "契約解除時の扱いを明確に",
         "CLAUSE_NON_COMPETE": "競業避止義務は期間と範囲を確認",
-        "CLAUSE_CONFIDENTIAL": "秘密保持の範囲と期間をチェック",
+        "CLAUSE_CONFIDENTIAL": "秘密保持の範囲と期間を確認",
         "CLAUSE_SCOPE": "業務範囲は具体的に定義されているか確認",
         "CLAUSE_ACCEPTANCE": "検収条件と基準を明確に",
         "CLAUSE_HARASSMENT": "ハラスメント対策条項の有無を確認",

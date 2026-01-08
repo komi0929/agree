@@ -1,7 +1,7 @@
 "use client";
 
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
-import { AlertTriangle, AlertOctagon, FileText, Sparkles, X } from "lucide-react";
+import { AlertTriangle, AlertOctagon, FileText, X } from "lucide-react";
 
 export type RiskLevelFilter = "critical" | "high" | "medium" | "low" | null;
 
@@ -22,12 +22,12 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
     // Calculate simple score (100 - weighted deductions)
     const score = Math.max(0, 100 - (criticalCount * 25) - (highCount * 15) - (mediumCount * 5) - (lowCount * 2));
 
-    // Playful score message
+    // Professional message based on score
     const getScoreMessage = () => {
-        if (score >= 80) return { emoji: "🌟", text: "とても良い契約書です！" };
-        if (score >= 60) return { emoji: "👍", text: "いくつか確認ポイントがあります" };
-        if (score >= 40) return { emoji: "🔍", text: "確認が必要な箇所があります" };
-        return { emoji: "⚠️", text: "慎重に確認してください" };
+        if (score >= 80) return { text: "とても良い契約書です" };
+        if (score >= 60) return { text: "いくつか確認したい点があります" };
+        if (score >= 40) return { text: "確認が必要な箇所があります" };
+        return { text: "慎重にご確認ください" };
     };
 
     const scoreMessage = getScoreMessage();
@@ -89,22 +89,20 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
 
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                            <span className="text-lg">{scoreMessage.emoji}</span>
                             <h2 className="text-base font-bold text-slate-800">
-                                チェック完了！
+                                確認が完了しました
                             </h2>
-                            <Sparkles className="w-4 h-4 text-amber-400 animate-float" />
                         </div>
                         <p className="text-sm text-slate-600">
                             {scoreMessage.text}
-                            <span className="ml-2 text-slate-400">— {data.risks.filter(r => r.risk_level !== "low").length}件の要確認</span>
+                            <span className="ml-2 text-slate-400">— {data.risks.filter(r => r.risk_level !== "low").length}件の確認事項</span>
                         </p>
                         {/* Contract Type Badge */}
                         {contractType && contractType !== "不明" && (
                             <div className="flex items-center gap-2 mt-2">
                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 text-slate-600 text-xs rounded-full border border-slate-200 shadow-sm">
                                     <FileText className="w-3 h-3" />
-                                    {contractType}として解析
+                                    {contractType}として確認
                                 </span>
                             </div>
                         )}
@@ -126,51 +124,51 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
                     {criticalCount > 0 && (
                         <button
                             onClick={() => handleFilterClick("critical")}
-                            className={`flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-100 to-pink-100 border rounded-full shadow-sm transition-all cursor-pointer ${getPillClasses("critical", {
-                                active: "border-purple-500 ring-2 ring-purple-300 scale-105",
-                                inactive: "border-purple-200 opacity-50",
-                                default: "border-purple-200 hover:scale-105"
+                            className={`flex items-center gap-1.5 px-3 py-2 bg-slate-100 border rounded-full shadow-sm transition-all cursor-pointer ${getPillClasses("critical", {
+                                active: "border-slate-500 ring-2 ring-slate-300 scale-105 bg-slate-200",
+                                inactive: "border-slate-200 opacity-50",
+                                default: "border-slate-200 hover:scale-105 hover:bg-slate-200"
                             })}`}
                         >
-                            <AlertOctagon className="w-3.5 h-3.5 text-purple-600" />
-                            <span className="text-xs font-semibold text-purple-700">🔥 特に大事 {criticalCount}</span>
+                            <AlertOctagon className="w-3.5 h-3.5 text-slate-700" />
+                            <span className="text-xs font-medium text-slate-700">ご確認ください {criticalCount}</span>
                         </button>
                     )}
                     {highCount > 0 && (
                         <button
                             onClick={() => handleFilterClick("high")}
-                            className={`flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-red-50 to-orange-50 border rounded-full shadow-sm transition-all cursor-pointer ${getPillClasses("high", {
-                                active: "border-red-500 ring-2 ring-red-300 scale-105",
-                                inactive: "border-red-200 opacity-50",
-                                default: "border-red-200 hover:scale-105"
+                            className={`flex items-center gap-1.5 px-3 py-2 bg-slate-50 border rounded-full shadow-sm transition-all cursor-pointer ${getPillClasses("high", {
+                                active: "border-slate-500 ring-2 ring-slate-300 scale-105 bg-slate-200",
+                                inactive: "border-slate-200 opacity-50",
+                                default: "border-slate-200 hover:scale-105 hover:bg-slate-100"
                             })}`}
                         >
-                            <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
-                            <span className="text-xs font-semibold text-red-600">⚠️ 確認推奨 {highCount}</span>
+                            <AlertTriangle className="w-3.5 h-3.5 text-slate-600" />
+                            <span className="text-xs font-medium text-slate-600">確認をおすすめ {highCount}</span>
                         </button>
                     )}
                     {mediumCount > 0 && (
                         <button
                             onClick={() => handleFilterClick("medium")}
-                            className={`flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-yellow-50 to-amber-50 border rounded-full shadow-sm transition-all cursor-pointer ${getPillClasses("medium", {
-                                active: "border-yellow-500 ring-2 ring-yellow-300 scale-105",
-                                inactive: "border-yellow-200 opacity-50",
-                                default: "border-yellow-200 hover:scale-105"
+                            className={`flex items-center gap-1.5 px-3 py-2 bg-slate-50 border rounded-full shadow-sm transition-all cursor-pointer ${getPillClasses("medium", {
+                                active: "border-slate-500 ring-2 ring-slate-300 scale-105 bg-slate-200",
+                                inactive: "border-slate-200 opacity-50",
+                                default: "border-slate-200 hover:scale-105 hover:bg-slate-100"
                             })}`}
                         >
-                            <span className="text-xs font-semibold text-yellow-700">💡 ご参考 {mediumCount}</span>
+                            <span className="text-xs font-medium text-slate-600">ご参考まで {mediumCount}</span>
                         </button>
                     )}
                     {lowCount > 0 && (
                         <button
                             onClick={() => handleFilterClick("low")}
-                            className={`flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-green-50 to-emerald-50 border rounded-full shadow-sm transition-all cursor-pointer ${getPillClasses("low", {
-                                active: "border-green-500 ring-2 ring-green-300 scale-105",
-                                inactive: "border-green-200 opacity-50",
-                                default: "border-green-200 hover:scale-105"
+                            className={`flex items-center gap-1.5 px-3 py-2 bg-slate-50 border rounded-full shadow-sm transition-all cursor-pointer ${getPillClasses("low", {
+                                active: "border-slate-500 ring-2 ring-slate-300 scale-105 bg-slate-200",
+                                inactive: "border-slate-200 opacity-50",
+                                default: "border-slate-200 hover:scale-105 hover:bg-slate-100"
                             })}`}
                         >
-                            <span className="text-xs font-semibold text-green-700">📝 あると良い {lowCount}</span>
+                            <span className="text-xs font-medium text-slate-600">あると安心 {lowCount}</span>
                         </button>
                     )}
                 </div>

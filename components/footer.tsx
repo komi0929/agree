@@ -8,9 +8,8 @@ export function Footer() {
                 {/* Service Navigation (Primary) - C-7: Use noun form */}
                 <div className="flex flex-wrap justify-center gap-x-10 gap-y-4 mb-10">
                     <Link href="/generate" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-2">
-                        <span className="text-amber-500">✨</span>
                         契約書作成
-                        <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">β</span>
+                        <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">β</span>
                     </Link>
                     <Link href="/how-to-use" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">ガイド</Link>
                     <Link href="/check-policy" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">チェックポリシー</Link>

@@ -27,7 +27,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
         // Client-side size validation
         const MAX_FILE_SIZE = 4.5 * 1024 * 1024; // 4.5MB
         if (file.size > MAX_FILE_SIZE) {
-            setError("ファイルサイズが大きすぎます（最大4.5MB）。これより大きいファイルはチェックできません。");
+            setError("ファイルサイズが大きすぎます（最大4.5MB）。これより大きいファイルは確認できません。");
             trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "file_too_large", size: file.size });
             return;
         }
@@ -45,7 +45,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                 onAnalysisComplete(result.data, result.text);
             } else {
                 // A-3: More specific error messages
-                let errorMessage = result.message || "チェックに失敗しました";
+                let errorMessage = result.message || "確認に失敗しました";
                 if (errorMessage.includes("テキストが少な") || errorMessage.includes("text")) {
                     errorMessage = "このPDFはスキャン画像の可能性があります。テキストが埋め込まれたPDFをお使いください。";
                 } else if (errorMessage.includes("抽出")) {
@@ -89,7 +89,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
             if (result.success && result.data) {
                 onAnalysisComplete(result.data, result.text);
             } else {
-                const errorMessage = result.message || "チェックに失敗しました";
+                const errorMessage = result.message || "確認に失敗しました";
                 setError(errorMessage);
                 onAnalysisComplete(null);
             }
@@ -198,7 +198,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
 
                     {/* Privacy Notice */}
                     <div className="mt-6 flex items-center justify-center gap-4 text-[10px] text-slate-400">
-                        <span className="flex items-center gap-1">🔒 サーバー保存なし</span>
+                        <span className="flex items-center gap-1">サーバー保存なし</span>
                         <span>•</span>
                         <span>AI学習に使用しません</span>
                         <span>•</span>
@@ -228,9 +228,9 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                             {isUploading ? (
                                 <div className="flex items-center gap-2">
                                     <Loader2 className="h-3 w-3 animate-spin" />
-                                    <span className="text-xs">チェック中</span>
+                                    <span className="text-xs">確認中</span>
                                 </div>
-                            ) : "このPDFをチェック"}
+                            ) : "このPDFを確認してもらう"}
                         </Button>
                     </div>
                 </TabsContent>

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { UserContext, UserEntityType, CapitalRange, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
 import { ExtractionResult } from "@/lib/types/analysis";
-import { Building2, User, Users, HelpCircle, ArrowRight, Check, Zap } from "lucide-react";
+import { Building2, User, Users, HelpCircle, ArrowRight, Check, Briefcase } from "lucide-react";
 
 interface UnifiedContextFormProps {
     extractionData: ExtractionResult;
@@ -120,10 +120,10 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-                                    <Zap className="w-5 h-5 text-slate-600" />
+                                    <Briefcase className="w-5 h-5 text-slate-600" />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-slate-800">今すぐチェック！</p>
+                                    <p className="font-medium text-slate-800">すぐに見てもらう</p>
                                     <p className="text-xs text-slate-400">おまかせ設定でスタート</p>
                                 </div>
                             </div>
@@ -275,7 +275,7 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 >
                     {isComplete ? (
                         <>
-                            契約書をチェック
+                            契約書を確認してもらう
                             <ArrowRight className="w-4 h-4 ml-2" />
                         </>
                     ) : (

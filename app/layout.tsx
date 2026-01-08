@@ -13,16 +13,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "agree - 契約書リスク解析AI",
-  description: "契約書のリスクを静かにチェックするシンプルなAIツール。フリーランス・個人事業主のための無料契約書チェッカー。",
+  title: "agree - 契約書確認サポート",
+  description: "契約書の気になる点を確認してくれる、あなただけのマネージャー。フリーランス・個人事業主のための無料契約書サポート。",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",
     apple: "/logo.png",
   },
   openGraph: {
-    title: "agree - 契約書リスク解析AI",
-    description: "契約書のリスクを静かにチェックするシンプルなAIツール。フリーランス・個人事業主のための無料契約書チェッカー。",
+    title: "agree - 契約書確認サポート",
+    description: "契約書の気になる点を確認してくれる、あなただけのマネージャー。フリーランス・個人事業主のための無料契約書サポート。",
     type: "website",
     locale: "ja_JP",
     images: [
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "agree - 契約書リスク解析AI",
-    description: "契約書のリスクを静かにチェックするシンプルなAIツール",
+    title: "agree - 契約書確認サポート",
+    description: "契約書の気になる点を確認してくれる、あなただけのマネージャー",
     images: ["/logo.png"],
   },
   robots: {

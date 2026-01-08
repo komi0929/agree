@@ -59,7 +59,7 @@ export default function Home() {
   // A-1: Simplified flow - only 3 steps now: upload -> unified_context -> analyzing -> complete
   const [step, setStep] = useState<"upload" | "unified_context" | "analyzing" | "complete">("upload");
   // A-2: Progressive loading messages
-  const [loadingMessage, setLoadingMessage] = useState("契約書を読み込んでいます...");
+  const [loadingMessage, setLoadingMessage] = useState("契約書を拝見しています...");
 
   // Store the promise of the deep analysis so we can await it later
   const deepAnalysisPromiseRef = useRef<Promise<AnalysisState> | null>(null);
@@ -113,14 +113,14 @@ export default function Home() {
     trackEvent(ANALYTICS_EVENTS.ROLE_SELECTED, { role });
 
     setStep("analyzing");
-    setLoadingMessage("契約書を読み込んでいます...");
+    setLoadingMessage("契約書を拝見しています...");
 
     // Progressive loading messages
     const messages = [
-      "契約書を読んでいます...",
-      "確認していますね...",
+      "契約書を拝見しています...",
+      "内容を確認しています...",
       "気になる点がないか見ています...",
-      "改善のヒントを準備中..."
+      "ご報告の準備をしています..."
     ];
     let msgIndex = 0;
     const interval = setInterval(() => {
@@ -190,7 +190,7 @@ export default function Home() {
         } catch { }
       } else {
         trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "analysis_failed" });
-        alert("チェックできませんでした。もう一度お試しください。");
+        alert("確認できませんでした。もう一度お試しください。");
         setStep("upload");
       }
     } catch (e) {
@@ -346,7 +346,7 @@ export default function Home() {
             }}
             className="text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-full font-normal"
           >
-            新しくチェックする
+            別の契約書を確認する
           </Button>
         )}
       </header>

@@ -34,7 +34,7 @@ export function EngagementModal({ open, onClose }: EngagementModalProps) {
                                 お疲れ様でした！
                             </DialogTitle>
                             <DialogDescription className="text-center text-slate-600 leading-relaxed">
-                                契約書のチェック完了、おめでとうございます。<br />
+                                契約書の確認が完了しました。<br />
                                 agreeがあなたの安心に少しでも貢献できていれば嬉しいです。
                             </DialogDescription>
                         </DialogHeader>
@@ -68,7 +68,7 @@ export function EngagementModal({ open, onClose }: EngagementModalProps) {
                             {/* SNS Follow Section */}
                             <div className="text-center space-y-3">
                                 <p className="text-xs text-slate-400">
-                                    開発者のSNSをフォローして、最新情報をチェック
+                                    開発者のSNSをフォローして、最新情報を受け取る
                                 </p>
                                 <Button variant="outline" className="w-full h-10 rounded-full hover:bg-slate-50 border-slate-200">
                                     <svg viewBox="0 0 24 24" className="w-4 h-4 mr-2 text-slate-900" aria-hidden="true" fill="currentColor">

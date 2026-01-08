@@ -16,15 +16,15 @@ type MessageTone = "formal" | "neutral" | "casual";
 type MessagePurpose = "request" | "question" | "negotiate";
 
 const TONE_OPTIONS = [
-    { value: "formal" as const, label: "丁寧に", emoji: "🙏", description: "敬語で丁重に依頼" },
-    { value: "neutral" as const, label: "対等に", emoji: "🤝", description: "ビジネスライクに" },
-    { value: "casual" as const, label: "カジュアル", emoji: "💬", description: "フレンドリーに" },
+    { value: "formal" as const, label: "丁寧に", description: "敬語で丁重に依頼" },
+    { value: "neutral" as const, label: "対等に", description: "ビジネスライクに" },
+    { value: "casual" as const, label: "カジュアル", description: "フレンドリーに" },
 ];
 
 const PURPOSE_OPTIONS = [
-    { value: "request" as const, label: "修正をお願い", emoji: "✏️" },
-    { value: "question" as const, label: "質問する", emoji: "❓" },
-    { value: "negotiate" as const, label: "条件交渉", emoji: "🤝" },
+    { value: "request" as const, label: "修正をお願い" },
+    { value: "question" as const, label: "質問する" },
+    { value: "negotiate" as const, label: "条件交渉" },
 ];
 
 export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafterProps) {
@@ -137,11 +137,10 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
                             key={option.value}
                             onClick={() => { setTone(option.value); setIsEditing(false); }}
                             className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${tone === option.value
-                                    ? "bg-blue-50 border-blue-300 text-blue-700"
-                                    : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                                ? "bg-slate-100 border-slate-400 text-slate-800"
+                                : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
                                 }`}
                         >
-                            <span className="mr-1">{option.emoji}</span>
                             {option.label}
                         </button>
                     ))}
@@ -157,11 +156,10 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
                             key={option.value}
                             onClick={() => { setPurpose(option.value); setIsEditing(false); }}
                             className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${purpose === option.value
-                                    ? "bg-teal-50 border-teal-300 text-teal-700"
-                                    : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                                ? "bg-slate-100 border-slate-400 text-slate-800"
+                                : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
                                 }`}
                         >
-                            <span className="mr-1">{option.emoji}</span>
                             {option.label}
                         </button>
                     ))}

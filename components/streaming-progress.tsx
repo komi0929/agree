@@ -11,10 +11,10 @@ interface AnalysisStep {
 }
 
 const ANALYSIS_STEPS: AnalysisStep[] = [
-    { id: "connect", label: "接続中", description: "AIサーバーに接続" },
-    { id: "analyze", label: "解析中", description: "契約書の構造を分析" },
-    { id: "detect", label: "検出中", description: "リスクポイントを特定" },
-    { id: "suggest", label: "生成中", description: "修正案を作成" },
+    { id: "connect", label: "接続中", description: "サーバーに接続" },
+    { id: "analyze", label: "内容を確認中", description: "契約書の内容を確認" },
+    { id: "detect", label: "気になる点を整理中", description: "ポイントを特定" },
+    { id: "suggest", label: "ご報告を準備中", description: "まとめを作成" },
 ];
 
 interface StreamingProgressProps {
@@ -48,26 +48,26 @@ export function StreamingProgress({ state, progress, elapsedTime, rawContent }: 
     }
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
             {/* Header with timer */}
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-slate-800">AI解析中...</h3>
-                <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <div className="flex items-center justify-between mb-6">
+                <h3 className="text-base font-medium text-slate-700">確認しています...</h3>
+                <div className="flex items-center gap-1.5 text-xs text-slate-400">
                     <Clock className="w-3 h-3" />
                     {formatTime(elapsedTime)}
                 </div>
             </div>
 
             {/* Progress bar */}
-            <div className="h-2 bg-slate-100 rounded-full overflow-hidden mb-4">
+            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-6">
                 <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 ease-out"
+                    className="h-full bg-slate-600 transition-all duration-300 ease-out"
                     style={{ width: `${progress}%` }}
                 />
             </div>
 
             {/* Steps */}
-            <div className="space-y-2">
+            <div className="space-y-3">
                 {ANALYSIS_STEPS.map((step, index) => {
                     const isComplete = index < currentStep;
                     const isCurrent = index === currentStep;
@@ -77,9 +77,9 @@ export function StreamingProgress({ state, progress, elapsedTime, rawContent }: 
                         <div
                             key={step.id}
                             className={cn(
-                                "flex items-center gap-3 py-1.5 transition-all",
-                                isComplete && "text-green-600",
-                                isCurrent && "text-blue-600",
+                                "flex items-center gap-3 py-2 transition-all",
+                                isComplete && "text-slate-600",
+                                isCurrent && "text-slate-800",
                                 isPending && "text-slate-300"
                             )}
                         >
@@ -87,22 +87,17 @@ export function StreamingProgress({ state, progress, elapsedTime, rawContent }: 
                             <div className="w-5 h-5 flex items-center justify-center">
                                 {isComplete && <Check className="w-4 h-4" />}
                                 {isCurrent && <Loader2 className="w-4 h-4 animate-spin" />}
-                                {isPending && <div className="w-2 h-2 rounded-full bg-current" />}
+                                {isPending && <div className="w-1.5 h-1.5 rounded-full bg-current" />}
                             </div>
 
                             {/* Label */}
                             <div className="flex-1">
                                 <span className={cn(
-                                    "text-sm font-medium",
-                                    isCurrent && "animate-pulse"
+                                    "text-sm",
+                                    isCurrent && "font-medium"
                                 )}>
                                     {step.label}
                                 </span>
-                                {isCurrent && (
-                                    <span className="ml-2 text-xs text-slate-400">
-                                        {step.description}
-                                    </span>
-                                )}
                             </div>
                         </div>
                     );

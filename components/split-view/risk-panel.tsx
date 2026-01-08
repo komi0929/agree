@@ -93,39 +93,39 @@ export function RiskPanel({
         switch (riskLevel) {
             case "critical":
                 return {
-                    border: "border-l-purple-600",
-                    bg: "bg-purple-50/30",
-                    badge: "bg-purple-100 text-purple-700 border-purple-200",
-                    label: "🔥 ここは特に大事",
-                    labelShort: "特に大事",
-                    icon: <AlertOctagon className="w-4 h-4 text-purple-600" />,
+                    border: "border-l-slate-700",
+                    bg: "bg-slate-50",
+                    badge: "bg-slate-200 text-slate-700 border-slate-300",
+                    label: "ご確認ください",
+                    labelShort: "重要",
+                    icon: <AlertOctagon className="w-4 h-4 text-slate-700" />,
                 };
             case "high":
                 return {
-                    border: "border-l-red-500",
-                    bg: "bg-red-50/30",
-                    badge: "bg-red-100 text-red-700 border-red-200",
-                    label: "⚠️ 確認推奨",
+                    border: "border-l-slate-500",
+                    bg: "bg-slate-50/50",
+                    badge: "bg-slate-100 text-slate-600 border-slate-200",
+                    label: "確認をおすすめします",
                     labelShort: "確認推奨",
-                    icon: <AlertTriangle className="w-4 h-4 text-red-500" />,
+                    icon: <AlertTriangle className="w-4 h-4 text-slate-600" />,
                 };
             case "medium":
                 return {
-                    border: "border-l-yellow-500",
-                    bg: "bg-yellow-50/30",
-                    badge: "bg-yellow-100 text-yellow-700 border-yellow-200",
-                    label: "💡 ご参考",
-                    labelShort: "ご参考",
-                    icon: <AlertTriangle className="w-4 h-4 text-yellow-500" />,
+                    border: "border-l-slate-400",
+                    bg: "bg-white",
+                    badge: "bg-slate-100 text-slate-500 border-slate-200",
+                    label: "ご参考まで",
+                    labelShort: "参考",
+                    icon: <AlertTriangle className="w-4 h-4 text-slate-500" />,
                 };
             default:
                 return {
-                    border: "border-l-green-500",
-                    bg: "bg-green-50/30",
-                    badge: "bg-green-100 text-green-700 border-green-200",
-                    label: "📝 あると良い",
-                    labelShort: "あると良い",
-                    icon: <Check className="w-4 h-4 text-green-500" />,
+                    border: "border-l-slate-300",
+                    bg: "bg-white",
+                    badge: "bg-slate-50 text-slate-500 border-slate-200",
+                    label: "あると安心です",
+                    labelShort: "推奨",
+                    icon: <Check className="w-4 h-4 text-slate-500" />,
                 };
         }
     };
@@ -149,7 +149,7 @@ export function RiskPanel({
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-slate-200">
                 <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-slate-700">要確認</span>
+                    <span className="text-sm font-medium text-slate-700">確認事項</span>
                     <Badge variant="outline" className="rounded-full text-[10px] px-2">
                         {risks.filter(r => r.risk_level !== "low").length}件
                     </Badge>
@@ -157,13 +157,13 @@ export function RiskPanel({
                 {/* Legend */}
                 <div className="flex items-center gap-3 text-[10px] text-slate-400">
                     <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-purple-600" />特に大事
+                        <span className="w-2 h-2 rounded-full bg-slate-700" />重要
                     </span>
                     <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-red-500" />確認推奨
+                        <span className="w-2 h-2 rounded-full bg-slate-500" />確認推奨
                     </span>
                     <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-yellow-500" />ご参考
+                        <span className="w-2 h-2 rounded-full bg-slate-400" />参考
                     </span>
                 </div>
             </div>
@@ -279,11 +279,11 @@ export function RiskPanel({
                                     {/* Section: 具体的にどうなる？ */}
                                     {risk.practical_impact && (
                                         <div className="space-y-2">
-                                            <div className="flex items-center gap-2 text-xs font-semibold text-rose-700">
+                                            <div className="flex items-center gap-2 text-xs font-semibold text-slate-700">
                                                 <AlertTriangle className="w-4 h-4" />
                                                 具体的にどうなる？
                                             </div>
-                                            <div className="bg-rose-50 rounded-lg p-3 text-xs text-rose-900 leading-relaxed border border-rose-100">
+                                            <div className="bg-slate-100 rounded-lg p-3 text-xs text-slate-700 leading-relaxed border border-slate-200">
                                                 {risk.practical_impact}
                                             </div>
                                         </div>
@@ -292,15 +292,15 @@ export function RiskPanel({
                                     {/* Section: おすすめの対処法 */}
                                     {canAdopt && (
                                         <div className="space-y-2">
-                                            <div className="flex items-center gap-2 text-xs font-semibold text-teal-700">
+                                            <div className="flex items-center gap-2 text-xs font-semibold text-slate-700">
                                                 <Lightbulb className="w-4 h-4" />
                                                 おすすめの対処法
                                             </div>
-                                            <div className="bg-teal-50 rounded-lg p-3 space-y-2">
-                                                <p className="text-xs text-teal-800">{getWhatToDo(risk)}</p>
-                                                <div className="bg-white rounded-lg p-3 border border-teal-100">
-                                                    <p className="text-xs font-medium text-teal-900 mb-1">💡 修正案</p>
-                                                    <p className="text-xs text-teal-800 leading-relaxed">
+                                            <div className="bg-slate-50 rounded-lg p-3 space-y-2">
+                                                <p className="text-xs text-slate-700">{getWhatToDo(risk)}</p>
+                                                <div className="bg-white rounded-lg p-3 border border-slate-200">
+                                                    <p className="text-xs font-medium text-slate-800 mb-1">修正案</p>
+                                                    <p className="text-xs text-slate-700 leading-relaxed">
                                                         {risk.suggestion.revised_text}
                                                     </p>
                                                 </div>
@@ -312,8 +312,8 @@ export function RiskPanel({
                                                     className={`
                                                         w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium transition-all
                                                         ${isSelected
-                                                            ? "bg-blue-600 text-white"
-                                                            : "bg-teal-600 text-white hover:bg-teal-700"
+                                                            ? "bg-slate-800 text-white"
+                                                            : "bg-slate-700 text-white hover:bg-slate-600"
                                                         }
                                                     `}
                                                 >
@@ -354,13 +354,13 @@ export function RiskPanel({
                                     {/* Contract Link - hide for low risk (missing clauses don't exist in text) */}
                                     {!isLowRisk && (
                                         <button
-                                            className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
+                                            className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 onScrollToContract(index);
                                             }}
                                         >
-                                            📍 契約書で確認
+                                            該当箇所を見る
                                         </button>
                                     )}
                                 </div>

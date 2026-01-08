@@ -9,7 +9,7 @@ export default function HowToUsePage() {
             <main className="flex-1 max-w-2xl mx-auto w-full px-6 pt-24 pb-20">
                 <PageHeader
                     title="agreeの使い方"
-                    description="3つのステップで、契約書のリスクをチェックできます。"
+                    description="3つのステップで、契約書の気になる点を確認できます。"
                 />
 
                 <div className="space-y-14">
