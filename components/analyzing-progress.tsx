@@ -12,10 +12,10 @@ interface AnalysisStep {
 }
 
 const ANALYSIS_STEPS: AnalysisStep[] = [
-    { id: "read", label: "契約書を拝見しています", description: "内容を確認中", duration: 2000 },
-    { id: "analyze", label: "内容を確認しています", description: "詳細を確認中", duration: 4000 },
-    { id: "detect", label: "気になる点を整理しています", description: "ポイントを整理中", duration: 5000 },
-    { id: "suggest", label: "ご報告の準備をしています", description: "まとめ中", duration: 3000 },
+    { id: "read", label: "契約書を解析しています", description: "データの読み込み中", duration: 2000 },
+    { id: "analyze", label: "条項を精査しています", description: "リーガルチェック実行中", duration: 4000 },
+    { id: "detect", label: "リスクポイントを整理しています", description: "懸念事項を特定中", duration: 5000 },
+    { id: "suggest", label: "診断レポートを生成しています", description: "アドバイスを作成中", duration: 3000 },
 ];
 
 interface AnalyzingProgressProps {

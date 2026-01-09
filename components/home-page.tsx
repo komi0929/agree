@@ -59,7 +59,7 @@ export function HomePage() {
     // A-1: Simplified flow - only 3 steps now: upload -> unified_context -> analyzing -> complete
     const [step, setStep] = useState<"upload" | "unified_context" | "analyzing" | "complete">("upload");
     // A-2: Progressive loading messages
-    const [loadingMessage, setLoadingMessage] = useState("契約書を拝見しています...");
+    const [loadingMessage, setLoadingMessage] = useState("契約書を解析しています...");
 
     // Store the promise of the deep analysis so we can await it later
     const deepAnalysisPromiseRef = useRef<Promise<AnalysisState> | null>(null);
@@ -117,10 +117,10 @@ export function HomePage() {
 
         // Progressive loading messages
         const messages = [
-            "契約書を拝見しています...",
-            "内容を確認しています...",
-            "気になる点がないか見ています...",
-            "ご報告の準備をしています..."
+            "契約書を解析しています...",
+            "条項を精査しています...",
+            "リスクポイントを整理しています...",
+            "診断レポートを生成しています..."
         ];
         let msgIndex = 0;
         const interval = setInterval(() => {
@@ -229,17 +229,16 @@ export function HomePage() {
                         <SignatureLogo className="w-64 h-32 text-black" />
                     </div>
 
-                    {/* Quiet Introduction */}
+                    {/* Main Copy */}
                     {!hasStarted ? (
                         <div className="text-center space-y-12 animate-fade-in-delayed">
-                            <div className="space-y-8">
-                                <p className="text-lg leading-loose max-w-lg mx-auto font-medium text-black text-balance tracking-wide">
-                                    契約書、ちょっと不安じゃないですか？<br />
-                                    難しいことは、AIにおまかせ。
+                            <div className="space-y-6">
+                                <p className="text-xl leading-loose max-w-lg mx-auto font-semibold text-black text-balance tracking-tight">
+                                    その契約書、不安はありませんか？
                                 </p>
-                                <p className="text-lg leading-loose max-w-lg mx-auto font-medium text-black text-balance tracking-wide">
-                                    登録も通知もいりません。<br />
-                                    契約書をアップして、ちょっと待つだけ。
+                                <p className="text-slate-500 text-sm leading-relaxed max-w-md mx-auto font-medium">
+                                    AIがあなたの立場からリスクを解析、修正案をご提案。<br />
+                                    登録不要、最短15秒で診断が完了します。
                                 </p>
                             </div>
 
@@ -252,15 +251,15 @@ export function HomePage() {
                                     }}
                                     className="relative rounded-full px-12 py-8 bg-slate-900 border border-slate-900 text-white hover:bg-slate-800 shadow-xl hover:shadow-2xl transition-all duration-300 text-lg font-medium tracking-wide overflow-hidden cursor-pointer"
                                 >
-                                    <span className="relative z-10">さっそく見てもらう</span>
+                                    <span className="relative z-10">今すぐ診断を始める</span>
                                     <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent z-0" />
                                 </Button>
                             </div>
 
                             {/* Link to why we made this */}
-                            <div className="pt-8">
+                            <div className="pt-4">
                                 <Link href="/how-to-use" className="inline-block text-sm text-slate-400 hover:text-slate-600 border-b border-dashed border-slate-300 pb-0.5 transition-colors">
-                                    agreeについて
+                                    agreeの使い方を確認する
                                 </Link>
                             </div>
                         </div>

@@ -123,8 +123,8 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                                     <Briefcase className="w-5 h-5 text-slate-600" />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-slate-800">すぐに見てもらう</p>
-                                    <p className="text-xs text-slate-400">おまかせ設定でスタート</p>
+                                    <p className="font-medium text-slate-800">クイック診断を開始</p>
+                                    <p className="text-xs text-slate-400">標準設定で今すぐ解析する</p>
                                 </div>
                             </div>
                             <ArrowRight className="w-5 h-5 text-slate-400 group-hover:translate-x-1 transition-transform" />
@@ -275,7 +275,7 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 >
                     {isComplete ? (
                         <>
-                            契約書を確認してもらう
+                            契約書の解析を開始する
                             <ArrowRight className="w-4 h-4 ml-2" />
                         </>
                     ) : (
