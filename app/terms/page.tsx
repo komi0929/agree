@@ -7,7 +7,7 @@ export default function TermsPage() {
             <main className="flex-1 max-w-2xl mx-auto w-full px-6 pt-24 pb-20">
                 <PageHeader
                     title="利用規約"
-                    description="最終更新日: 2025年1月1日"
+                    description="最終更新日: 2026年1月9日"
                 />
 
                 <div className="space-y-12">
