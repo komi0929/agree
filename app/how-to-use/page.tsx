@@ -9,7 +9,7 @@ export default function HowToUsePage() {
             <main className="flex-1 max-w-2xl mx-auto w-full px-6 pt-24 pb-20">
                 <PageHeader
                     title="agreeの使い方"
-                    description="3つのステップで、契約書の気になる点を確認できます。"
+                    description="たった3つのステップで、契約書のリスクを素早く診断します。"
                 />
 
                 <div className="space-y-14">
@@ -19,9 +19,9 @@ export default function HowToUsePage() {
                             <UploadCloud className="w-4 h-4 text-slate-400" />
                         </div>
                         <div className="space-y-2 pt-1">
-                            <h2 className="text-base font-medium text-slate-900">Step 1. 契約書をお預けください</h2>
+                            <h2 className="text-base font-medium text-slate-900">Step 1. 契約書をアップロード</h2>
                             <p className="text-sm text-slate-500 leading-relaxed font-light">
-                                トップページから、確認したい契約書のPDFファイルをドラッグ&ドロップしてください。URLからの確認も可能です。
+                                診断したい契約書のPDFファイルをドラッグ＆ドロップ、またはURLの入力やテキストの貼り付けを行ってください。
                             </p>
                         </div>
                     </div>
@@ -32,9 +32,9 @@ export default function HowToUsePage() {
                             <Search className="w-4 h-4 text-slate-400" />
                         </div>
                         <div className="space-y-2 pt-1">
-                            <h2 className="text-base font-medium text-slate-900">Step 2. 内容を確認します</h2>
+                            <h2 className="text-base font-medium text-slate-900">Step 2. AIによるリスク解析</h2>
                             <p className="text-sm text-slate-500 leading-relaxed font-light">
-                                契約書の内容を読み込み、あなたにとって不利な条項やリスクがないかを確認いたします。15秒ほどお待ちください。
+                                AIが条項を一文ずつ精査し、あなたにとって不利な条件や、本来あるべき重要項目の欠落がないかを解析します。
                             </p>
                         </div>
                     </div>
@@ -45,9 +45,9 @@ export default function HowToUsePage() {
                             <ShieldCheck className="w-4 h-4 text-slate-400" />
                         </div>
                         <div className="space-y-2 pt-1">
-                            <h2 className="text-base font-medium text-slate-900">Step 3. 結果と、お伝えする言葉をご提案</h2>
+                            <h2 className="text-base font-medium text-slate-900">Step 3. 診断結果と修正案を確認</h2>
                             <p className="text-sm text-slate-500 leading-relaxed font-light">
-                                確認結果をお見せします。気になる箇所には「修正のご提案」や、先方へお伝えするための「メッセージ案」もご用意いたします。これらを参考に、安心して契約をお進めください。
+                                解析結果に基づき、リスクの解説、具体的な「修正案」、および先方へ伝えるための「交渉メッセージ案」を提案します。
                             </p>
                         </div>
                     </div>
@@ -56,9 +56,9 @@ export default function HowToUsePage() {
                 <div className="mt-20 text-center">
                     <Link
                         href="/"
-                        className="inline-flex items-center justify-center rounded-full px-8 py-4 bg-white border border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-300 shadow-sm transition-all text-sm font-normal"
+                        className="inline-flex items-center justify-center rounded-full px-8 py-4 bg-slate-900 text-white hover:bg-slate-800 shadow-lg transition-all text-sm font-medium"
                     >
-                        さっそく使ってみる
+                        今すぐ診断を始める
                     </Link>
                 </div>
             </main>
