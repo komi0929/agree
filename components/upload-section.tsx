@@ -19,6 +19,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
     const [isUploading, setIsUploading] = useState(false);
     const [dragActive, setDragActive] = useState(false);
     const [url, setUrl] = useState("");
+    const [textInput, setTextInput] = useState("");
     const [error, setError] = useState<string | null>(null);
 
     async function handleFileSelect(file: File) {
@@ -110,6 +111,44 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
         }
     }
 
+    async function handleTextAnalysis() {
+        if (!textInput.trim()) return;
+
+        setError(null);
+        setIsUploading(true);
+        onAnalysisStart();
+        trackEvent(ANALYTICS_EVENTS.UPLOAD_STARTED, { type: "text" });
+
+        const formData = new FormData();
+        formData.append("text", textInput);
+
+        try {
+            const result = await extractPartiesAction(null, formData);
+            if (result.success && result.data) {
+                onAnalysisComplete(result.data, result.text);
+            } else {
+                const errorMessage = result.message || "確認に失敗しました";
+                setError(errorMessage);
+                onAnalysisComplete(null);
+            }
+        } catch (e: unknown) {
+            console.error(e);
+            let errorMessage = "予期しないエラーが発生しました。";
+            if (e instanceof Error) {
+                if (e.message.includes("unexpected response")) {
+                    errorMessage = "サーバーとの通信でエラーが発生しました。";
+                } else {
+                    errorMessage = e.message;
+                }
+            }
+            setError(errorMessage);
+            trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "text_upload_error", message: errorMessage });
+            onAnalysisComplete(null);
+        } finally {
+            setIsUploading(false);
+        }
+    }
+
     const handleDrag = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -155,9 +194,10 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
             )}
 
             <Tabs defaultValue="upload" className="w-full" onValueChange={() => setError(null)}>
-                <TabsList className="grid w-full max-w-[200px] grid-cols-2 mb-8 bg-slate-100/50 p-1 rounded-full mx-auto">
+                <TabsList className="grid w-full max-w-[300px] grid-cols-3 mb-8 bg-slate-100/50 p-1 rounded-full mx-auto">
                     <TabsTrigger value="upload" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300">ファイル</TabsTrigger>
                     <TabsTrigger value="url" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300">URL</TabsTrigger>
+                    <TabsTrigger value="text" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300">テキスト</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="upload">
@@ -221,9 +261,13 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                         </div>
                         {/* B-2: Specific button label */}
                         <Button
+                            type="button"
                             className="w-full h-10 rounded-full bg-slate-900 hover:bg-slate-800 text-white shadow-none transition-all font-normal text-sm"
                             disabled={isUploading || !url}
-                            onClick={handleUrlAnalysis}
+                            onClick={async (e) => {
+                                e.preventDefault();
+                                await handleUrlAnalysis();
+                            }}
                         >
                             {isUploading ? (
                                 <div className="flex items-center gap-2">
@@ -231,6 +275,39 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                                     <span className="text-xs">確認中</span>
                                 </div>
                             ) : "このPDFを確認してもらう"}
+                        </Button>
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="text">
+                    <div className="space-y-6 max-w-lg mx-auto pt-4">
+                        <div className="space-y-2">
+                            <p className="text-xs text-slate-500 text-center">契約書テキストを直接貼り付け</p>
+                            <textarea
+                                placeholder="ここに契約書の本文を貼り付けてください..."
+                                value={textInput}
+                                onChange={(e) => setTextInput(e.target.value)}
+                                disabled={isUploading}
+                                className="w-full h-48 p-4 rounded-xl border-slate-200 focus:ring-0 focus:border-slate-400 bg-slate-50/50 font-light placeholder:text-slate-300 resize-none text-sm"
+                            />
+                        </div>
+                        <Button
+                            type="button"
+                            className="w-full h-10 rounded-full bg-slate-900 hover:bg-slate-800 text-white shadow-none transition-all font-normal text-sm"
+                            disabled={isUploading || !textInput.trim()}
+                            onClick={async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log("Text analysis started via button click");
+                                await handleTextAnalysis();
+                            }}
+                        >
+                            {isUploading ? (
+                                <div className="flex items-center gap-2">
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                    <span className="text-xs">確認中</span>
+                                </div>
+                            ) : "このテキストを確認してもらう"}
                         </Button>
                     </div>
                 </TabsContent>
