@@ -3,6 +3,10 @@ import { z } from "zod";
 import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
 import { determineApplicableLaws, ApplicableLaws } from "@/lib/legal/law-applicability";
 import { ClauseTag, ViolatedLaw } from "@/lib/types/clause-tags";
+import { EnhancedAnalysisResult, AnalysisResult } from "@/lib/types/analysis";
+
+// Re-export for backward compatibility
+export type { EnhancedAnalysisResult, AnalysisResult };
 
 // 遅延初期化でOpenAIクライアントを作成（サーバーサイドでのみ使用される）
 let _openai: OpenAI | null = null;
@@ -82,11 +86,6 @@ const EnhancedAnalysisSchema = z.object({
     // 重要な欠落項目
     missing_clauses: z.array(z.string()),
 });
-
-export type EnhancedAnalysisResult = z.infer<typeof EnhancedAnalysisSchema>;
-
-// 後方互換性のため
-export type AnalysisResult = EnhancedAnalysisResult;
 
 // ============================================
 // System Prompts
@@ -240,6 +239,8 @@ export async function extractContractParties(text: string): Promise<ExtractionRe
     try {
         const completion = await getOpenAIClient().chat.completions.create({
             model: "gpt-4o-mini",
+            temperature: 0,  // Deterministic output
+            seed: 42,        // Fixed seed for reproducibility
             messages: [
                 {
                     role: "system",
@@ -318,6 +319,8 @@ export async function analyzeContractText(
 
         const completion = await getOpenAIClient().chat.completions.create({
             model: "gpt-4o",
+            temperature: 0,  // Deterministic output
+            seed: 42,        // Fixed seed for reproducibility
             messages: [
                 {
                     role: "system",

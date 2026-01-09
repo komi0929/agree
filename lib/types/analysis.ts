@@ -49,6 +49,18 @@ export type EnhancedAnalysisResult = {
     risks: EnhancedRisk[];
     contract_classification: "ukeoi" | "jun_inin_hourly" | "jun_inin_result" | "mixed" | "unknown";
     missing_clauses: string[];
+    // 決定論的スコア（100%再現性）
+    deterministicScore?: {
+        score: number;
+        grade: "A" | "B" | "C" | "D" | "F";
+        explanation: string;
+        breakdown: {
+            critical: number;
+            high: number;
+            medium: number;
+            low: number;
+        };
+    };
 };
 
 // Backward compatibility

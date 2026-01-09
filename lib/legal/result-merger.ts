@@ -8,6 +8,7 @@
 import { RuleBasedRisk, RuleBasedCheckResult } from "@/lib/rules/rule-checker";
 import { EnhancedAnalysisResult } from "@/lib/ai-service";
 import { ViolatedLaw, VIOLATED_LAW_EXPLANATIONS, ClauseTag } from "@/lib/types/clause-tags";
+import { calculateDeterministicScore, DeterministicScore } from "@/lib/rules/deterministic-scorer";
 
 type RiskLevel = "critical" | "high" | "medium" | "low";
 
@@ -51,6 +52,9 @@ export interface MergedAnalysisResult {
         critical_count: number;
         high_count: number;
     };
+
+    // 決定論的スコア（100%再現性）
+    deterministicScore: DeterministicScore;
 }
 
 /**
@@ -277,6 +281,9 @@ export function mergeAnalysisResults(
     ];
     const uniqueMissingClauses = [...new Set(missingClauses)];
 
+    // 決定論的スコアを計算（ルールベースのみ - 100%再現性）
+    const deterministicScore = calculateDeterministicScore(ruleResult);
+
     return {
         summary: llmResult.summary,
         risks: mergedRisks,
@@ -289,5 +296,6 @@ export function mergeAnalysisResults(
             critical_count: mergedRisks.filter(r => r.risk_level === "critical").length,
             high_count: mergedRisks.filter(r => r.risk_level === "high").length,
         },
+        deterministicScore,
     };
 }

@@ -221,6 +221,7 @@ export async function analyzeDeepAction(text: string, userContext?: UserContext)
         const mergedResult = mergeAnalysisResults(ruleResult, llmResult);
 
         // EnhancedAnalysisResult形式に変換して返す
+        // [精度向上ログ: 2026-01-09] deterministicScore追加で100%再現性を実現
         const result: EnhancedAnalysisResult = {
             summary: mergedResult.summary,
             risks: mergedResult.risks.map(r => ({
@@ -234,6 +235,7 @@ export async function analyzeDeepAction(text: string, userContext?: UserContext)
             })),
             contract_classification: mergedResult.contract_classification,
             missing_clauses: mergedResult.missing_clauses,
+            deterministicScore: mergedResult.deterministicScore,
         };
 
         return { success: true, data: result };
