@@ -20,7 +20,8 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
     const lowCount = data.risks.filter(r => r.risk_level === "low").length;
 
     // Calculate simple score (100 - weighted deductions)
-    const score = Math.max(0, 100 - (criticalCount * 25) - (highCount * 15) - (mediumCount * 5) - (lowCount * 2));
+    // Adjusted weights to avoid 0 score too easily (2025-01-09)
+    const score = Math.max(0, 100 - (criticalCount * 20) - (highCount * 10) - (mediumCount * 5) - (lowCount * 1));
 
     // Professional message based on score
     const getScoreMessage = () => {

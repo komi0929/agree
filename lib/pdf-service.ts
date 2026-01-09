@@ -66,6 +66,10 @@ export async function extractTextFromPdf(buffer: Buffer): Promise<string> {
                 // Clean up pdf2json specific page break artifacts
                 text = text.replace(/[-]+Page \(\d+\) Break[-]+/g, '\n\n');
 
+                // Fix Japanese spacing issue: remove spaces between non-ASCII characters
+                // PDF extraction often adds spaces between Japanese characters based on positioning
+                text = text.replace(/([^\x01-\x7E])\s+([^\x01-\x7E])/g, '$1$2');
+
                 // Final validation
                 if (text.trim().length > 0) {
                     console.log(`[pdf2json] Extraction success. Length: ${text.length}`);

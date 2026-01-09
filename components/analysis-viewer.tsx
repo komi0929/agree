@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 import { SummaryHeader, RiskLevelFilter } from "@/components/split-view/summary-header";
@@ -74,7 +74,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
             // Collect all instructions
             const instructions = selectedRiskIndices
                 .map(index => {
-                    const risk = data.risks[index];
+                    const risk = risks[index];
                     return `- ${risk.section_title}: ${risk.suggestion.revised_text}`;
                 })
                 .join("\n");
@@ -130,14 +130,26 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
         setSelectedRiskIndices([]);
     };
 
+    // Deduplicate risks proactively (Phase 3 fix)
+    const risks = useMemo(() => {
+        const seen = new Set();
+        return data.risks.filter(r => {
+            // Create a unique key for the risk
+            const key = `${r.section_title}|${r.explanation}|${r.original_text}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }, [data.risks]);
+
     // Derived values
-    const selectedRisks = selectedRiskIndices.map(i => data.risks[i]);
+    const selectedRisks = selectedRiskIndices.map(i => risks[i]);
 
     return (
         <div className="h-screen w-full flex flex-col font-sans bg-slate-100">
             {/* Summary Header */}
             <SummaryHeader
-                data={data}
+                data={{ ...data, risks }}
                 contractType={contractType}
                 activeFilter={riskFilter}
                 onFilterChange={setRiskFilter}
@@ -153,7 +165,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                     {viewMode === "contract" ? (
                         <ContractViewer
                             text={text}
-                            risks={data.risks}
+                            risks={risks}
                             highlightedRiskIndex={highlightedRiskIndex}
                             onHighlightClick={handleHighlightClick}
                         />
@@ -174,7 +186,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                 </span>
                             </div>
                             <MessageCrafter
-                                risk={selectedRiskIndex !== null ? data.risks[selectedRiskIndex] : null}
+                                risk={selectedRiskIndex !== null ? risks[selectedRiskIndex] : null}
                                 selectedRisks={selectedRisks.length > 0 ? selectedRisks : undefined}
                                 onFinish={handleFinish}
                             />
@@ -185,7 +197,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                 {/* Right Pane */}
                 <div className="w-full md:w-1/2 h-full flex flex-col bg-slate-50 overflow-hidden relative">
                     <RiskPanel
-                        risks={data.risks}
+                        risks={risks}
                         highlightedRiskIndex={highlightedRiskIndex}
                         selectedRiskIndices={selectedRiskIndices}
                         activeFilter={riskFilter}

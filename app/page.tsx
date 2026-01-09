@@ -358,11 +358,39 @@ export default function Home() {
           </div>
         ) : (
           <div className="py-20 flex flex-col items-center justify-center text-center">
-            <Loader2 className="w-8 h-8 animate-spin text-slate-300 mb-4" />
-            <p className="text-slate-400">結果を読み込んでいます...</p>
+              // Fallback loader if something goes wrong
+            <>
+              <Loader2 className="w-8 h-8 animate-spin text-slate-300 mb-4" />
+              <p className="text-slate-400">結果を読み込んでいます...</p>
+            </>
           </div>
         )}
       </div>
+
+      {/* DEBUG: Quick Load Button for UI Verification */}
+      {process.env.NODE_ENV === "development" && !analysisData && step === "upload" && (
+        <div className="fixed bottom-4 left-4 z-50 opacity-50 hover:opacity-100 transition-opacity">
+          <Button
+            variant="outline"
+            size="sm"
+            className="bg-yellow-50 border-yellow-200 text-yellow-700 text-xs"
+            onClick={async () => {
+              const { SAMPLE_ANALYSIS_RESULT, SAMPLE_CONTRACT_TEXT } = await import("@/lib/debug-data");
+              setContractText(SAMPLE_CONTRACT_TEXT);
+              setAnalysisData(SAMPLE_ANALYSIS_RESULT);
+              setExtractionData({
+                party_a: "株式会社グッドカンパニー",
+                party_b: "田中花子",
+                contract_type: "業務委託基本契約書",
+                estimated_contract_months: 12
+              });
+              setStep("complete");
+            }}
+          >
+            🐛 Debug: Load Sample
+          </Button>
+        </div>
+      )}
     </main>
   );
 }

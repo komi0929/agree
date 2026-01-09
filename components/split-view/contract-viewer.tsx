@@ -24,7 +24,7 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
     // Find all matches for all risks
     const matches = useMemo(() => {
         const foundMatches: Match[] = [];
-        const normalizeText = (str: string) => str.replace(/\s+/g, ' ').trim();
+        const normalizeText = (str: string) => str.replace(/\s+/g, '');
         const normalizedContractText = normalizeText(text);
 
         risks.forEach((risk, index) => {

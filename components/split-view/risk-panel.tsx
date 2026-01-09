@@ -61,10 +61,8 @@ export function RiskPanel({
                 return next;
             });
 
-            // Don't scroll if user is manually scrolling or if we just scrolled to this index
-            if (isUserScrolling.current) {
-                return;
-            }
+            // Removed isUserScrolling check to allow rapid navigation
+
             if (lastProgrammaticScrollIndex.current === highlightedRiskIndex) {
                 return;
             }
@@ -351,8 +349,8 @@ export function RiskPanel({
                                         </div>
                                     )}
 
-                                    {/* Contract Link - hide for low risk (missing clauses don't exist in text) */}
-                                    {!isLowRisk && (
+                                    {/* Contract Link - only show if there is text to highlight */}
+                                    {risk.original_text && risk.original_text.length > 0 && (
                                         <button
                                             className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors"
                                             onClick={(e) => {
