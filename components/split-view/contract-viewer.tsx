@@ -98,7 +98,7 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
         }
     }, [highlightedRiskIndex]);
 
-    // Color styling for highlights
+    // Color styling for highlights - リスクパネルと色を統一
     const getHighlightStyles = (riskIndex: number) => {
         const risk = risks[riskIndex];
         const isActive = highlightedRiskIndex === riskIndex;
@@ -108,18 +108,18 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
         if (isActive) {
             const activeBase = `${base} font-bold ring-4 ring-offset-1 shadow-lg z-10 scale-[1.03] animate-in fade-in zoom-in-95 duration-300`;
             switch (risk?.risk_level) {
-                case "critical": return `${activeBase} bg-purple-200 border-purple-500 text-purple-900 ring-purple-300`;
-                case "high": return `${activeBase} bg-red-200 border-red-500 text-red-900 ring-red-300`;
+                case "critical": return `${activeBase} bg-red-200 border-red-500 text-red-900 ring-red-300`;
+                case "high": return `${activeBase} bg-orange-200 border-orange-500 text-orange-900 ring-orange-300`;
                 case "medium": return `${activeBase} bg-yellow-200 border-yellow-500 text-yellow-900 ring-yellow-300`;
-                default: return `${activeBase} bg-green-200 border-green-500 text-green-900 ring-green-300`;
+                default: return `${activeBase} bg-blue-200 border-blue-500 text-blue-900 ring-blue-300`;
             }
         } else {
             const inactiveBase = `${base} opacity-70 hover:opacity-100 hover:scale-[1.01]`;
             switch (risk?.risk_level) {
-                case "critical": return `${inactiveBase} bg-purple-100/50 border-purple-200 text-purple-800`;
-                case "high": return `${inactiveBase} bg-red-100/50 border-red-200 text-red-800`;
+                case "critical": return `${inactiveBase} bg-red-100/50 border-red-200 text-red-800`;
+                case "high": return `${inactiveBase} bg-orange-100/50 border-orange-200 text-orange-800`;
                 case "medium": return `${inactiveBase} bg-yellow-100/50 border-yellow-200 text-yellow-800`;
-                default: return `${inactiveBase} bg-green-100/50 border-green-200 text-green-800`;
+                default: return `${inactiveBase} bg-blue-100/50 border-blue-200 text-blue-800`;
             }
         }
     };

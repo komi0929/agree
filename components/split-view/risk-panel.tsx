@@ -86,44 +86,52 @@ export function RiskPanel({
         });
     };
 
-    // Get risk styling based on level
+    // Get risk styling based on level - 色分けで視認性向上
     const getRiskStyling = (riskLevel: string) => {
         switch (riskLevel) {
             case "critical":
                 return {
-                    border: "border-l-slate-700",
-                    bg: "bg-slate-50",
-                    badge: "bg-slate-200 text-slate-700 border-slate-300",
+                    border: "border-l-red-500",
+                    bg: "bg-red-50",
+                    badge: "bg-red-100 text-red-700 border-red-200",
                     label: "ご確認ください",
                     labelShort: "重要",
-                    icon: <AlertOctagon className="w-4 h-4 text-slate-700" />,
+                    icon: <AlertOctagon className="w-4 h-4 text-red-600" />,
+                    highlightColor: "bg-red-100",
+                    dotColor: "bg-red-500",
                 };
             case "high":
                 return {
-                    border: "border-l-slate-500",
-                    bg: "bg-slate-50/50",
-                    badge: "bg-slate-100 text-slate-600 border-slate-200",
+                    border: "border-l-orange-400",
+                    bg: "bg-orange-50/50",
+                    badge: "bg-orange-100 text-orange-700 border-orange-200",
                     label: "確認をおすすめします",
                     labelShort: "確認推奨",
-                    icon: <AlertTriangle className="w-4 h-4 text-slate-600" />,
+                    icon: <AlertTriangle className="w-4 h-4 text-orange-500" />,
+                    highlightColor: "bg-orange-100",
+                    dotColor: "bg-orange-400",
                 };
             case "medium":
                 return {
-                    border: "border-l-slate-400",
-                    bg: "bg-white",
-                    badge: "bg-slate-100 text-slate-500 border-slate-200",
+                    border: "border-l-yellow-400",
+                    bg: "bg-yellow-50/30",
+                    badge: "bg-yellow-100 text-yellow-700 border-yellow-200",
                     label: "ご参考まで",
                     labelShort: "参考",
-                    icon: <AlertTriangle className="w-4 h-4 text-slate-500" />,
+                    icon: <AlertTriangle className="w-4 h-4 text-yellow-600" />,
+                    highlightColor: "bg-yellow-100",
+                    dotColor: "bg-yellow-400",
                 };
             default:
                 return {
-                    border: "border-l-slate-300",
-                    bg: "bg-white",
-                    badge: "bg-slate-50 text-slate-500 border-slate-200",
+                    border: "border-l-blue-300",
+                    bg: "bg-blue-50/30",
+                    badge: "bg-blue-100 text-blue-600 border-blue-200",
                     label: "あると安心です",
                     labelShort: "推奨",
-                    icon: <Check className="w-4 h-4 text-slate-500" />,
+                    icon: <Check className="w-4 h-4 text-blue-500" />,
+                    highlightColor: "bg-blue-100",
+                    dotColor: "bg-blue-400",
                 };
         }
     };
@@ -152,24 +160,27 @@ export function RiskPanel({
                         {risks.filter(r => r.risk_level !== "low").length}件
                     </Badge>
                 </div>
-                {/* Legend */}
-                <div className="flex items-center gap-3 text-[10px] text-slate-400">
+                {/* Legend - 色分けの凡例 */}
+                <div className="flex items-center gap-3 text-[10px] text-slate-500">
                     <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-slate-700" />重要
+                        <span className="w-2 h-2 rounded-full bg-red-500" />重要
                     </span>
                     <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-slate-500" />確認推奨
+                        <span className="w-2 h-2 rounded-full bg-orange-400" />確認推奨
                     </span>
                     <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-slate-400" />参考
+                        <span className="w-2 h-2 rounded-full bg-yellow-400" />参考
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-blue-400" />推奨
                     </span>
                 </div>
             </div>
 
-            {/* Cards */}
+            {/* Cards - pb-40で固定フッターとの重なりを防止 */}
             <div
                 ref={scrollContainerRef}
-                className="flex-1 overflow-auto p-4 space-y-4 pb-24"
+                className="flex-1 overflow-auto p-4 space-y-4 pb-40"
                 onScroll={handleScrollStart}
             >
                 {risks.map((risk, index) => {
