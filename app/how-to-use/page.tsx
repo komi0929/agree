@@ -53,7 +53,56 @@ export default function HowToUsePage() {
                     </div>
                 </div>
 
-                <div className="mt-20 text-center">
+                {/* Registration Benefits */}
+                <div className="mt-16 bg-slate-50 rounded-xl p-6">
+                    <h2 className="text-base font-medium text-slate-900 mb-4">
+                        無料登録するともっと便利に
+                    </h2>
+                    <ul className="space-y-3 text-sm text-slate-600">
+                        <li className="flex items-center gap-3">
+                            <span className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                                <svg className="w-3 h-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </span>
+                            <span>月10回までチェック可能（未登録は3回）</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                            <span className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                                <svg className="w-3 h-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </span>
+                            <span>修正依頼文をワンクリックでコピー</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                            <span className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                                <svg className="w-3 h-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </span>
+                            <span>チェック履歴を保存していつでも確認</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                            <span className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                                <svg className="w-3 h-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </span>
+                            <span>AIがあなたに有利な契約書を自動生成</span>
+                        </li>
+                    </ul>
+                    <div className="mt-6">
+                        <Link
+                            href="/pricing"
+                            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                            詳しい機能比較を見る →
+                        </Link>
+                    </div>
+                </div>
+
+                <div className="mt-12 text-center">
                     <Link
                         href="/"
                         className="inline-flex items-center justify-center rounded-full px-8 py-4 bg-slate-900 text-white hover:bg-slate-800 shadow-lg transition-all text-sm font-medium"
