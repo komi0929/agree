@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { UploadSection } from "@/components/upload-section";
 import { trackEvent, trackPageView, ANALYTICS_EVENTS } from "@/lib/analytics/client";
@@ -11,8 +11,13 @@ import { Footer } from "@/components/footer";
 import { SignatureLogo } from "@/components/signature-logo";
 import { analyzeDeepAction, AnalysisState } from "@/app/actions";
 import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
-import { Loader2 } from "lucide-react";
+import { Loader2, LogIn } from "lucide-react";
 import { AnalyzingProgress } from "@/components/analyzing-progress";
+import { useAuth } from "@/lib/auth/auth-context";
+import { AuthModal, UserMenu } from "@/components/auth/auth-modal";
+import { HistorySidebar, useAnalysisHistory } from "@/components/history-sidebar";
+import { UsageLimitBanner } from "@/components/ui/usage-limit-banner";
+import { RegistrationGateModal } from "@/components/auth/registration-gate-modal";
 
 import {
     SpeculativeAnalysisCache,
@@ -59,6 +64,15 @@ export function HomePage() {
     // A-2: Progressive loading messages
     const [loadingMessage, setLoadingMessage] = useState("契約書を解析しています...");
 
+    // Auth & History state
+    const { user, isLoading: authLoading } = useAuth();
+    const { saveToHistory, loadFromHistory } = useAnalysisHistory();
+    const [showAuthModal, setShowAuthModal] = useState(false);
+    const [showGateModal, setShowGateModal] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [currentHistoryId, setCurrentHistoryId] = useState<string | undefined>();
+    const [showSavePrompt, setShowSavePrompt] = useState(false);
+
     // Store the promise of the deep analysis so we can await it later
     const deepAnalysisPromiseRef = useRef<Promise<AnalysisState> | null>(null);
 
@@ -71,12 +85,21 @@ export function HomePage() {
         trackPageView();
     }, []);
 
+    // Auto-open sidebar for logged-in users
+    useEffect(() => {
+        if (user && !authLoading) {
+            setSidebarOpen(true);
+        }
+    }, [user, authLoading]);
+
     const handleAnalysisStart = () => {
         setLoading(true);
         setAnalysisData(null);
         setExtractionData(null);
         setContractText("");
         setStep("upload");
+        setCurrentHistoryId(undefined);
+        setShowSavePrompt(false);
         // Clear speculative cache
         speculativeCacheRef.current = null;
         speculativePromiseRef.current = null;
@@ -103,6 +126,18 @@ export function HomePage() {
             setStep("unified_context");
         }
     };
+
+    // Save analysis to history (for logged-in users)
+    const handleSaveToHistory = useCallback(async (data: EnhancedAnalysisResult, text: string, type?: string) => {
+        if (!user) return;
+
+        // Generate title from contract type or first 30 chars of text
+        const title = type || text.slice(0, 30).replace(/\s+/g, " ").trim() + "...";
+        const historyId = await saveToHistory(title, text, data, type);
+        if (historyId) {
+            setCurrentHistoryId(historyId);
+        }
+    }, [user, saveToHistory]);
 
     // A-1: Unified handler for context + role completion
     // SPECULATIVE EXECUTION: Use pre-computed results if available and context matches
@@ -148,6 +183,14 @@ export function HomePage() {
                 setAnalysisData(cache.analysisResult);
                 trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED, { speculative: true });
                 setStep("complete");
+
+                // Save to history for logged-in users
+                if (user) {
+                    await handleSaveToHistory(cache.analysisResult, contractText, extractionData?.contract_type);
+                } else {
+                    setShowSavePrompt(true);
+                }
+
                 try {
                     localStorage.setItem("agreeLastAnalysis", JSON.stringify({
                         timestamp: new Date().toISOString(),
@@ -179,6 +222,14 @@ export function HomePage() {
                 setAnalysisData(result.data);
                 trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED);
                 setStep("complete");
+
+                // Save to history for logged-in users
+                if (user) {
+                    await handleSaveToHistory(result.data, contractText, extractionData?.contract_type);
+                } else {
+                    setShowSavePrompt(true);
+                }
+
                 try {
                     localStorage.setItem("agreeLastAnalysis", JSON.stringify({
                         timestamp: new Date().toISOString(),
@@ -216,11 +267,66 @@ export function HomePage() {
         await handleUnifiedComplete(defaultContext, "party_b");
     };
 
+    // Load history item
+    const handleSelectHistory = async (historyId: string) => {
+        const data = await loadFromHistory(historyId);
+        if (data) {
+            setContractText(data.contractText);
+            setAnalysisData(data.analysisResult);
+            setExtractionData({
+                party_a: "",
+                party_b: "",
+                contract_type: data.contractType || "",
+                estimated_contract_months: 12
+            });
+            setCurrentHistoryId(historyId);
+            setStep("complete");
+            setSidebarOpen(false);
+        }
+    };
+
+    // New analysis from sidebar
+    const handleNewAnalysis = () => {
+        handleAnalysisStart();
+        setSidebarOpen(false);
+    };
+
     // Initially show the unified hero with upload section
     if (step === "upload" && !analysisData) {
         return (
             <div className="min-h-screen flex flex-col bg-white text-slate-600 font-sans selection:bg-slate-100 selection:text-slate-900">
-                <section className="flex-1 flex flex-col items-center pt-20 pb-16 px-6 max-w-2xl mx-auto w-full">
+                {/* History Sidebar for logged-in users */}
+                {user && (
+                    <HistorySidebar
+                        isOpen={sidebarOpen}
+                        onToggle={() => setSidebarOpen(!sidebarOpen)}
+                        onSelectHistory={handleSelectHistory}
+                        onNewAnalysis={handleNewAnalysis}
+                        currentHistoryId={currentHistoryId}
+                    />
+                )}
+
+                {/* Auth header */}
+                <header className="absolute top-0 right-0 p-4 z-40">
+                    {authLoading ? null : user ? (
+                        <UserMenu />
+                    ) : (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowAuthModal(true)}
+                            className="text-slate-500 hover:text-slate-900 rounded-full"
+                        >
+                            <LogIn className="w-4 h-4 mr-2" />
+                            ログイン
+                        </Button>
+                    )}
+                </header>
+
+                {/* Usage limit banner */}
+                <UsageLimitBanner type="check" onRegisterClick={() => setShowGateModal(true)} />
+
+                <section className={`flex-1 flex flex-col items-center pt-20 pb-16 px-6 max-w-2xl mx-auto w-full transition-all ${sidebarOpen ? "ml-72" : ""}`}>
                     {/* Minimalist Logo with Signature Animation */}
                     <div className="mb-10 flex flex-col items-center">
                         {/* Logo matches text color exactly (black) */}
@@ -255,6 +361,16 @@ export function HomePage() {
                 </section>
 
                 <Footer />
+
+                {/* Auth Modal */}
+                <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+
+                {/* Registration Gate Modal */}
+                <RegistrationGateModal
+                    open={showGateModal}
+                    onClose={() => setShowGateModal(false)}
+                    reason="limit"
+                />
             </div>
         );
     }
@@ -291,12 +407,24 @@ export function HomePage() {
     // Analysis Result View (Clean & Centered)
     return (
         <main className="min-h-screen flex flex-col bg-white">
+            {/* History Sidebar for logged-in users */}
+            {user && (
+                <HistorySidebar
+                    isOpen={sidebarOpen}
+                    onToggle={() => setSidebarOpen(!sidebarOpen)}
+                    onSelectHistory={handleSelectHistory}
+                    onNewAnalysis={handleNewAnalysis}
+                    currentHistoryId={currentHistoryId}
+                />
+            )}
+
             <header className="h-20 px-8 flex items-center justify-between max-w-5xl mx-auto w-full">
                 <div
                     className="flex items-center gap-3 cursor-pointer"
                     onClick={() => {
                         setAnalysisData(null);
                         setStep("upload");
+                        setCurrentHistoryId(undefined);
                         // Clear speculative cache
                         speculativeCacheRef.current = null;
                         speculativePromiseRef.current = null;
@@ -305,22 +433,38 @@ export function HomePage() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/logo.png" alt="agree" className="h-16 w-auto" />
                 </div>
-                {analysisData && (
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                            setAnalysisData(null);
-                            setStep("upload");
-                        }}
-                        className="text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-full font-normal"
-                    >
-                        別の契約書を確認する
-                    </Button>
-                )}
+                <div className="flex items-center gap-3">
+                    {analysisData && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                                setAnalysisData(null);
+                                setStep("upload");
+                                setCurrentHistoryId(undefined);
+                            }}
+                            className="text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-full font-normal"
+                        >
+                            別の契約書を確認する
+                        </Button>
+                    )}
+                    {authLoading ? null : user ? (
+                        <UserMenu />
+                    ) : (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowAuthModal(true)}
+                            className="text-slate-500 hover:text-slate-900 rounded-full"
+                        >
+                            <LogIn className="w-4 h-4 mr-2" />
+                            ログイン
+                        </Button>
+                    )}
+                </div>
             </header>
 
-            <div className="flex-1 max-w-5xl mx-auto w-full px-8 pb-20">
+            <div className={`flex-1 max-w-5xl mx-auto w-full px-8 pb-20 transition-all ${sidebarOpen ? "ml-72" : ""}`}>
                 {step === "complete" && analysisData ? (
                     <div className="h-[calc(100vh-5rem)] -mx-8 bg-slate-50">
                         <AnalysisViewer data={analysisData} text={contractText} contractType={extractionData?.contract_type} />
@@ -332,6 +476,36 @@ export function HomePage() {
                     </div>
                 )}
             </div>
+
+            {/* Save prompt for non-logged-in users */}
+            {showSavePrompt && !user && step === "complete" && (
+                <div className="fixed bottom-4 right-4 bg-white rounded-xl shadow-lg border border-slate-200 p-4 max-w-sm animate-in slide-in-from-bottom-4 z-50">
+                    <p className="text-sm text-slate-700 mb-3">
+                        診断結果を保存しませんか？<br />
+                        <span className="text-slate-500">登録すると履歴がいつでも確認できます。</span>
+                    </p>
+                    <div className="flex gap-2">
+                        <Button
+                            size="sm"
+                            onClick={() => setShowAuthModal(true)}
+                            className="flex-1 bg-slate-900 hover:bg-slate-800"
+                        >
+                            無料で登録
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setShowSavePrompt(false)}
+                            className="text-slate-500"
+                        >
+                            後で
+                        </Button>
+                    </div>
+                </div>
+            )}
+
+            {/* Auth Modal */}
+            <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
 
             {/* DEBUG: Quick Load Button for UI Verification */}
             {process.env.NODE_ENV === "development" && !analysisData && step === "upload" && (

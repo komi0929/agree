@@ -1,0 +1,166 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@/lib/auth/auth-context";
+import {
+    getAnonymousCheckCount,
+    getAnonymousRemainingChecks,
+    hasAnonymousReachedCheckLimit,
+    incrementAnonymousCheckCount,
+    ANONYMOUS_CHECK_LIMIT,
+    REGISTERED_CHECK_LIMIT,
+    REGISTERED_GENERATION_LIMIT,
+} from "@/lib/storage/anonymous-usage";
+
+export type UserPlan = "anonymous" | "registered";
+
+export interface UsageState {
+    plan: UserPlan;
+    isRegistered: boolean;
+    // Check limits
+    checkCount: number;
+    checkLimit: number;
+    checkRemaining: number;
+    hasReachedCheckLimit: boolean;
+    // Generation limits (registered only)
+    generationCount: number;
+    generationLimit: number;
+    generationRemaining: number;
+    hasReachedGenerationLimit: boolean;
+    // Loading
+    isLoading: boolean;
+}
+
+/**
+ * Hook for user tier and usage limit management
+ * 
+ * Limits:
+ * - Anonymous: 3 checks/month, no generation
+ * - Registered: 10 checks/month, 5 generations/month
+ */
+export function useUsageLimit(): UsageState & {
+    incrementCheckCount: () => Promise<boolean>;
+    incrementGenerationCount: () => Promise<boolean>;
+    refreshUsage: () => Promise<void>;
+} {
+    const { user, session } = useAuth();
+    const [checkCount, setCheckCount] = useState(0);
+    const [generationCount, setGenerationCount] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const isRegistered = !!user;
+    const plan: UserPlan = isRegistered ? "registered" : "anonymous";
+
+    // Limits based on plan
+    const checkLimit = isRegistered ? REGISTERED_CHECK_LIMIT : ANONYMOUS_CHECK_LIMIT;
+    const generationLimit = isRegistered ? REGISTERED_GENERATION_LIMIT : 0;
+
+    // Calculated values
+    const checkRemaining = Math.max(0, checkLimit - checkCount);
+    const hasReachedCheckLimit = checkCount >= checkLimit;
+    const generationRemaining = Math.max(0, generationLimit - generationCount);
+    const hasReachedGenerationLimit = generationCount >= generationLimit;
+
+    const loadUsage = useCallback(async () => {
+        setIsLoading(true);
+
+        if (!isRegistered) {
+            // Anonymous user - use localStorage
+            setCheckCount(getAnonymousCheckCount());
+            setGenerationCount(0); // Anonymous can't generate
+        } else if (session?.access_token) {
+            // Registered user - fetch from server
+            try {
+                const response = await fetch("/api/usage", {
+                    headers: {
+                        Authorization: `Bearer ${session.access_token}`,
+                    },
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setCheckCount(data.checkCount || 0);
+                    setGenerationCount(data.generationCount || 0);
+                }
+            } catch (error) {
+                console.error("Failed to fetch usage:", error);
+            }
+        }
+
+        setIsLoading(false);
+    }, [isRegistered, session?.access_token]);
+
+    useEffect(() => {
+        loadUsage();
+    }, [loadUsage]);
+
+    const incrementCheckCount = async (): Promise<boolean> => {
+        if (hasReachedCheckLimit) return false;
+
+        if (!isRegistered) {
+            const success = incrementAnonymousCheckCount();
+            if (success) {
+                setCheckCount(prev => prev + 1);
+            }
+            return success;
+        } else if (session?.access_token) {
+            try {
+                const response = await fetch("/api/usage/increment-check", {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${session.access_token}`,
+                    },
+                });
+                if (response.ok) {
+                    setCheckCount(prev => prev + 1);
+                    return true;
+                }
+            } catch (error) {
+                console.error("Failed to increment check count:", error);
+            }
+            return false;
+        }
+
+        return false;
+    };
+
+    const incrementGenerationCount = async (): Promise<boolean> => {
+        if (!isRegistered || hasReachedGenerationLimit) return false;
+
+        if (session?.access_token) {
+            try {
+                const response = await fetch("/api/usage/increment-generation", {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${session.access_token}`,
+                    },
+                });
+                if (response.ok) {
+                    setGenerationCount(prev => prev + 1);
+                    return true;
+                }
+            } catch (error) {
+                console.error("Failed to increment generation count:", error);
+            }
+            return false;
+        }
+
+        return false;
+    };
+
+    return {
+        plan,
+        isRegistered,
+        checkCount,
+        checkLimit,
+        checkRemaining,
+        hasReachedCheckLimit,
+        generationCount,
+        generationLimit,
+        generationRemaining,
+        hasReachedGenerationLimit,
+        isLoading,
+        incrementCheckCount,
+        incrementGenerationCount,
+        refreshUsage: loadUsage,
+    };
+}

@@ -5,6 +5,9 @@ import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Copy, Check, RefreshCw } from "lucide-react";
+import { useAuth } from "@/lib/auth/auth-context";
+import { RegistrationGateModal } from "@/components/auth/registration-gate-modal";
+
 
 interface MessageCrafterProps {
     risk: EnhancedAnalysisResult["risks"][0] | null;
@@ -28,12 +31,14 @@ const PURPOSE_OPTIONS = [
 ];
 
 export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafterProps) {
+    const { user } = useAuth();
     const [tone, setTone] = useState<MessageTone>("neutral");
     const [purpose, setPurpose] = useState<MessagePurpose>("request");
     const [copied, setCopied] = useState(false);
     const [showFinish, setShowFinish] = useState(false);
     const [generatedMessage, setGeneratedMessage] = useState("");
     const [isEditing, setIsEditing] = useState(false);
+    const [showGateModal, setShowGateModal] = useState(false);
 
     const isMultiple = selectedRisks && selectedRisks.length > 0;
 
@@ -153,6 +158,11 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
     if (!risk && !isMultiple) return <div className="p-8 text-center text-slate-400">項目を選択してください</div>;
 
     const handleCopy = () => {
+        // Gate: require registration to copy
+        if (!user) {
+            setShowGateModal(true);
+            return;
+        }
         navigator.clipboard.writeText(generatedMessage);
         setCopied(true);
         setShowFinish(true);
@@ -262,6 +272,21 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
                     </Button>
                 )}
             </div>
+
+            {/* Registration Gate Modal */}
+            <RegistrationGateModal
+                open={showGateModal}
+                onClose={() => setShowGateModal(false)}
+                reason="copy"
+                onSuccess={() => {
+                    setShowGateModal(false);
+                    // Auto-copy after successful registration
+                    navigator.clipboard.writeText(generatedMessage);
+                    setCopied(true);
+                    setShowFinish(true);
+                    setTimeout(() => setCopied(false), 2000);
+                }}
+            />
         </div>
     );
 }
