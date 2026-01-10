@@ -12,11 +12,15 @@ import {
     REGISTERED_GENERATION_LIMIT,
 } from "@/lib/storage/anonymous-usage";
 
-export type UserPlan = "anonymous" | "registered";
+// Admin emails with unlimited access (comma-separated in env var)
+const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
+
+export type UserPlan = "anonymous" | "registered" | "admin";
 
 export interface UsageState {
     plan: UserPlan;
     isRegistered: boolean;
+    isAdmin: boolean;
     // Check limits
     checkCount: number;
     checkLimit: number;
@@ -49,11 +53,12 @@ export function useUsageLimit(): UsageState & {
     const [isLoading, setIsLoading] = useState(true);
 
     const isRegistered = !!user;
-    const plan: UserPlan = isRegistered ? "registered" : "anonymous";
+    const isAdmin = user?.email ? ADMIN_EMAILS.includes(user.email.toLowerCase()) : false;
+    const plan: UserPlan = isAdmin ? "admin" : isRegistered ? "registered" : "anonymous";
 
-    // Limits based on plan
-    const checkLimit = isRegistered ? REGISTERED_CHECK_LIMIT : ANONYMOUS_CHECK_LIMIT;
-    const generationLimit = isRegistered ? REGISTERED_GENERATION_LIMIT : 0;
+    // Limits based on plan (admin = unlimited)
+    const checkLimit = isAdmin ? Infinity : isRegistered ? REGISTERED_CHECK_LIMIT : ANONYMOUS_CHECK_LIMIT;
+    const generationLimit = isAdmin ? Infinity : isRegistered ? REGISTERED_GENERATION_LIMIT : 0;
 
     // Calculated values
     const checkRemaining = Math.max(0, checkLimit - checkCount);
@@ -150,6 +155,7 @@ export function useUsageLimit(): UsageState & {
     return {
         plan,
         isRegistered,
+        isAdmin,
         checkCount,
         checkLimit,
         checkRemaining,
