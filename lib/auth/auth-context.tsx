@@ -85,10 +85,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return { error: new Error("Supabase not configured") };
         }
 
+        const redirectTo = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+
         const { error } = await client.auth.signInWithOtp({
             email,
             options: {
-                emailRedirectTo: `${window.location.origin}/`,
+                emailRedirectTo: `${redirectTo}/`,
             },
         });
         return { error: error as Error | null };
