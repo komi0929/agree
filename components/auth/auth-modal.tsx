@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth/auth-context";
 import { Button } from "@/components/ui/button";
-import { Mail, Loader2, CheckCircle, LogOut, User } from "lucide-react";
+import Link from "next/link";
+import { Mail, Loader2, CheckCircle, LogOut, User, Settings } from "lucide-react";
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -170,20 +171,30 @@ export function UserMenu() {
                         onClick={() => setIsOpen(false)}
                     />
                     <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50">
-                        <div className="px-4 py-2 border-b border-slate-100">
-                            <p className="text-xs text-slate-400">ログイン中</p>
-                            <p className="text-sm text-slate-700 truncate">{user.email}</p>
+                        <div className="px-4 py-3 border-b border-slate-100">
+                            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Account</p>
+                            <p className="text-sm font-medium text-slate-700 truncate">{user.email}</p>
                         </div>
-                        <button
-                            onClick={() => {
-                                signOut();
-                                setIsOpen(false);
-                            }}
-                            className="w-full px-4 py-2 text-left text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-2"
-                        >
-                            <LogOut className="w-4 h-4" />
-                            ログアウト
-                        </button>
+                        <div className="py-1">
+                            <Link
+                                href="/account"
+                                onClick={() => setIsOpen(false)}
+                                className="w-full px-4 py-2.5 text-left text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-2.5 transition-colors"
+                            >
+                                <Settings className="w-4 h-4 text-slate-400" />
+                                アカウント設定
+                            </Link>
+                            <button
+                                onClick={() => {
+                                    signOut();
+                                    setIsOpen(false);
+                                }}
+                                className="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2.5 transition-colors"
+                            >
+                                <LogOut className="w-4 h-4 text-red-400" />
+                                ログアウト
+                            </button>
+                        </div>
                     </div>
                 </>
             )}
