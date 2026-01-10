@@ -203,7 +203,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                 <TabsContent value="upload">
                     <div
                         className={`flex flex-col items-center justify-center space-y-4 py-16 border border-dashed rounded-xl transition-all duration-300 cursor-pointer group
-                      ${dragActive ? "border-slate-400 bg-slate-50" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/50"}`}
+                      ${dragActive ? "border-primary bg-primary/5" : "border-primary/20 hover:border-primary/40 hover:bg-primary/5"}`}
                         onDragEnter={handleDrag}
                         onDragLeave={handleDrag}
                         onDragOver={handleDrag}

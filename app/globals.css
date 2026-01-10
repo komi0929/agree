@@ -241,6 +241,13 @@
   background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
 }
 
+/* Dotted Background Pattern (Aoki Style) */
+.bg-dotted-pattern {
+  background-color: var(--background);
+  background-image: radial-gradient(oklch(0.9 0.05 145) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
 /* Celebration Animation - Confetti Effect */
 @keyframes confetti-fall {
   0% {

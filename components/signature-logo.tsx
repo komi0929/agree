@@ -15,15 +15,20 @@ export function SignatureLogo({ className = "" }: { className?: string }) {
         <div className={`relative overflow-hidden ${className}`}>
             {/* Logo with clip-path reveal animation */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-                src="/logo.png"
-                alt="agree"
-                className="w-full h-full object-contain brightness-0"
+            {/* CSS Mask for color control */}
+            <div
+                className="w-full h-full bg-current transition-all duration-1000 ease-out"
                 style={{
-                    clipPath: isVisible
-                        ? "inset(0 0% 0 0)"
-                        : "inset(0 100% 0 0)",
-                    transition: "clip-path 1.5s cubic-bezier(0.4, 0, 0.2, 1)",
+                    maskImage: "url(/logo.png)",
+                    maskSize: "contain",
+                    maskRepeat: "no-repeat",
+                    maskPosition: "center",
+                    WebkitMaskImage: "url(/logo.png)",
+                    WebkitMaskSize: "contain",
+                    WebkitMaskRepeat: "no-repeat",
+                    WebkitMaskPosition: "center",
+                    opacity: isVisible ? 1 : 0,
+                    transform: isVisible ? "translateY(0)" : "translateY(10px)",
                 }}
             />
         </div>

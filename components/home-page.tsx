@@ -294,7 +294,7 @@ export function HomePage() {
     // Initially show the unified hero with upload section
     if (step === "upload" && !analysisData) {
         return (
-            <div className="min-h-screen flex flex-col bg-white text-slate-600 font-sans selection:bg-slate-100 selection:text-slate-900">
+            <div className="min-h-screen flex flex-col bg-dotted-pattern text-slate-600 font-sans selection:bg-slate-100 selection:text-slate-900">
                 {/* History Sidebar for logged-in users */}
                 {user && (
                     <HistorySidebar
@@ -314,7 +314,7 @@ export function HomePage() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => setShowAuthModal(true)}
-                                className="text-slate-500 hover:text-slate-900 rounded-full"
+                                className="text-primary hover:text-[#FFD700] hover:bg-white/10 rounded-full bg-white/50 backdrop-blur-sm"
                             >
                                 <LogIn className="w-4 h-4 mr-2" />
                                 ログイン
