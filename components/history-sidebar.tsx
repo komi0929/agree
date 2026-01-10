@@ -13,6 +13,8 @@ interface HistoryItem {
     created_at: string;
 }
 
+import { AuthModal, UserMenu } from "@/components/auth/auth-modal";
+
 interface HistorySidebarProps {
     isOpen: boolean;
     onToggle: () => void;
@@ -107,28 +109,31 @@ export function HistorySidebar({
 
             {/* Sidebar */}
             <div
-                className={`fixed left-0 top-0 h-full bg-slate-50 border-r border-slate-200 z-50 transition-all duration-300 flex flex-col ${isOpen ? "w-72" : "w-0 overflow-hidden"
+                className={`fixed left-0 top-0 h-full bg-slate-50 border-r border-slate-200 z-50 transition-all duration-300 flex flex-col shadow-sm ${isOpen ? "w-72" : "w-0 overflow-hidden"
                     }`}
             >
                 {/* Header */}
-                <div className="p-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
-                    <h2 className="font-semibold text-slate-800">診断履歴</h2>
+                <div className="p-5 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
+                    <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                        <h2 className="font-semibold text-slate-900 text-sm tracking-tight">診断履歴</h2>
+                    </div>
                     <button
                         onClick={onToggle}
-                        className="p-1 hover:bg-slate-200 rounded transition-colors"
+                        className="p-1.5 hover:bg-slate-200 rounded-lg transition-colors"
                     >
-                        <ChevronLeft className="w-5 h-5 text-slate-600" />
+                        <ChevronLeft className="w-4 h-4 text-slate-500" />
                     </button>
                 </div>
 
                 {/* New Analysis Button */}
-                <div className="p-3 flex-shrink-0">
+                <div className="p-4 flex-shrink-0">
                     <button
                         onClick={onNewAnalysis}
-                        className="w-full flex items-center gap-2 px-4 py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors font-medium"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 hover:border-slate-300 transition-all font-medium text-sm shadow-sm active:scale-[0.98]"
                     >
-                        <Plus className="w-5 h-5" />
-                        新しい診断
+                        <Plus className="w-4 h-4 text-slate-400" />
+                        分析室へ戻る
                     </button>
                 </div>
 
@@ -150,8 +155,8 @@ export function HistorySidebar({
                                     key={item.id}
                                     onClick={() => onSelectHistory(item.id)}
                                     className={`w-full text-left p-3 rounded-lg transition-colors group ${currentHistoryId === item.id
-                                            ? "bg-slate-200"
-                                            : "hover:bg-slate-100"
+                                        ? "bg-slate-200"
+                                        : "hover:bg-slate-100"
                                         }`}
                                 >
                                     <div className="flex items-start gap-3">
@@ -178,11 +183,14 @@ export function HistorySidebar({
                     )}
                 </div>
 
-                {/* Footer */}
-                <div className="p-3 border-t border-slate-200 flex-shrink-0">
-                    <p className="text-xs text-slate-400 text-center">
-                        {history.length}件の履歴
-                    </p>
+                {/* Footer / User Profile */}
+                <div className="p-4 border-t border-slate-100 flex-shrink-0 bg-white/50 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-4 px-1">
+                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+                            {history.length}件の履歴
+                        </span>
+                    </div>
+                    <UserMenu />
                 </div>
             </div>
         </>
