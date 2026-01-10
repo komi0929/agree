@@ -4,7 +4,7 @@ import { useRef, useEffect, useState, useCallback } from "react";
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, AlertOctagon, Check, ChevronDown, ChevronUp, Lightbulb, CheckSquare, Square, FileText, HelpCircle, Sparkles } from "lucide-react";
+import { AlertTriangle, AlertOctagon, Check, ChevronDown, ChevronUp, Lightbulb, CheckSquare, Square, FileText, HelpCircle, Sparkles, Shield, Bot, ShieldCheck } from "lucide-react";
 import { VIOLATED_LAW_EXPLANATIONS, ViolatedLaw } from "@/lib/types/clause-tags";
 import { RiskLevelFilter } from "./summary-header";
 
@@ -226,11 +226,30 @@ export function RiskPanel({
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="flex-1 min-w-0">
-                                        {/* Risk Level Badge */}
-                                        <div className="flex items-center gap-2 mb-2">
+                                        {/* Risk Level Badge + Source Badge */}
+                                        <div className="flex items-center gap-2 mb-2 flex-wrap">
                                             <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${styling.badge}`}>
                                                 {styling.label}
                                             </span>
+                                            {/* Source Badge - 検出ソースの信頼度表示 */}
+                                            {risk.source === "rule" && (
+                                                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                                                    <Shield className="w-3 h-3" />
+                                                    確実
+                                                </span>
+                                            )}
+                                            {risk.source === "llm" && (
+                                                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200 flex items-center gap-1">
+                                                    <Sparkles className="w-3 h-3" />
+                                                    AI分析
+                                                </span>
+                                            )}
+                                            {risk.source === "both" && (
+                                                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                                                    <ShieldCheck className="w-3 h-3" />
+                                                    確認済み
+                                                </span>
+                                            )}
                                             <span className="text-[10px] text-slate-400">#{index + 1}</span>
                                         </div>
 

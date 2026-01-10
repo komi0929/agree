@@ -1,0 +1,19 @@
+噫 Starting 10-Pattern Contract Verification Suite...
+笨・[PASS] 01_payment_delay.txt: Must detect 60-day rule violation
+笨・[PASS] 02_prohibited_acts.txt: Must detect prohibited acts (reduction/return)
+笨・[PASS] 03_copyright_transfer.txt: Must detect Copyright transfer without Art 27/28
+笨・[PASS] 04_unlimited_liability.txt: Must detect Unlimited Liability
+笨・[PASS] 05_scope_creep.txt: Must detect Ambiguous Scope
+笨・[PASS] 06_non_compete.txt: Must detect Excessive Non-compete
+笨・[PASS] 07_disguised_employment.txt: Must detect Disguised Employment indicators
+笨・[PASS] 08_long_warranty.txt: Must detect Long Warranty/Defect Liability
+笨・[PASS] 09_jurisdiction.txt: Must detect Unfair Jurisdiction
+笨・[PASS] 10_perfect_contract.txt: Must NOT have Critical risks (Healthy contract)
+
+投 Summary:
+笏娯楳笏笏笏笏笏笏笏笏笏ｬ笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏ｬ笏笏笏笏笏笏笏ｬ笏笏笏笏笏笏笏・笏・(index) 笏・file                          笏・pass 笏・note 笏・笏懌楳笏笏笏笏笏笏笏笏笏ｼ笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏ｼ笏笏笏笏笏笏笏ｼ笏笏笏笏笏笏笏､
+笏・0       笏・'01_payment_delay.txt'        笏・true 笏・'OK' 笏・笏・1       笏・'02_prohibited_acts.txt'      笏・true 笏・'OK' 笏・笏・2       笏・'03_copyright_transfer.txt'   笏・true 笏・'OK' 笏・笏・3       笏・'04_unlimited_liability.txt'  笏・true 笏・'OK' 笏・笏・4       笏・'05_scope_creep.txt'          笏・true 笏・'OK' 笏・笏・5       笏・'06_non_compete.txt'          笏・true 笏・'OK' 笏・笏・6       笏・'07_disguised_employment.txt' 笏・true 笏・'OK' 笏・笏・7       笏・'08_long_warranty.txt'        笏・true 笏・'OK' 笏・笏・8       笏・'09_jurisdiction.txt'         笏・true 笏・'OK' 笏・笏・9       笏・'10_perfect_contract.txt'     笏・true 笏・'OK' 笏・笏披楳笏笏笏笏笏笏笏笏笏ｴ笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏ｴ笏笏笏笏笏笏笏ｴ笏笏笏笏笏笏笏・
+Result: 10/10 Passed
+
+孱・・Starting Robust Liability Regex Verification...
+   Safe: 10/10, Unsafe: 7/10, Tricky: 3/4

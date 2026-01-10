@@ -11,15 +11,14 @@ import { Footer } from "@/components/footer";
 import { SignatureLogo } from "@/components/signature-logo";
 import { analyzeDeepAction, AnalysisState } from "@/app/actions";
 import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
-import { FileText, Shield, MessageSquare, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { AnalyzingProgress } from "@/components/analyzing-progress";
-import { useLocalHistory } from "@/hooks/use-local-history";
+
 import {
     SpeculativeAnalysisCache,
     startSpeculativeAnalysis,
     isContextMatch,
-    getContextDiff,
-    SPECULATIVE_DEFAULT_CONTEXT
+    getContextDiff
 } from "@/lib/speculative-analysis";
 
 // Phase 5: Dynamic imports for heavy components (reduces initial bundle)
@@ -55,7 +54,6 @@ export function HomePage() {
     const [extractionData, setExtractionData] = useState<ExtractionResult | null>(null);
     const [contractText, setContractText] = useState<string>("");
     const [loading, setLoading] = useState(false);
-    const [hasStarted, setHasStarted] = useState(false);
     // A-1: Simplified flow - only 3 steps now: upload -> unified_context -> analyzing -> complete
     const [step, setStep] = useState<"upload" | "unified_context" | "analyzing" | "complete">("upload");
     // A-2: Progressive loading messages
@@ -218,72 +216,46 @@ export function HomePage() {
         await handleUnifiedComplete(defaultContext, "party_b");
     };
 
-    // Initially show the minimalist hero with optional upload reveal
+    // Initially show the unified hero with upload section
     if (step === "upload" && !analysisData) {
         return (
             <div className="min-h-screen flex flex-col bg-white text-slate-600 font-sans selection:bg-slate-100 selection:text-slate-900">
-                <section className="flex-1 flex flex-col items-center pt-32 pb-20 px-6 max-w-2xl mx-auto w-full">
+                <section className="flex-1 flex flex-col items-center pt-20 pb-16 px-6 max-w-2xl mx-auto w-full">
                     {/* Minimalist Logo with Signature Animation */}
-                    <div className="mb-20 flex flex-col items-center">
+                    <div className="mb-10 flex flex-col items-center">
                         {/* Logo matches text color exactly (black) */}
-                        <SignatureLogo className="w-64 h-32 text-black" />
+                        <SignatureLogo className="w-56 h-28 text-black" />
                     </div>
 
-                    {/* Main Copy */}
-                    {!hasStarted ? (
-                        <div className="text-center space-y-12 animate-fade-in-delayed">
-                            <div className="space-y-6">
-                                <p className="text-xl leading-loose max-w-lg mx-auto font-semibold text-black text-balance tracking-tight">
-                                    その契約書、不安はありませんか？
-                                </p>
-                                <p className="text-slate-500 text-sm leading-relaxed max-w-md mx-auto font-medium">
-                                    AIがあなたの立場からリスクを解析、修正案をご提案。<br />
-                                    登録不要、最短15秒で診断が完了します。
-                                </p>
-                            </div>
+                    {/* Main Copy - Compact for unified view */}
+                    <div className="text-center space-y-4 mb-10 animate-fade-in-delayed">
+                        <p className="text-xl leading-loose max-w-lg mx-auto font-semibold text-black text-balance tracking-tight">
+                            その契約書、不安はありませんか？
+                        </p>
+                        <p className="text-slate-500 text-sm leading-relaxed max-w-md mx-auto font-medium">
+                            AIがあなたの立場からリスクを解析、修正案をご提案。<br />
+                            登録不要、最短15秒で診断が完了します。
+                        </p>
+                    </div>
 
-                            <div className="relative group">
-                                <div className="absolute -inset-1 bg-gradient-to-r from-slate-200 to-slate-100 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                                <Button
-                                    onClick={() => {
-                                        trackEvent(ANALYTICS_EVENTS.STARTED_CLICKED);
-                                        setHasStarted(true);
-                                    }}
-                                    className="relative rounded-full px-12 py-8 bg-slate-900 border border-slate-900 text-white hover:bg-slate-800 shadow-xl hover:shadow-2xl transition-all duration-300 text-lg font-medium tracking-wide overflow-hidden cursor-pointer"
-                                >
-                                    <span className="relative z-10">今すぐ診断を始める</span>
-                                    <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent z-0" />
-                                </Button>
-                            </div>
+                    {/* Unified Upload Section */}
+                    <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <UploadSection
+                            onAnalysisStart={handleAnalysisStart}
+                            onAnalysisComplete={handleExtractionComplete}
+                        />
+                    </div>
 
-                            {/* Link to why we made this */}
-                            <div className="pt-4">
-                                <Link href="/how-to-use" className="inline-block text-sm text-slate-400 hover:text-slate-600 border-b border-dashed border-slate-300 pb-0.5 transition-colors">
-                                    agreeの使い方を確認する
-                                </Link>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <UploadSection
-                                onAnalysisStart={handleAnalysisStart}
-                                onAnalysisComplete={handleExtractionComplete}
-                            />
-                            <div className="mt-12 text-center">
-                                <button
-                                    onClick={() => setHasStarted(false)}
-                                    className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
-                                >
-                                    戻る
-                                </button>
-                            </div>
-                        </div>
-                    )
-                    }
-                </section >
+                    {/* Link to how-to-use */}
+                    <div className="mt-10">
+                        <Link href="/how-to-use" className="inline-block text-sm text-slate-400 hover:text-slate-600 border-b border-dashed border-slate-300 pb-0.5 transition-colors">
+                            agreeの使い方を確認する
+                        </Link>
+                    </div>
+                </section>
 
                 <Footer />
-            </div >
+            </div>
         );
     }
 
@@ -325,7 +297,6 @@ export function HomePage() {
                     onClick={() => {
                         setAnalysisData(null);
                         setStep("upload");
-                        setHasStarted(false);
                         // Clear speculative cache
                         speculativeCacheRef.current = null;
                         speculativePromiseRef.current = null;
@@ -341,7 +312,6 @@ export function HomePage() {
                         onClick={() => {
                             setAnalysisData(null);
                             setStep("upload");
-                            setHasStarted(true);
                         }}
                         className="text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-full font-normal"
                     >
@@ -357,11 +327,8 @@ export function HomePage() {
                     </div>
                 ) : (
                     <div className="py-20 flex flex-col items-center justify-center text-center">
-              // Fallback loader if something goes wrong
-                        <>
-                            <Loader2 className="w-8 h-8 animate-spin text-slate-300 mb-4" />
-                            <p className="text-slate-400">結果を読み込んでいます...</p>
-                        </>
+                        <Loader2 className="w-8 h-8 animate-spin text-slate-300 mb-4" />
+                        <p className="text-slate-400">結果を読み込んでいます...</p>
                     </div>
                 )}
             </div>

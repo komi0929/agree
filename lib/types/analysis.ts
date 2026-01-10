@@ -14,7 +14,11 @@ export type NegotiationMessage = {
     casual: string;
 };
 
+export type RiskSource = "rule" | "llm" | "both";
+
 export type EnhancedRisk = {
+    // 検出ソース（ルールベース: 100%確実、LLM: AI分析、両方: 確認済み）
+    source?: RiskSource;
     clause_tag:
     | "CLAUSE_SCOPE" | "CLAUSE_PAYMENT" | "CLAUSE_ACCEPTANCE" | "CLAUSE_IP"
     | "CLAUSE_LIABILITY" | "CLAUSE_TERM" | "CLAUSE_TERMINATION" | "CLAUSE_NON_COMPETE"

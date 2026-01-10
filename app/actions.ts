@@ -222,9 +222,11 @@ export async function analyzeDeepAction(text: string, userContext?: UserContext)
 
         // EnhancedAnalysisResult形式に変換して返す
         // [精度向上ログ: 2026-01-09] deterministicScore追加で100%再現性を実現
+        // [Phase 1改善: 2026-01-09] source属性を維持してUIで「確実」「AI分析」バッジ表示を可能に
         const result: EnhancedAnalysisResult = {
             summary: mergedResult.summary,
             risks: mergedResult.risks.map(r => ({
+                source: r.source, // 検出ソースを維持（rule: 確実, llm: AI分析, both: 確認済み）
                 clause_tag: r.clause_tag,
                 section_title: r.section_title,
                 original_text: r.original_text || "",

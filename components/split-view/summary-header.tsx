@@ -1,7 +1,7 @@
 "use client";
 
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
-import { AlertTriangle, AlertOctagon, FileText, X } from "lucide-react";
+import { AlertTriangle, AlertOctagon, FileText, X, Shield } from "lucide-react";
 
 export type RiskLevelFilter = "critical" | "high" | "medium" | "low" | null;
 
@@ -10,9 +10,10 @@ interface SummaryHeaderProps {
     contractType?: string;
     activeFilter?: RiskLevelFilter;
     onFilterChange?: (filter: RiskLevelFilter) => void;
+    on28CheckClick?: () => void;  // 28項目チェックボタンのコールバック
 }
 
-export function SummaryHeader({ data, contractType, activeFilter, onFilterChange }: SummaryHeaderProps) {
+export function SummaryHeader({ data, contractType, activeFilter, onFilterChange, on28CheckClick }: SummaryHeaderProps) {
     // Count risks by level
     const criticalCount = data.risks.filter(r => r.risk_level === "critical").length;
     const highCount = data.risks.filter(r => r.risk_level === "high").length;
@@ -140,6 +141,18 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
                             <span className="text-xs font-medium text-blue-600">あると安心 {lowCount}</span>
                         </button>
                     )}
+
+                    {/* 分離線 */}
+                    <div className="w-px h-6 bg-slate-300 mx-1" />
+
+                    {/* 28項目チェックボタン */}
+                    <button
+                        onClick={on28CheckClick}
+                        className="flex items-center gap-1.5 px-3 py-2 bg-slate-900 text-white rounded-full shadow-md hover:bg-slate-800 hover:scale-105 transition-all"
+                    >
+                        <Shield className="w-3.5 h-3.5" />
+                        <span className="text-xs font-bold">28項目チェック</span>
+                    </button>
                 </div>
             </div>
         </div>

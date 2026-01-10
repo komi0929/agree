@@ -10,8 +10,8 @@ import { checkDangerPatterns, DangerPatternMatch } from "./danger-patterns";
 import { checkRequiredClauses, RequiredClause } from "./required-clauses";
 import { checkRecommendedClauses, RecommendedClause } from "./recommended-clauses";
 import { analyzePaymentTerms, PaymentTermAnalysis } from "./payment-calculator";
-import { checkKnownBadPatterns, KnownBadPattern } from "@/lib/knowledge/known-bad-patterns";
-import { ViolatedLaw } from "@/lib/types/clause-tags";
+import { checkKnownBadPatterns, KnownBadPattern } from "../knowledge/known-bad-patterns";
+import { ViolatedLaw } from "../types/clause-tags";
 
 export type RiskLevel = "critical" | "high" | "medium" | "low";
 

@@ -18,12 +18,13 @@ export interface PaymentTermAnalysis {
     riskLevel: RiskLevel;
     explanation: string;
     details: string;
+    matchedText?: string;
 }
 
 interface PaymentPattern {
     pattern: RegExp;
     name: string;
-    calculate: (match: RegExpMatchArray) => Omit<PaymentTermAnalysis, "detected" | "pattern">;
+    calculate: (match: RegExpMatchArray) => Omit<PaymentTermAnalysis, "detected" | "pattern" | "matchedText">;
 }
 
 /**
@@ -169,6 +170,7 @@ export function analyzePaymentTerms(text: string): PaymentTermAnalysis {
             return {
                 detected: true,
                 pattern: paymentPattern.name,
+                matchedText: match[0],
                 ...result,
             };
         }

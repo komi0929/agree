@@ -14,6 +14,12 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, FileText, Send, Sparkles, Loader2, X, Lightbulb } from "lucide-react";
 import { modifyContractAction } from "@/app/generate/actions";
 import { ContractInput, DEFAULT_CONTRACT_OPTIONS } from "@/lib/types/contract-input";
+import { runAllCheckpoints, CheckpointResult } from "@/lib/rules/checkpoints-28";
+import dynamic from "next/dynamic";
+
+const ChecklistPanel = dynamic(() => import("@/components/split-view/checklist-panel").then(mod => mod.ChecklistPanel), {
+    loading: () => null
+});
 
 interface AnalysisViewerProps {
     data: EnhancedAnalysisResult;
@@ -31,6 +37,10 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
     const [showWelcome, setShowWelcome] = useState(true);
     const [isGenerating, setIsGenerating] = useState(false);
     const [riskFilter, setRiskFilter] = useState<RiskLevelFilter>(null);
+
+    // 28 Checkpoints state
+    const [showChecklist, setShowChecklist] = useState(false);
+    const [checkpointResult, setCheckpointResult] = useState<CheckpointResult | null>(null);
 
     // Toggle risk selection
     const handleRiskToggle = useCallback((index: number) => {
@@ -60,6 +70,18 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
     const handleHighlightClick = useCallback((index: number) => {
         setHighlightedRiskIndex(index);
     }, []);
+
+
+
+    // Handle 28 checkpoints click
+    const handle28CheckClick = useCallback(() => {
+        if (!checkpointResult) {
+            // First time click: run analysis
+            const result = runAllCheckpoints(text);
+            setCheckpointResult(result);
+        }
+        setShowChecklist(true);
+    }, [checkpointResult, text]);
 
     const handleFinish = () => {
         setShowEngagement(true);
@@ -147,13 +169,24 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
 
     return (
         <div className="h-screen w-full flex flex-col font-sans bg-slate-100">
-            {/* Summary Header */}
-            <SummaryHeader
-                data={{ ...data, risks }}
-                contractType={contractType}
-                activeFilter={riskFilter}
-                onFilterChange={setRiskFilter}
-            />
+            {/* Header */}
+            <div className="flex-none z-10 sticky top-0 bg-white/80 backdrop-blur-md">
+                <SummaryHeader
+                    data={{ ...data, risks }}
+                    contractType={contractType}
+                    activeFilter={riskFilter}
+                    onFilterChange={setRiskFilter}
+                    on28CheckClick={handle28CheckClick}
+                />
+            </div>
+
+            {/* 28 Checkpoints Panel (Modal) */}
+            {showChecklist && checkpointResult && (
+                <ChecklistPanel
+                    result={checkpointResult}
+                    onClose={() => setShowChecklist(false)}
+                />
+            )}
 
             {/* Guide Bar - Onboarding */}
             <GuideBar />

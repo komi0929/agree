@@ -78,7 +78,7 @@ export const DANGER_PATTERNS: Record<string, DangerPattern[]> = {
     liability: [
         {
             id: "liability_001",
-            pattern: /一切の損害.*賠償|一切.*損害.*負担/,
+            pattern: /(?:一切|すべて|全)の損害.*賠償|一切.*損害.*負担/,
             risk: "critical",
             law: "civil_code_conformity",
             title: "無制限の損害賠償責任",
@@ -94,7 +94,7 @@ export const DANGER_PATTERNS: Record<string, DangerPattern[]> = {
         },
         {
             id: "liability_003",
-            pattern: /損害賠償.*上限.*(?:設けない|なし|ない)/,
+            pattern: /(?:損害賠償|賠償額)(?:[^。]{0,100})(?:上限|制限)(?:[^。]{0,20})(?:設けない|定めない|なし|(?:は|が|も)ない|適用しない)(?!とする|とした|という|より)/,
             risk: "critical",
             law: "civil_code_conformity",
             title: "賠償上限なしの明記",
@@ -162,7 +162,7 @@ export const DANGER_PATTERNS: Record<string, DangerPattern[]> = {
         },
         {
             id: "copyright_002",
-            pattern: /著作者人格権.*(?:行使しない|放棄|不行使)/,
+            pattern: /著作者人格権[\s\S]*?(?:行使しない|放棄|不行使)/,
             risk: "medium",
             law: "copyright_art27_28",
             title: "著作者人格権の不行使",
@@ -209,7 +209,7 @@ export const DANGER_PATTERNS: Record<string, DangerPattern[]> = {
         },
         {
             id: "employment_005",
-            pattern: /再委託.*(?:禁止|できない|してはならない)|第三者.*委託.*(?:禁止|できない)/,
+            pattern: /再委託(?:そのもの)?(?:の|を|は).{0,20}(?:禁止|できない|してはならない)|第三者.*委託.{0,20}(?:禁止|できない)/,
             risk: "medium",
             law: "disguised_employment",
             title: "再委託の禁止",
@@ -224,7 +224,7 @@ export const DANGER_PATTERNS: Record<string, DangerPattern[]> = {
     non_compete: [
         {
             id: "non_compete_001",
-            pattern: /競業(?:避止|禁止).*[2-9]年|[2-9]年間.*競業/,
+            pattern: /(?:競業|競合)(?:避止|禁止|他社).{0,50}[2-9]年|[2-9]年間?.{0,50}(?:競業|競合)/,
             risk: "high",
             law: "public_order",
             title: "長期の競業避止義務",
