@@ -317,8 +317,11 @@ export async function analyzeContractText(
         // 動的プロンプトを生成
         const systemPrompt = buildEnhancedSystemPrompt(userContext, applicableLaws);
 
+        // モデル選択: 環境変数で切り替え可能（デフォルト: gpt-4o-mini でコスト最適化）
+        const analysisModel = process.env.ANALYSIS_MODEL || "gpt-4o-mini";
+
         const completion = await getOpenAIClient().chat.completions.create({
-            model: "gpt-4o",
+            model: analysisModel,
             temperature: 0,  // Deterministic output
             seed: 42,        // Fixed seed for reproducibility
             messages: [

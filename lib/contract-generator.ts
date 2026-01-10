@@ -29,8 +29,11 @@ export async function generateContract(input: ContractInput): Promise<GeneratedC
     try {
         const systemPrompt = buildContractGenerationPrompt(input);
 
+        // モデル選択: 環境変数で切り替え可能（デフォルト: gpt-4o-mini でコスト最適化）
+        const generationModel = process.env.GENERATION_MODEL || "gpt-4o-mini";
+
         const completion = await openai.chat.completions.create({
-            model: "gpt-4o",
+            model: generationModel,
             messages: [
                 {
                     role: "system",
@@ -84,8 +87,10 @@ export async function modifyContract(
     instruction: string,
     input: ContractInput
 ): Promise<string> {
+    const generationModel = process.env.GENERATION_MODEL || "gpt-4o-mini";
+
     const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: generationModel,
         messages: [
             {
                 role: "system",
@@ -125,9 +130,10 @@ export async function generateEmail(
     contractMarkdown: string
 ): Promise<GeneratedEmail> {
     const prompt = buildEmailPrompt(input, contractMarkdown);
+    const generationModel = process.env.GENERATION_MODEL || "gpt-4o-mini";
 
     const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: generationModel,
         messages: [
             {
                 role: "system",
