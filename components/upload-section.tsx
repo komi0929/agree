@@ -212,14 +212,14 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                     >
                         {isUploading ? (
                             <div className="flex flex-col items-center space-y-4">
-                                <Loader2 className="h-6 w-6 text-slate-800 animate-spin" />
-                                <p className="text-xs font-light text-slate-500 tracking-wider">読み込んでいます...</p>
+                                <Loader2 className="h-6 w-6 text-primary animate-spin" />
+                                <p className="text-xs font-light text-primary/80 tracking-wider">読み込んでいます...</p>
                             </div>
                         ) : (
                             <>
-                                <UploadCloud className="h-6 w-6 text-slate-300 group-hover:text-slate-400 transition-colors" />
+                                <UploadCloud className="h-8 w-8 text-primary/40 group-hover:text-primary/60 transition-colors" />
                                 <div className="text-center space-y-2">
-                                    <p className="text-sm text-slate-600 font-light">ここにファイルをドロップ</p>
+                                    <p className="text-sm text-primary/80 font-medium">ここにファイルをドロップ</p>
                                     {/* A-4: Clearer prerequisites */}
                                     <p className="text-[10px] text-slate-400 tracking-wide">PDF形式 / 4.5MBまで / テキストPDF限定</p>
                                     <p className="text-[9px] text-slate-300">※スキャン・画像PDFは非対応</p>
@@ -262,7 +262,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                         {/* B-2: Specific button label */}
                         <Button
                             type="button"
-                            className="w-full h-10 rounded-full bg-slate-900 hover:bg-slate-800 text-white shadow-none transition-all font-normal text-sm"
+                            className="w-full h-10 rounded-full bg-primary hover:bg-primary/90 text-white shadow-sm transition-all font-medium text-sm"
                             disabled={isUploading || !url}
                             onClick={async (e) => {
                                 e.preventDefault();
@@ -293,7 +293,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                         </div>
                         <Button
                             type="button"
-                            className="w-full h-10 rounded-full bg-slate-900 hover:bg-slate-800 text-white shadow-none transition-all font-normal text-sm"
+                            className="w-full h-10 rounded-full bg-primary hover:bg-primary/90 text-white shadow-sm transition-all font-medium text-sm"
                             disabled={isUploading || !textInput.trim()}
                             onClick={async (e) => {
                                 e.preventDefault();

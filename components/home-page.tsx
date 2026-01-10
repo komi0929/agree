@@ -329,15 +329,15 @@ export function HomePage() {
                 <section className="flex-1 flex flex-col items-center pt-32 pb-16 px-6 max-w-2xl mx-auto w-full transition-all duration-500">
                     {/* Minimalist Logo - Reduced size for balance */}
                     <div className="mb-14 flex flex-col items-center">
-                        <SignatureLogo className="w-44 h-22 text-black" />
+                        <SignatureLogo className="w-44 h-22 text-primary" />
                     </div>
 
                     {/* Main Copy - Compact for unified view */}
                     <div className="text-center space-y-5 mb-14 animate-fade-in-delayed">
-                        <p className="text-2xl leading-normal max-w-lg mx-auto font-bold text-black text-balance tracking-tight">
+                        <p className="text-2xl leading-normal max-w-lg mx-auto font-bold text-primary text-balance tracking-tight">
                             その契約書、不安はありませんか？
                         </p>
-                        <p className="text-slate-500 text-[15px] leading-relaxed max-w-md mx-auto font-medium">
+                        <p className="text-slate-600 text-[15px] leading-relaxed max-w-md mx-auto font-medium">
                             AIがあなたの立場からリスクを解析、修正案をご提案。<br />
                             登録不要、最短15秒で診断が完了します。
                         </p>
