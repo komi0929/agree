@@ -11,12 +11,16 @@ import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, FileText } from "lucide-react";
 import Link from "next/link";
 import { Footer } from "@/components/footer";
+import { useUsageLimit } from "@/hooks/use-usage-limit";
+import { RegistrationGateModal } from "@/components/auth/registration-gate-modal";
 import { ContractInput, validateContractInput } from "@/lib/types/contract-input";
 import { generateContractAction } from "./actions";
 
 export default function GeneratePage() {
     const router = useRouter();
+    const { isRegistered, hasReachedGenerationLimit, incrementGenerationCount } = useUsageLimit();
     const [isGenerating, setIsGenerating] = useState(false);
+    const [showGateModal, setShowGateModal] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     // フォーム状態
@@ -29,6 +33,18 @@ export default function GeneratePage() {
     const [requireDeposit, setRequireDeposit] = useState(true);
 
     const handleGenerate = async () => {
+        // 1. 登録チェック
+        if (!isRegistered) {
+            setShowGateModal(true);
+            return;
+        }
+
+        // 2. 回数制限チェック
+        if (hasReachedGenerationLimit) {
+            setError("今月の生成上限（5回）に達しました。");
+            return;
+        }
+
         setError(null);
 
         const input: ContractInput = {
@@ -54,6 +70,14 @@ export default function GeneratePage() {
         setIsGenerating(true);
 
         try {
+            // カウントをインクリメント
+            const success = await incrementGenerationCount();
+            if (!success) {
+                setError("使用制限の更新に失敗しました。");
+                setIsGenerating(false);
+                return;
+            }
+
             const result = await generateContractAction(input);
 
             if (result.success && result.data) {
@@ -227,6 +251,12 @@ export default function GeneratePage() {
                 </div>
             </main>
             <Footer />
+
+            <RegistrationGateModal
+                open={showGateModal}
+                onClose={() => setShowGateModal(false)}
+                reason="generate"
+            />
         </div>
     );
 }
