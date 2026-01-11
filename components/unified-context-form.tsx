@@ -15,7 +15,7 @@ interface UnifiedContextFormProps {
 // Consistent step number badge - all same style
 function StepBadge({ number }: { number: number }) {
     return (
-        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-xs font-medium">
+        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/20 text-primary text-xs font-medium">
             {number}
         </span>
     );
@@ -41,18 +41,18 @@ function OptionCard({
                 relative p-4 rounded-xl border cursor-pointer transition-all
                 flex items-center gap-3 min-h-[60px]
                 ${isSelected
-                    ? "border-slate-400 bg-slate-50 shadow-sm"
-                    : "border-slate-200 hover:border-slate-300 bg-white"
+                    ? "border-primary bg-primary/10 shadow-sm"
+                    : "border-primary/20 hover:border-primary/40 bg-white"
                 }
             `}
             onClick={onClick}
         >
-            {icon && <div className="shrink-0 text-slate-500">{icon}</div>}
+            {icon && <div className="shrink-0 text-primary">{icon}</div>}
             <div className="flex-1 min-w-0">
-                <p className="font-medium text-slate-800 text-sm">{title}</p>
-                {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+                <p className="font-medium text-foreground text-sm">{title}</p>
+                {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
             </div>
-            {isSelected && <Check className="w-4 h-4 text-slate-600 shrink-0" />}
+            {isSelected && <Check className="w-4 h-4 text-primary shrink-0" />}
         </div>
     );
 }
@@ -114,20 +114,20 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
             {onSkip && (
                 <div className="mb-6">
                     <div
-                        className="p-4 rounded-xl border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition-all group"
+                        className="p-4 rounded-xl border border-primary/20 bg-white cursor-pointer hover:bg-primary/5 transition-all group"
                         onClick={onSkip}
                     >
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-                                    <Briefcase className="w-5 h-5 text-slate-600" />
+                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <Briefcase className="w-5 h-5 text-primary" />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-slate-800">クイック診断を開始</p>
-                                    <p className="text-xs text-slate-400">標準設定で今すぐ解析する</p>
+                                    <p className="font-medium text-foreground">クイック診断を開始</p>
+                                    <p className="text-xs text-muted-foreground">標準設定で今すぐ解析する</p>
                                 </div>
                             </div>
-                            <ArrowRight className="w-5 h-5 text-slate-400 group-hover:translate-x-1 transition-transform" />
+                            <ArrowRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
                         </div>
                     </div>
                 </div>
@@ -135,9 +135,9 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
 
             {/* Divider */}
             <div className="flex items-center gap-4 mb-6">
-                <div className="flex-1 h-px bg-slate-200" />
-                <span className="text-xs text-slate-400">詳しく設定する場合</span>
-                <div className="flex-1 h-px bg-slate-200" />
+                <div className="flex-1 h-px bg-primary/20" />
+                <span className="text-xs text-muted-foreground">詳しく設定する場合</span>
+                <div className="flex-1 h-px bg-primary/20" />
             </div>
 
             {/* Main Form */}
@@ -147,7 +147,7 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
                         <StepBadge number={1} />
-                        <h3 className="text-sm font-medium text-slate-700">あなたは？</h3>
+                        <h3 className="text-sm font-medium text-primary">あなたは？</h3>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
@@ -180,8 +180,8 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
                         <StepBadge number={2} />
-                        <h3 className="text-sm font-medium text-slate-700">あなたの立場</h3>
-                        <span className="text-xs text-slate-400">任意</span>
+                        <h3 className="text-sm font-medium text-primary">あなたの立場</h3>
+                        <span className="text-xs text-muted-foreground">任意</span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
@@ -206,8 +206,8 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
                         <StepBadge number={3} />
-                        <h3 className="text-sm font-medium text-slate-700">事業形態</h3>
-                        <span className="text-xs text-slate-400">任意</span>
+                        <h3 className="text-sm font-medium text-primary">事業形態</h3>
+                        <span className="text-xs text-muted-foreground">任意</span>
                     </div>
 
                     <div className="grid grid-cols-1 gap-2">
@@ -236,8 +236,8 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
                         <StepBadge number={4} />
-                        <h3 className="text-sm font-medium text-slate-700">取引先の資本金</h3>
-                        <span className="text-xs text-slate-400">任意</span>
+                        <h3 className="text-sm font-medium text-primary">取引先の資本金</h3>
+                        <span className="text-xs text-muted-foreground">任意</span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
@@ -271,7 +271,7 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 <Button
                     onClick={handleComplete}
                     disabled={!isComplete}
-                    className="w-full h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-white border-0 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-base font-medium transition-colors"
+                    className="w-full h-12 rounded-full bg-primary hover:bg-primary/90 hover:text-[#FFD700] text-white border-0 disabled:bg-primary/30 disabled:text-white/50 disabled:cursor-not-allowed text-base font-medium transition-colors"
                 >
                     {isComplete ? (
                         <>
@@ -283,7 +283,7 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                     )}
                 </Button>
                 {isComplete && (
-                    <p className="text-center text-xs text-slate-400 mt-3">
+                    <p className="text-center text-xs text-muted-foreground mt-3">
                         Enterキーでも開始できます
                     </p>
                 )}

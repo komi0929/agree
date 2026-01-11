@@ -96,25 +96,25 @@ export default function GeneratePage() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col bg-white text-slate-600 font-sans selection:bg-slate-100 selection:text-slate-900">
+        <div className="min-h-screen flex flex-col bg-background text-foreground font-sans selection:bg-primary/10 selection:text-primary">
             <main className="flex-1 max-w-2xl mx-auto w-full px-6 pt-24 pb-20">
                 {/* Header */}
                 <div className="mb-16">
                     <div className="flex items-center justify-between mb-8">
                         <Link
                             href="/"
-                            className="inline-flex items-center text-sm text-slate-400 hover:text-slate-600 transition-colors"
+                            className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
                         >
                             <ArrowLeft className="w-4 h-4 mr-1.5" />
                             トップに戻る
                         </Link>
-                        <span className="text-xs text-slate-400 border border-slate-200 px-2 py-1 rounded-full">β版</span>
+                        <span className="text-xs text-primary border border-primary/20 px-2 py-1 rounded-full">β版</span>
                     </div>
 
-                    <h1 className="text-2xl font-semibold tracking-tight text-slate-900 mb-3">
+                    <h1 className="text-2xl font-semibold tracking-tight text-primary mb-3">
                         契約書を作成する
                     </h1>
-                    <p className="text-slate-500 text-sm font-light leading-relaxed">
+                    <p className="text-muted-foreground text-sm font-light leading-relaxed">
                         必要な情報を入力するだけ。あなたを守る28の条項をAIが自動で組み込みます。
                     </p>
                 </div>
@@ -122,7 +122,7 @@ export default function GeneratePage() {
                 {/* Form */}
                 <div className="space-y-8">
                     {error && (
-                        <div className="bg-slate-50 border border-slate-200 text-slate-600 text-sm p-4 rounded-xl">
+                        <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm p-4 rounded-xl">
                             {error.split("\n").map((line, i) => (
                                 <div key={i}>{line}</div>
                             ))}
@@ -131,80 +131,80 @@ export default function GeneratePage() {
 
                     <div className="space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-slate-900 mb-2">
+                            <label className="block text-sm font-medium text-primary mb-2">
                                 クライアント名（相手）
                             </label>
                             <Input
                                 placeholder="例: 株式会社〇〇"
                                 value={clientName}
                                 onChange={(e) => setClientName(e.target.value)}
-                                className="h-12 border-slate-200 focus-visible:ring-0 focus-visible:border-slate-400"
+                                className="h-12 border-primary/20 focus-visible:ring-0 focus-visible:border-primary"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-900 mb-2">
+                            <label className="block text-sm font-medium text-primary mb-2">
                                 あなたの名前（屋号）
                             </label>
                             <Input
                                 placeholder="例: 山田太郎 / 〇〇デザイン事務所"
                                 value={userName}
                                 onChange={(e) => setUserName(e.target.value)}
-                                className="h-12 border-slate-200 focus-visible:ring-0 focus-visible:border-slate-400"
+                                className="h-12 border-primary/20 focus-visible:ring-0 focus-visible:border-primary"
                             />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-slate-900 mb-2">
+                                <label className="block text-sm font-medium text-primary mb-2">
                                     金額（税抜）
                                 </label>
                                 <Input
                                     placeholder="例: 500000"
                                     value={amount}
                                     onChange={(e) => setAmount(e.target.value)}
-                                    className="h-12 border-slate-200 focus-visible:ring-0 focus-visible:border-slate-400"
+                                    className="h-12 border-primary/20 focus-visible:ring-0 focus-visible:border-primary"
                                     type="text"
                                     inputMode="numeric"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-900 mb-2">
+                                <label className="block text-sm font-medium text-primary mb-2">
                                     納期
                                 </label>
                                 <Input
                                     placeholder="例: 2025年2月末"
                                     value={deadline}
                                     onChange={(e) => setDeadline(e.target.value)}
-                                    className="h-12 border-slate-200 focus-visible:ring-0 focus-visible:border-slate-400"
+                                    className="h-12 border-primary/20 focus-visible:ring-0 focus-visible:border-primary"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-900 mb-2">
+                            <label className="block text-sm font-medium text-primary mb-2">
                                 業務内容（ラフでOK）
                             </label>
                             <Textarea
                                 placeholder="例: LP制作のデザインとコーディング。サーバーアップまで。修正は2回まで。"
                                 value={scopeDescription}
                                 onChange={(e) => setScopeDescription(e.target.value)}
-                                className="min-h-[120px] resize-none border-slate-200 focus-visible:ring-0 focus-visible:border-slate-400"
+                                className="min-h-[120px] resize-none border-primary/20 focus-visible:ring-0 focus-visible:border-primary"
                             />
-                            <p className="text-xs text-slate-400 mt-2 font-light">
+                            <p className="text-xs text-muted-foreground mt-2 font-light">
                                 詳細が曖昧でも、AIがあなたに有利な条件で具体化します
                             </p>
                         </div>
                     </div>
 
                     {/* Options */}
-                    <div className="border-t border-slate-100 pt-8 space-y-4">
-                        <h3 className="text-sm font-medium text-slate-900 mb-4">オプション設定</h3>
+                    <div className="border-t border-primary/10 pt-8 space-y-4">
+                        <h3 className="text-sm font-medium text-primary mb-4">オプション設定</h3>
 
-                        <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl">
+                        <div className="flex items-center justify-between p-4 border border-primary/20 rounded-xl">
                             <div>
-                                <p className="text-sm font-medium text-slate-900">著作権は譲渡しない</p>
-                                <p className="text-xs text-slate-400 font-light mt-0.5">ライセンス契約として権利を保持</p>
+                                <p className="text-sm font-medium text-foreground">著作権は譲渡しない</p>
+                                <p className="text-xs text-muted-foreground font-light mt-0.5">ライセンス契約として権利を保持</p>
                             </div>
                             <Switch
                                 checked={keepCopyright}
@@ -212,10 +212,10 @@ export default function GeneratePage() {
                             />
                         </div>
 
-                        <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl">
+                        <div className="flex items-center justify-between p-4 border border-primary/20 rounded-xl">
                             <div>
-                                <p className="text-sm font-medium text-slate-900">着手金を請求する（50%）</p>
-                                <p className="text-xs text-slate-400 font-light mt-0.5">契約時に半額を受領</p>
+                                <p className="text-sm font-medium text-foreground">着手金を請求する（50%）</p>
+                                <p className="text-xs text-muted-foreground font-light mt-0.5">契約時に半額を受領</p>
                             </div>
                             <Switch
                                 checked={requireDeposit}
@@ -229,11 +229,11 @@ export default function GeneratePage() {
                         <Button
                             onClick={handleGenerate}
                             disabled={isGenerating}
-                            className="w-full h-12 bg-white border border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-300 shadow-sm transition-all text-sm font-normal rounded-full"
+                            className="w-full h-12 bg-primary border-0 text-white hover:bg-primary/90 hover:text-[#FFD700] shadow-sm transition-all text-sm font-medium rounded-full"
                         >
                             {isGenerating ? (
                                 <>
-                                    <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin mr-2" />
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                                     生成中...
                                 </>
                             ) : (
@@ -244,7 +244,7 @@ export default function GeneratePage() {
                             )}
                         </Button>
 
-                        <p className="text-center text-xs text-slate-400 mt-4 font-light">
+                        <p className="text-center text-xs text-muted-foreground mt-4 font-light">
                             生成には約10〜20秒かかります
                         </p>
                     </div>

@@ -61,20 +61,20 @@ export default function AccountPage() {
 
     if (authLoading || usageLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50">
-                <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-background">
             {/* Header */}
-            <header className="bg-white border-b border-slate-100">
+            <header className="bg-white border-b border-primary/10">
                 <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
                     <Link
                         href="/"
-                        className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+                        className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         <span className="text-sm">ホームに戻る</span>
@@ -85,20 +85,20 @@ export default function AccountPage() {
             </header>
 
             <main className="max-w-2xl mx-auto px-6 py-10">
-                <h1 className="text-2xl font-bold text-slate-900 mb-8">アカウント設定</h1>
+                <h1 className="text-2xl font-bold text-primary mb-8">アカウント設定</h1>
 
                 {/* Profile Section */}
-                <section className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+                <section className="bg-white rounded-xl border border-primary/20 p-6 mb-6">
                     <div className="flex items-center gap-4 mb-6">
-                        <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
-                            <User className="w-6 h-6 text-slate-500" />
+                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                            <User className="w-6 h-6 text-primary" />
                         </div>
                         <div>
-                            <p className="font-medium text-slate-900">{user?.email}</p>
+                            <p className="font-medium text-foreground">{user?.email}</p>
                             <div className="flex items-center gap-2">
                                 <span className={`text-xs px-2 py-0.5 rounded-full ${isAdmin
-                                        ? "bg-purple-100 text-purple-700"
-                                        : "bg-blue-100 text-blue-700"
+                                    ? "bg-purple-100 text-purple-700"
+                                    : "bg-blue-100 text-blue-700"
                                     }`}>
                                     {isAdmin ? "管理者" : "無料プラン"}
                                 </span>
@@ -106,24 +106,24 @@ export default function AccountPage() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm text-slate-500">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Mail className="w-4 h-4" />
                         <span>{user?.email}</span>
                     </div>
                 </section>
 
                 {/* Usage Stats */}
-                <section className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+                <section className="bg-white rounded-xl border border-primary/20 p-6 mb-6">
                     <div className="flex items-center gap-2 mb-4">
-                        <BarChart3 className="w-5 h-5 text-slate-500" />
-                        <h2 className="font-medium text-slate-900">今月の使用状況</h2>
+                        <BarChart3 className="w-5 h-5 text-primary" />
+                        <h2 className="font-medium text-primary">今月の使用状況</h2>
                     </div>
 
                     <div className="space-y-4">
                         <div>
                             <div className="flex items-center justify-between mb-1">
-                                <span className="text-sm text-slate-600">契約書チェック</span>
-                                <span className="text-sm font-medium text-slate-900">
+                                <span className="text-sm text-foreground">契約書チェック</span>
+                                <span className="text-sm font-medium text-primary">
                                     {formatLimit(checkCount, checkLimit)}
                                 </span>
                             </div>
@@ -141,8 +141,8 @@ export default function AccountPage() {
 
                         <div>
                             <div className="flex items-center justify-between mb-1">
-                                <span className="text-sm text-slate-600">AI契約書生成</span>
-                                <span className="text-sm font-medium text-slate-900">
+                                <span className="text-sm text-foreground">AI契約書生成</span>
+                                <span className="text-sm font-medium text-primary">
                                     {formatLimit(generationCount, generationLimit)}
                                 </span>
                             </div>
@@ -159,22 +159,22 @@ export default function AccountPage() {
                         </div>
                     </div>
 
-                    <p className="text-xs text-slate-400 mt-4">{getResetDate()}</p>
+                    <p className="text-xs text-muted-foreground mt-4">{getResetDate()}</p>
                 </section>
 
                 {/* Actions */}
-                <section className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+                <section className="bg-white rounded-xl border border-primary/20 divide-y divide-primary/10">
                     <button
                         onClick={handleSignOut}
                         disabled={isSigningOut}
-                        className="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-slate-50 transition-colors"
+                        className="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-primary/5 transition-colors"
                     >
                         {isSigningOut ? (
-                            <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+                            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                         ) : (
-                            <LogOut className="w-5 h-5 text-slate-500" />
+                            <LogOut className="w-5 h-5 text-primary" />
                         )}
-                        <span className="text-slate-700">ログアウト</span>
+                        <span className="text-foreground">ログアウト</span>
                     </button>
 
                     {!showDeleteConfirm ? (
@@ -218,11 +218,11 @@ export default function AccountPage() {
                 </section>
 
                 {/* Security Note */}
-                <div className="mt-6 flex items-start gap-3 text-sm text-slate-500">
+                <div className="mt-6 flex items-start gap-3 text-sm text-muted-foreground">
                     <Shield className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <p>
                         あなたのデータは安全に保護されています。詳しくは
-                        <Link href="/privacy" className="text-blue-600 hover:underline">
+                        <Link href="/privacy" className="text-primary hover:underline">
                             プライバシーポリシー
                         </Link>
                         をご確認ください。
