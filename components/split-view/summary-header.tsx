@@ -1,7 +1,7 @@
 "use client";
 
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
-import { AlertTriangle, AlertOctagon, FileText, X, Shield } from "lucide-react";
+import { AlertTriangle, AlertOctagon, FileText, X, Shield, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type RiskLevelFilter = "critical" | "high" | "medium" | "low" | null;
@@ -11,10 +11,11 @@ interface SummaryHeaderProps {
     contractType?: string;
     activeFilter?: RiskLevelFilter;
     onFilterChange?: (filter: RiskLevelFilter) => void;
-    on28CheckClick?: () => void;  // 28項目チェックボタンのコールバック
+    on28CheckClick?: () => void;
+    onShareClick?: () => void;  // 共有ボタンのコールバック
 }
 
-export function SummaryHeader({ data, contractType, activeFilter, onFilterChange, on28CheckClick }: SummaryHeaderProps) {
+export function SummaryHeader({ data, contractType, activeFilter, onFilterChange, on28CheckClick, onShareClick }: SummaryHeaderProps) {
     // Count risks by level
     const criticalCount = data.risks.filter(r => r.risk_level === "critical").length;
     const highCount = data.risks.filter(r => r.risk_level === "high").length;
@@ -159,6 +160,17 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
                         <Shield className="w-3.5 h-3.5" />
                         <span className="text-xs font-bold">28項目チェック</span>
                     </button>
+
+                    {/* 共有ボタン */}
+                    {onShareClick && (
+                        <button
+                            onClick={onShareClick}
+                            className="flex items-center gap-1.5 px-3 py-2 bg-white border border-primary/20 text-primary rounded-full shadow-sm hover:bg-primary/5 hover:scale-105 transition-all"
+                        >
+                            <Share2 className="w-3.5 h-3.5" />
+                            <span className="text-xs font-medium">共有</span>
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

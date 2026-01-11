@@ -219,7 +219,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                             <>
                                 <UploadCloud className="h-8 w-8 text-primary/40 group-hover:text-primary/60 transition-colors" />
                                 <div className="text-center space-y-2">
-                                    <p className="text-sm text-primary/80 font-medium">ここに契約書をポンと置いてね 📄</p>
+                                    <p className="text-sm text-primary/80 font-medium">契約書をここにドロップ</p>
                                     {/* A-4: Clearer prerequisites */}
                                     <p className="text-[10px] text-slate-400 tracking-wide">PDF形式 / 4.5MBまで</p>
                                     <p className="text-[9px] text-slate-300">※スキャン・画像PDFは非対応</p>
@@ -274,7 +274,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                                     <Loader2 className="h-3 w-3 animate-spin" />
                                     <span className="text-xs">見ているよ...</span>
                                 </div>
-                            ) : "この契約書を見てもらう 👀"}
+                            ) : "契約書をチェックする"}
                         </Button>
                     </div>
                 </TabsContent>
@@ -284,7 +284,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                         <div className="space-y-2">
                             <p className="text-xs text-slate-500 text-center">契約書のテキストを直接貼り付け</p>
                             <textarea
-                                placeholder="ここに契約書の本文をコピペしてね。すぐに目を通すよ！👀"
+                                placeholder="契約書の本文をここに貼り付けてください"
                                 value={textInput}
                                 onChange={(e) => setTextInput(e.target.value)}
                                 disabled={isUploading}

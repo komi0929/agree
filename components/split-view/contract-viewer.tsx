@@ -175,8 +175,32 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
         return elements;
     };
 
+    // Calculate minimap markers based on text positions
+    const minimapMarkers = useMemo(() => {
+        if (text.length === 0) return [];
+        return matches.map(match => ({
+            position: (match.start / text.length) * 100,
+            riskIndex: match.riskIndex,
+            riskLevel: risks[match.riskIndex]?.risk_level || "low"
+        }));
+    }, [matches, text.length, risks]);
+
+    const getMinimapMarkerColor = (riskLevel: string) => {
+        switch (riskLevel) {
+            case "critical": return "bg-red-500";
+            case "high": return "bg-orange-400";
+            case "medium": return "bg-yellow-400";
+            default: return "bg-blue-400";
+        }
+    };
+
+    // Handle minimap marker click
+    const handleMinimapClick = useCallback((riskIndex: number) => {
+        onHighlightClick?.(riskIndex);
+    }, [onHighlightClick]);
+
     return (
-        <div className="h-full flex flex-col bg-background">
+        <div className="h-full flex flex-col bg-background relative">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-3 bg-background border-b border-primary/10">
                 <div className="flex items-center gap-2">
@@ -190,10 +214,9 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
                 </div>
             </div>
 
-            {/* Content Container */}
-            <div className="flex-1 overflow-auto bg-background">
+            {/* Content Container with Minimap */}
+            <div className="flex-1 overflow-auto bg-background relative" ref={containerRef}>
                 <div
-                    ref={containerRef}
                     className="max-w-3xl mx-auto p-12 lg:p-16 min-h-full bg-white font-serif leading-relaxed text-foreground"
                     style={{ fontSize: "15px" }}
                 >
@@ -201,7 +224,28 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
                         {renderContent()}
                     </div>
                 </div>
+
+                {/* Minimap - Risk markers on the right edge */}
+                {minimapMarkers.length > 0 && (
+                    <div
+                        className="absolute right-2 top-0 bottom-0 w-3 pointer-events-auto z-20"
+                        style={{ marginTop: '48px' }} // Account for header
+                    >
+                        <div className="relative h-full">
+                            {minimapMarkers.map((marker, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => handleMinimapClick(marker.riskIndex)}
+                                    className={`absolute right-0 w-3 h-2 rounded-l transition-all hover:w-5 hover:shadow-md ${getMinimapMarkerColor(marker.riskLevel)} ${highlightedRiskIndex === marker.riskIndex ? 'w-5 ring-2 ring-white shadow-lg' : 'opacity-70 hover:opacity-100'}`}
+                                    style={{ top: `${marker.position}%` }}
+                                    title={`リスク #${marker.riskIndex + 1}`}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
 }
+

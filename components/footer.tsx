@@ -8,7 +8,7 @@ export function Footer() {
                 {/* Guardian Manager Message */}
                 <div className="mb-8 text-center">
                     <p className="text-sm text-primary/80 font-medium">
-                        面倒な契約書チェックは私に任せて。<br />
+                        契約書チェックはお任せください。<br />
                         <span className="text-muted-foreground">あなたは最高の作品を生み出すことに集中して。💪</span>
                     </p>
                 </div>

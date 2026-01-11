@@ -4,12 +4,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { UserContext, UserEntityType, CapitalRange, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
 import { ExtractionResult } from "@/lib/types/analysis";
-import { Building2, User, Users, HelpCircle, ArrowRight, Check, Briefcase } from "lucide-react";
+import { Building2, User, Users, HelpCircle, ArrowRight, Check } from "lucide-react";
 
 interface UnifiedContextFormProps {
     extractionData: ExtractionResult;
     onComplete: (context: UserContext, role: "party_a" | "party_b") => void;
-    onSkip?: () => void;
 }
 
 // Consistent step number badge - all same style
@@ -57,7 +56,7 @@ function OptionCard({
     );
 }
 
-export function UnifiedContextForm({ extractionData, onComplete, onSkip }: UnifiedContextFormProps) {
+export function UnifiedContextForm({ extractionData, onComplete }: UnifiedContextFormProps) {
     const [context, setContext] = useState<UserContext>({
         ...DEFAULT_USER_CONTEXT,
         userRole: "vendor", // Default: 受注者
@@ -110,36 +109,6 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
 
     return (
         <div className="w-full max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 px-4">
-            {/* Quick Start - Friendly design */}
-            {onSkip && (
-                <div className="mb-6">
-                    <div
-                        className="p-4 rounded-xl border border-primary/20 bg-white cursor-pointer hover:bg-primary/5 transition-all group"
-                        onClick={onSkip}
-                    >
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                    <Briefcase className="w-5 h-5 text-primary" />
-                                </div>
-                                <div>
-                                    <p className="font-medium text-foreground">すぐに見てもらう 🚀</p>
-                                    <p className="text-xs text-muted-foreground">フリーランスの味方設定でサクッとチェック</p>
-                                </div>
-                            </div>
-                            <ArrowRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Divider */}
-            <div className="flex items-center gap-4 mb-6">
-                <div className="flex-1 h-px bg-primary/20" />
-                <span className="text-xs text-muted-foreground">詳しく設定する場合</span>
-                <div className="flex-1 h-px bg-primary/20" />
-            </div>
-
             {/* Main Form */}
             <div className="space-y-6">
 
@@ -147,7 +116,7 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
                         <StepBadge number={1} />
-                        <h3 className="text-sm font-medium text-primary">今回のあなたの立場は？</h3>
+                        <h3 className="text-sm font-medium text-primary">今回のあなたの立場</h3>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
@@ -275,11 +244,11 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 >
                     {isComplete ? (
                         <>
-                            チェックをお願いする 🛡️
+                            契約書をチェックする
                             <ArrowRight className="w-4 h-4 ml-2" />
                         </>
                     ) : (
-                        "「甲」または「乙」を選んでね"
+                        "「甲」または「乙」を選択してください"
                     )}
                 </Button>
                 {isComplete && (

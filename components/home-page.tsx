@@ -11,10 +11,10 @@ import { Footer } from "@/components/footer";
 import { SignatureLogo } from "@/components/signature-logo";
 import { analyzeDeepAction, AnalysisState } from "@/app/actions";
 import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
-import { Loader2, LogIn } from "lucide-react";
-import { AnalyzingProgress } from "@/components/analyzing-progress";
+import { Loader2, LogIn, Sparkles, Settings2 } from "lucide-react";
+import { AnalyzingOverlay } from "@/components/analyzing-overlay";
 import { useAuth } from "@/lib/auth/auth-context";
-import { AuthModal, UserMenu } from "@/components/auth/auth-modal";
+import { AuthModal } from "@/components/auth/auth-modal";
 import { HistorySidebar, useAnalysisHistory } from "@/components/history-sidebar";
 import { UsageLimitBanner } from "@/components/ui/usage-limit-banner";
 import { RegistrationGateModal } from "@/components/auth/registration-gate-modal";
@@ -59,9 +59,11 @@ export function HomePage() {
     const [extractionData, setExtractionData] = useState<ExtractionResult | null>(null);
     const [contractText, setContractText] = useState<string>("");
     const [loading, setLoading] = useState(false);
-    // A-1: Simplified flow - only 3 steps now: upload -> unified_context -> analyzing -> complete
-    const [step, setStep] = useState<"upload" | "unified_context" | "analyzing" | "complete">("upload");
-    // A-2: Progressive loading messages
+    // Full flow: upload -> unified_context -> complete (analyzing happens via overlay)
+    const [step, setStep] = useState<"upload" | "unified_context" | "complete">("upload");
+    // Overlay state for analyzing
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    // Progressive loading messages
     const [loadingMessage, setLoadingMessage] = useState("契約書を解析しています...");
 
     // Auth & History state
@@ -111,18 +113,11 @@ export function HomePage() {
             setExtractionData(result);
             setContractText(text);
 
-            // SPECULATIVE EXECUTION: Start background analysis immediately!
-            // This runs while user is filling out the context form
+            // Start speculative analysis in background while user selects conditions
             console.log("[Speculative] Starting background analysis...");
             speculativePromiseRef.current = startSpeculativeAnalysis(text, analyzeDeepAction);
-            speculativePromiseRef.current.then(cache => {
-                if (cache) {
-                    speculativeCacheRef.current = cache;
-                    console.log("[Speculative] Background analysis completed!");
-                }
-            });
 
-            // A-1: Go directly to unified context (combines user context + role selection)
+            // Show condition selection form (speculative analysis runs in parallel)
             setStep("unified_context");
         }
     };
@@ -139,21 +134,27 @@ export function HomePage() {
         }
     }, [user, saveToHistory]);
 
-    // A-1: Unified handler for context + role completion
-    // SPECULATIVE EXECUTION: Use pre-computed results if available and context matches
-    const handleUnifiedComplete = async (ctx: UserContext, role: "party_a" | "party_b") => {
+    // NEW: Auto-analysis handler with overlay (no page transition)
+    // This provides faster UX by eliminating the unified_context step
+    const handleAutoAnalysis = async (
+        text: string,
+        extraction: ExtractionResult,
+        ctx: UserContext,
+        role: "party_a" | "party_b"
+    ) => {
         trackEvent(ANALYTICS_EVENTS.USER_CONTEXT_COMPLETED);
         trackEvent(ANALYTICS_EVENTS.ROLE_SELECTED, { role });
 
-        setStep("analyzing");
+        // Show overlay instead of changing step
+        setIsAnalyzing(true);
         setLoadingMessage("契約書を拝見しています...");
 
         // Progressive loading messages
         const messages = [
-            "じっくり見ているよ...👀",
-            "条項をチェック中...🔍",
-            "気になるところを整理してる...",
-            "もうすぐ終わるよ！✨"
+            "内容を確認しています...",
+            "条項をチェックしています...",
+            "重要なポイントを整理しています...",
+            "まもなく完了します..."
         ];
         let msgIndex = 0;
         const interval = setInterval(() => {
@@ -164,8 +165,7 @@ export function HomePage() {
         try {
             let result: AnalysisState;
 
-            // SPECULATIVE EXECUTION: Check if we can use pre-computed results
-            // First, wait for the speculative promise if it's still running
+            // Wait for speculative analysis if still running
             if (speculativePromiseRef.current) {
                 console.log("[Speculative] Waiting for background analysis...");
                 const cache = await speculativePromiseRef.current;
@@ -177,16 +177,17 @@ export function HomePage() {
             const cache = speculativeCacheRef.current;
 
             if (cache && isContextMatch(ctx, cache.usedContext)) {
-                // FAST PATH: Context matches! Use cached results immediately
+                // FAST PATH: Use cached results immediately
                 console.log("[Speculative] Context matches! Using cached results (INSTANT)");
                 clearInterval(interval);
                 setAnalysisData(cache.analysisResult);
                 trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED, { speculative: true });
+                setIsAnalyzing(false);
                 setStep("complete");
 
-                // Save to history for logged-in users
+                // Save to history
                 if (user) {
-                    await handleSaveToHistory(cache.analysisResult, contractText, extractionData?.contract_type);
+                    await handleSaveToHistory(cache.analysisResult, text, extraction.contract_type);
                 } else {
                     setShowSavePrompt(true);
                 }
@@ -195,37 +196,25 @@ export function HomePage() {
                     localStorage.setItem("agreeLastAnalysis", JSON.stringify({
                         timestamp: new Date().toISOString(),
                         data: cache.analysisResult,
-                        text: contractText,
+                        text: text,
                     }));
                 } catch { }
                 return;
             }
 
-            // SLOW PATH: Context differs, need to re-analyze
-            if (cache) {
-                const diff = getContextDiff(ctx, cache.usedContext);
-                console.log("[Speculative] Context differs:", diff);
-
-                if (!diff.needsFullReanalysis) {
-                    // Minor differences - could potentially adapt results
-                    // For now, fall through to full re-analysis for accuracy
-                    console.log("[Speculative] Minor diff but re-analyzing for accuracy");
-                }
-            }
-
-            // Full re-analysis with actual context
-            console.log("[Speculative] Running full analysis with actual context...");
-            result = await analyzeDeepAction(contractText, ctx);
+            // Full analysis with actual context
+            console.log("[Analysis] Running full analysis...");
+            result = await analyzeDeepAction(text, ctx);
             clearInterval(interval);
 
             if (result.data) {
                 setAnalysisData(result.data);
                 trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED);
+                setIsAnalyzing(false);
                 setStep("complete");
 
-                // Save to history for logged-in users
                 if (user) {
-                    await handleSaveToHistory(result.data, contractText, extractionData?.contract_type);
+                    await handleSaveToHistory(result.data, text, extraction.contract_type);
                 } else {
                     setShowSavePrompt(true);
                 }
@@ -234,12 +223,13 @@ export function HomePage() {
                     localStorage.setItem("agreeLastAnalysis", JSON.stringify({
                         timestamp: new Date().toISOString(),
                         data: result.data,
-                        text: contractText,
+                        text: text,
                     }));
                 } catch { }
             } else {
                 trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "analysis_failed" });
-                alert("うまく確認できなかったみたい。もう一度試してみてね！");
+                alert("分析中にエラーが発生しました。もう一度お試しください。");
+                setIsAnalyzing(false);
                 setStep("upload");
             }
         } catch (e) {
@@ -247,25 +237,22 @@ export function HomePage() {
             console.error(e);
             trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "exception" });
             alert("エラーが発生しました");
+            setIsAnalyzing(false);
             setStep("upload");
         }
     };
 
-    // A-1: Quick start handler (skip detailed settings)
-    const handleQuickStart = async () => {
-        if (!extractionData) return;
-
-        // Use defaults
-        const defaultContext: UserContext = {
-            ...DEFAULT_USER_CONTEXT,
-            userRole: "vendor",
-            userEntityType: "individual",
-            counterpartyCapital: "unknown",
-        };
-
-        // Default to party_b (most freelancers are 乙)
-        await handleUnifiedComplete(defaultContext, "party_b");
+    // Cancel analysis handler
+    const handleCancelAnalysis = () => {
+        setIsAnalyzing(false);
+        setStep("upload");
+        setExtractionData(null);
+        setContractText("");
+        speculativeCacheRef.current = null;
+        speculativePromiseRef.current = null;
     };
+
+
 
     // Load history item
     const handleSelectHistory = async (historyId: string) => {
@@ -289,6 +276,10 @@ export function HomePage() {
     const handleNewAnalysis = () => {
         handleAnalysisStart();
         setSidebarOpen(false);
+    };
+    // Handler for when user completes context selection
+    const handleContextComplete = (ctx: UserContext, role: "party_a" | "party_b") => {
+        handleAutoAnalysis(contractText, extractionData!, ctx, role);
     };
 
     // Initially show the unified hero with upload section
@@ -335,12 +326,12 @@ export function HomePage() {
                     {/* Main Copy - Guardian Manager voice */}
                     <div className="text-center space-y-5 mb-14 animate-fade-in-delayed">
                         <p className="text-2xl leading-normal max-w-lg mx-auto font-bold text-primary text-balance tracking-tight">
-                            契約書のチェックは任せて。<br />
-                            あなたは、その手で生み出すことに集中してほしいから。<span className="emoji-bounce">✨</span>
+                            契約書のチェックはお任せください。<br />
+                            あなたは、創作に集中できます。
                         </p>
                         <p className="text-slate-600 text-[15px] leading-relaxed max-w-md mx-auto font-medium">
-                            複雑な契約書も、私がサッと目を通して気になるポイントをお伝えするよ。<br />
-                            あなたは最高の作品を作ることに集中して。<span className="emoji-bounce">💪</span>
+                            複雑な契約書も、重要なポイントを分かりやすくお伝えします。<br />
+                            安心してお仕事に取り組めるよう、しっかりサポートいたします。
                         </p>
                     </div>
 
@@ -371,35 +362,62 @@ export function HomePage() {
                     onClose={() => setShowGateModal(false)}
                     reason="limit"
                 />
+                {/* Analyzing Overlay - shows on top without page transition */}
+                <AnalyzingOverlay
+                    isActive={isAnalyzing}
+                    loadingMessage={loadingMessage}
+                    onCancel={handleCancelAnalysis}
+                />
             </div>
         );
     }
 
-    // A-1: Unified Context Collection Step (combines user context + role selection)
+    // Context selection step (speculative analysis running in background)
     if (step === "unified_context" && extractionData) {
         return (
-            <div className="min-h-screen flex flex-col bg-white font-sans">
-                <div className="flex-1 flex flex-col items-center justify-start py-8 px-4 overflow-y-auto">
+            <div className="min-h-screen flex flex-col bg-guardian-warm bg-guardian-blob text-slate-600 font-sans">
+                {/* Analyzing Overlay - shows when analysis completes */}
+                <AnalyzingOverlay
+                    isActive={isAnalyzing}
+                    loadingMessage={loadingMessage}
+                    onCancel={handleCancelAnalysis}
+                />
+
+                {/* Header */}
+                <header className="absolute top-0 left-0 right-0 p-4 z-40 flex justify-between items-center">
+                    <div
+                        className="flex items-center gap-2 cursor-pointer"
+                        onClick={() => {
+                            setStep("upload");
+                            setExtractionData(null);
+                            setContractText("");
+                            speculativeCacheRef.current = null;
+                            speculativePromiseRef.current = null;
+                        }}
+                    >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/logo.png" alt="agree" className="h-10 w-auto opacity-70 hover:opacity-100 transition-opacity" />
+                    </div>
+                </header>
+
+                {/* Main Content */}
+                <section className="flex-1 flex flex-col items-center justify-center px-6 pt-20 pb-16">
+                    <div className="text-center mb-8">
+                        <p className="text-lg text-primary font-medium">
+                            確認内容の設定
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-2">
+                            より正確なチェックのためにお答えください
+                        </p>
+                    </div>
+
                     <UnifiedContextForm
                         extractionData={extractionData}
-                        onComplete={handleUnifiedComplete}
-                        onSkip={handleQuickStart}
+                        onComplete={handleContextComplete}
                     />
-                </div>
-            </div>
-        );
-    }
+                </section>
 
-    // A-2: Progressive loading screen with step indicators
-    if (step === "analyzing") {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-6 animate-in fade-in">
-                <div className="w-full max-w-md">
-                    <AnalyzingProgress
-                        isActive={true}
-                        loadingMessage={loadingMessage}
-                    />
-                </div>
+                <Footer />
             </div>
         );
     }

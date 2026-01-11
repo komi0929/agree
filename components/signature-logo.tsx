@@ -21,7 +21,10 @@ export function SignatureLogo({ className = "" }: { className?: string }) {
                     }`}
                 style={{
                     maxHeight: "100%",
-                    objectFit: "contain"
+                    objectFit: "contain",
+                    // Compensate for whitespace in the original PNG
+                    marginTop: "-12%",
+                    marginBottom: "-12%"
                 }}
             />
         </div>

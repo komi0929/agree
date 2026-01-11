@@ -15,6 +15,7 @@ import { ArrowLeft, FileText, Send, Sparkles, Loader2, X, Lightbulb } from "luci
 import { modifyContractAction } from "@/app/generate/actions";
 import { ContractInput, DEFAULT_CONTRACT_OPTIONS } from "@/lib/types/contract-input";
 import { runAllCheckpoints, CheckpointResult } from "@/lib/rules/checkpoints-28";
+import { ShareModal } from "@/components/share-modal";
 import dynamic from "next/dynamic";
 
 const ChecklistPanel = dynamic(() => import("@/components/split-view/checklist-panel").then(mod => mod.ChecklistPanel), {
@@ -41,6 +42,9 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
     // 28 Checkpoints state
     const [showChecklist, setShowChecklist] = useState(false);
     const [checkpointResult, setCheckpointResult] = useState<CheckpointResult | null>(null);
+
+    // Share modal state
+    const [showShareModal, setShowShareModal] = useState(false);
 
     // Toggle risk selection
     const handleRiskToggle = useCallback((index: number) => {
@@ -177,8 +181,18 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                     activeFilter={riskFilter}
                     onFilterChange={setRiskFilter}
                     on28CheckClick={handle28CheckClick}
+                    onShareClick={() => setShowShareModal(true)}
                 />
             </div>
+
+            {/* Share Modal */}
+            <ShareModal
+                open={showShareModal}
+                onClose={() => setShowShareModal(false)}
+                analysisData={data}
+                contractText={text}
+                contractType={contractType}
+            />
 
             {/* 28 Checkpoints Panel (Modal) */}
             {showChecklist && checkpointResult && (
@@ -268,7 +282,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                         onClick={() => setViewMode("message")}
                                     >
                                         <Send className="w-4 h-4 mr-2" />
-                                        「直して」って伝える ✉️
+                                        修正を依頼する
                                     </Button>
                                     <Button
                                         size="sm"
@@ -284,7 +298,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                         ) : (
                                             <>
                                                 <Sparkles className="w-4 h-4 mr-2" />
-                                                この内容で契約書を作り直す ✨
+                                                この内容で契約書を再作成
                                             </>
                                         )}
                                     </Button>
@@ -298,8 +312,8 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                         <Lightbulb className="w-4 h-4 text-primary" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-foreground">気になったところをタップしてね 👆</p>
-                                        <p className="text-xs text-muted-foreground">まとめて「ここ直して」って伝える文章を作れるよ</p>
+                                        <p className="text-sm font-medium text-foreground">気になる項目を選択してください</p>
+                                        <p className="text-xs text-muted-foreground">選択した項目をまとめて修正依頼文を作成できます</p>
                                     </div>
                                 </div>
 
@@ -311,7 +325,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                         disabled
                                     >
                                         <Send className="w-4 h-4 mr-2" />
-                                        「直して」って伝える
+                                        修正を依頼する
                                     </Button>
                                     <Button
                                         size="sm"
