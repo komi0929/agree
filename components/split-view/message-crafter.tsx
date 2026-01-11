@@ -17,7 +17,7 @@ interface MessageCrafterProps {
 }
 
 type MessageTone = "formal" | "neutral" | "casual";
-type MessagePurpose = "request" | "question" | "negotiate";
+type MessagePurpose = "request" | "question" | "negotiate" | "yesBut";
 
 const TONE_OPTIONS = [
     { value: "formal" as const, label: "丁寧に", description: "敬語で丁重に依頼" },
@@ -29,6 +29,7 @@ const PURPOSE_OPTIONS = [
     { value: "request" as const, label: "修正をお願い" },
     { value: "question" as const, label: "質問する" },
     { value: "negotiate" as const, label: "条件交渉" },
+    { value: "yesBut" as const, label: "Yes, But話法" },
 ];
 
 export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafterProps) {
@@ -49,16 +50,19 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
                 request: "お世話になっております。\n契約書の内容を確認いたしました。\n以下の点について、修正をお願いしたく存じます。\n\n",
                 question: "お世話になっております。\n契約書を拝見いたしました。\n以下の点についてご確認させていただきたくご連絡いたしました。\n\n",
                 negotiate: "お世話になっております。\n契約書を確認いたしました。\n以下の点について、条件のご相談をさせていただけますでしょうか。\n\n",
+                yesBut: "お世話になっております。\n契約書を確認いたしました。\nご提示いただいた条件について、大変ありがたく存じます。\nつきましては、一部ご相談させていただきたい点がございます。\n\n",
             },
             neutral: {
                 request: "お疲れ様です。\n契約書を確認しました。\n以下の箇所について修正をお願いできますでしょうか。\n\n",
                 question: "お疲れ様です。\n契約書を確認しました。\n以下の点について質問があります。\n\n",
                 negotiate: "お疲れ様です。\n契約書を確認しました。\n以下の条件について相談させてください。\n\n",
+                yesBut: "お疲れ様です。\n契約書を確認しました。\nご提示いただいた条件、ありがとうございます。\n概ね問題ございませんが、一部相談させてください。\n\n",
             },
             casual: {
                 request: "契約書見ました！\nちょっと以下の点だけ気になったので、相談させてください。\n\n",
                 question: "契約書見ました！\n以下の点がちょっと分からなくて、教えてほしいです。\n\n",
                 negotiate: "契約書見ました！\n以下の条件についてちょっと相談したいのですが…\n\n",
+                yesBut: "契約書見ました！\n基本的にはOKです！\nただ、ちょっとだけ相談したい点がありまして…\n\n",
             },
         };
 
@@ -67,16 +71,19 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
                 request: "\n\nお手数をおかけしますが、ご検討のほどよろしくお願いいたします。",
                 question: "\n\nお忙しいところ恐れ入りますが、ご回答いただけますと幸いです。",
                 negotiate: "\n\nご多用中恐縮ですが、ご検討いただけますと幸いです。",
+                yesBut: "\n\n上記以外の条件については、問題なく進められると考えております。\nご検討のほど、よろしくお願いいたします。",
             },
             neutral: {
                 request: "\n\nご確認よろしくお願いいたします。",
                 question: "\n\nご回答よろしくお願いします。",
                 negotiate: "\n\nご検討よろしくお願いします。",
+                yesBut: "\n\n上記以外は問題ありません。\nご検討よろしくお願いします。",
             },
             casual: {
                 request: "\n\nよろしくお願いします！",
                 question: "\n\nよろしくお願いします！",
                 negotiate: "\n\nよろしくお願いします！",
+                yesBut: "\n\nそれ以外はバッチリです！\nよろしくお願いします！",
             },
         };
 
@@ -94,7 +101,13 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
                     neutral: "【必ず修正いただきたい点】\n以下は契約を進める上で重要な点です。\n\n",
                     casual: "【ここは必ず直してほしいです】\n\n",
                 };
-                body += sectionHeader[tone];
+                // Yes, But話法用のセクションヘッダー
+                const yesButheader = {
+                    formal: "【ご相談させていただきたい点】\n以下の点について、もう少しご配慮いただけると大変助かります。\n\n",
+                    neutral: "【調整いただきたい点】\n以下の点だけ調整いただけると助かります。\n\n",
+                    casual: "【ここだけ相談させてください】\n\n",
+                };
+                body += purpose === "yesBut" ? yesButheader[tone] : sectionHeader[tone];
 
                 mustChange.forEach((r, i) => {
                     const suggestion = r.suggestion.revised_text || "（修正案をご提案）";
@@ -108,6 +121,10 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
                         body += `${i + 1}. 「${r.section_title}」について\n`;
                         body += `   理由：${reason}\n`;
                         body += `   希望条件：${suggestion}\n\n`;
+                    } else if (purpose === "yesBut") {
+                        body += `${i + 1}. 「${r.section_title}」について\n`;
+                        body += `   趣旨は理解いたしますが、${reason}\n`;
+                        body += `   可能であれば：${suggestion}\n\n`;
                     } else {
                         body += `${i + 1}. 「${r.section_title}」について\n`;
                         body += `   理由：${reason}\n`;
@@ -117,7 +134,7 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
             }
 
             // 「ご検討いただけると助かる点」セクション
-            if (wouldAppreciate.length > 0) {
+            if (wouldAppreciate.length > 0 && purpose !== "yesBut") {
                 const sectionHeader = {
                     formal: "【ご検討いただけますと幸いな点】\n以下の点につきましては、可能であればご調整いただけると大変助かります。\n\n",
                     neutral: "【できればご検討いただきたい点】\n以下は必須ではありませんが、調整いただけると助かります。\n\n",
@@ -144,6 +161,10 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
                 return `${preamble[tone][purpose]}「${risk.section_title}」について\n\nこの条項の意図を確認させてください。${risk.explanation}${closing[tone][purpose]}`;
             } else if (purpose === "negotiate") {
                 return `${preamble[tone][purpose]}「${risk.section_title}」について\n\n希望条件: ${risk.suggestion.revised_text}${closing[tone][purpose]}`;
+            } else if (purpose === "yesBut") {
+                const reason = risk.practical_impact || risk.explanation;
+                const suggestion = risk.suggestion.revised_text || "（代替案をご提案）";
+                return `${preamble[tone][purpose]}「${risk.section_title}」について\n\n趣旨は理解いたしますが、${reason}\n可能であれば: ${suggestion}${closing[tone][purpose]}`;
             }
             return risk.suggestion.negotiation_message[tone];
         }
