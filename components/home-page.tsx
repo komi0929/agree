@@ -286,33 +286,15 @@ export function HomePage() {
     if (step === "upload" && !analysisData) {
         return (
             <div className="min-h-screen flex flex-col bg-guardian-warm bg-guardian-blob text-slate-600 font-sans selection:bg-slate-100 selection:text-slate-900">
-                {/* History Sidebar for logged-in users */}
-                {user && (
-                    <HistorySidebar
-                        isOpen={sidebarOpen}
-                        onToggle={() => setSidebarOpen(!sidebarOpen)}
-                        onSelectHistory={handleSelectHistory}
-                        onNewAnalysis={handleNewAnalysis}
-                        currentHistoryId={currentHistoryId}
-                    />
-                )}
-
-                {/* Header (Minimal - UserMenu is now in sidebar) */}
-                {!user && (
-                    <header className="absolute top-0 right-0 p-4 z-40">
-                        {authLoading ? null : (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setShowAuthModal(true)}
-                                className="text-primary hover:text-[#FFD700] hover:bg-white/10 rounded-full bg-white/50 backdrop-blur-sm"
-                            >
-                                <LogIn className="w-4 h-4 mr-2" />
-                                ログイン
-                            </Button>
-                        )}
-                    </header>
-                )}
+                {/* History Sidebar - visible for all users */}
+                <HistorySidebar
+                    isOpen={sidebarOpen}
+                    onToggle={() => setSidebarOpen(!sidebarOpen)}
+                    onSelectHistory={handleSelectHistory}
+                    onNewAnalysis={handleNewAnalysis}
+                    currentHistoryId={currentHistoryId}
+                    onLoginClick={() => setShowAuthModal(true)}
+                />
 
                 {/* Usage limit banner */}
                 <UsageLimitBanner type="check" onRegisterClick={() => setShowGateModal(true)} />
@@ -425,16 +407,15 @@ export function HomePage() {
     // Analysis Result View (Clean & Centered)
     return (
         <main className="min-h-screen flex flex-col bg-white">
-            {/* History Sidebar for logged-in users */}
-            {user && (
-                <HistorySidebar
-                    isOpen={sidebarOpen}
-                    onToggle={() => setSidebarOpen(!sidebarOpen)}
-                    onSelectHistory={handleSelectHistory}
-                    onNewAnalysis={handleNewAnalysis}
-                    currentHistoryId={currentHistoryId}
-                />
-            )}
+            {/* History Sidebar - visible for all users */}
+            <HistorySidebar
+                isOpen={sidebarOpen}
+                onToggle={() => setSidebarOpen(!sidebarOpen)}
+                onSelectHistory={handleSelectHistory}
+                onNewAnalysis={handleNewAnalysis}
+                currentHistoryId={currentHistoryId}
+                onLoginClick={() => setShowAuthModal(true)}
+            />
 
             <header className="h-20 px-8 flex items-center justify-between max-w-5xl mx-auto w-full">
                 <div

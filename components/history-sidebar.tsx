@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth/auth-context";
 import { supabase } from "@/lib/auth/supabase-client";
-import { FileText, Plus, Trash2, ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { FileText, Plus, Trash2, ChevronLeft, ChevronRight, Clock, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 
 interface HistoryItem {
@@ -21,6 +22,7 @@ interface HistorySidebarProps {
     onSelectHistory: (historyId: string) => void;
     onNewAnalysis: () => void;
     currentHistoryId?: string;
+    onLoginClick?: () => void;
 }
 
 export function HistorySidebar({
@@ -29,6 +31,7 @@ export function HistorySidebar({
     onSelectHistory,
     onNewAnalysis,
     currentHistoryId,
+    onLoginClick,
 }: HistorySidebarProps) {
     const { user, session } = useAuth();
     const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -93,7 +96,6 @@ export function HistorySidebar({
         return date.toLocaleDateString("ja-JP", { month: "short", day: "numeric" });
     };
 
-    if (!user) return null;
 
     return (
         <>
@@ -139,7 +141,13 @@ export function HistorySidebar({
 
                 {/* History List */}
                 <div className="flex-1 overflow-y-auto px-3 pb-4">
-                    {isLoading ? (
+                    {!user ? (
+                        // Non-logged-in: Show placeholder with lock icon
+                        <div className="text-center py-8 text-muted-foreground text-sm">
+                            <Lock className="w-8 h-8 mx-auto mb-2 opacity-50 text-primary" />
+                            <p className="text-xs">端末に保存済み</p>
+                        </div>
+                    ) : isLoading ? (
                         <div className="text-center py-8 text-muted-foreground">
                             読み込み中...
                         </div>
@@ -183,14 +191,33 @@ export function HistorySidebar({
                     )}
                 </div>
 
-                {/* Footer / User Profile */}
+                {/* Footer - Different content based on auth state */}
                 <div className="p-4 border-t border-primary/10 flex-shrink-0 bg-white/50 backdrop-blur-sm">
-                    <div className="flex items-center justify-between mb-4 px-1">
-                        <span className="text-[10px] uppercase font-bold text-primary/50 tracking-widest">
-                            {history.length}件の履歴
-                        </span>
-                    </div>
-                    <UserMenu />
+                    {user ? (
+                        // Logged in: Show history count and user menu
+                        <>
+                            <div className="flex items-center justify-between mb-4 px-1">
+                                <span className="text-[10px] uppercase font-bold text-primary/50 tracking-widest">
+                                    {history.length}件の履歴
+                                </span>
+                            </div>
+                            <UserMenu />
+                        </>
+                    ) : (
+                        // Not logged in: Show login CTA
+                        <div className="space-y-3">
+                            <p className="text-xs text-muted-foreground flex items-center gap-2">
+                                <Lock className="w-3 h-3" />
+                                登録すれば履歴を保存できます
+                            </p>
+                            <Button
+                                onClick={onLoginClick}
+                                className="w-full bg-primary hover:bg-primary/90 text-white rounded-full font-medium"
+                            >
+                                無料ではじめる
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </div>
         </>
