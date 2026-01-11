@@ -12,23 +12,16 @@ export function SignatureLogo({ className = "" }: { className?: string }) {
     }, []);
 
     return (
-        <div className={`relative overflow-hidden ${className}`}>
-            {/* Logo with clip-path reveal animation */}
+        <div className={`relative ${className}`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            {/* CSS Mask for color control */}
-            <div
-                className="w-full h-full bg-current transition-all duration-1000 ease-out"
+            <img
+                src="/logo.png"
+                alt="agree logo"
+                className={`w-full h-auto transition-all duration-1000 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-[10px]"
+                    }`}
                 style={{
-                    maskImage: "url(/logo.png)",
-                    maskSize: "contain",
-                    maskRepeat: "no-repeat",
-                    maskPosition: "center",
-                    WebkitMaskImage: "url(/logo.png)",
-                    WebkitMaskSize: "contain",
-                    WebkitMaskRepeat: "no-repeat",
-                    WebkitMaskPosition: "center",
-                    opacity: isVisible ? 1 : 0,
-                    transform: isVisible ? "translateY(0)" : "translateY(10px)",
+                    maxHeight: "100%",
+                    objectFit: "contain"
                 }}
             />
         </div>

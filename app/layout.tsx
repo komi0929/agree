@@ -17,9 +17,9 @@ export const metadata: Metadata = {
   title: "agree - 契約書確認サポート",
   description: "契約書の気になる点を確認してくれる、あなただけのマネージャー。フリーランス・個人事業主のための無料契約書サポート。",
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/apple-icon.png",
   },
   openGraph: {
     title: "agree - 契約書確認サポート",

@@ -327,9 +327,9 @@ export function HomePage() {
                 <UsageLimitBanner type="check" onRegisterClick={() => setShowGateModal(true)} />
 
                 <section className="flex-1 flex flex-col items-center pt-32 pb-16 px-6 max-w-2xl mx-auto w-full transition-all duration-500">
-                    {/* Minimalist Logo - Reduced size for balance */}
+                    {/* Minimalist Logo - Optimized size/aspect for new branding */}
                     <div className="mb-14 flex flex-col items-center">
-                        <SignatureLogo className="w-44 h-22 text-primary" />
+                        <SignatureLogo className="w-56" />
                     </div>
 
                     {/* Main Copy - Guardian Manager voice */}
