@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface AdminLayoutProps {
     children: ReactNode;
@@ -44,43 +46,43 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-                <div className="text-slate-400">読み込み中...</div>
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="text-muted-foreground">読み込み中...</div>
             </div>
         );
     }
 
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+            <div className="min-h-screen bg-background flex items-center justify-center p-4">
                 <div className="w-full max-w-sm">
-                    <div className="bg-slate-800 rounded-2xl p-8 shadow-xl border border-slate-700">
+                    <div className="bg-white rounded-2xl p-8 shadow-xl border border-primary/20">
                         <div className="text-center mb-8">
                             <div className="text-3xl mb-2">🔒</div>
-                            <h1 className="text-xl font-semibold text-white">Admin Dashboard</h1>
-                            <p className="text-slate-400 text-sm mt-1">管理者PINを入力してください</p>
+                            <h1 className="text-xl font-semibold text-primary">Admin Dashboard</h1>
+                            <p className="text-muted-foreground text-sm mt-1">管理者PINを入力してください</p>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            <input
+                            <Input
                                 type="password"
                                 value={pin}
                                 onChange={(e) => setPin(e.target.value)}
                                 placeholder="PIN"
-                                className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-lg tracking-widest"
+                                className="w-full text-center text-lg tracking-widest border-primary/20 focus-visible:ring-primary"
                                 autoFocus
                             />
 
                             {error && (
-                                <p className="text-red-400 text-sm text-center">{error}</p>
+                                <p className="text-red-500 text-sm text-center">{error}</p>
                             )}
 
-                            <button
+                            <Button
                                 type="submit"
-                                className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors"
+                                className="w-full rounded-full bg-primary hover:bg-primary/90 text-white hover:text-[#FFD700] transition-colors"
                             >
                                 ログイン
-                            </button>
+                            </Button>
                         </form>
                     </div>
                 </div>
@@ -89,7 +91,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     }
 
     return (
-        <div className="min-h-screen bg-slate-900">
+        <div className="min-h-screen bg-background">
             {children}
         </div>
     );

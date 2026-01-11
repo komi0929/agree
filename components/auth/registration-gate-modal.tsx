@@ -78,34 +78,34 @@ export function RegistrationGateModal({ open, onClose, reason, onSuccess }: Regi
 
     return (
         <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md bg-background border border-primary/20 sm:rounded-2xl">
                 {step === "form" ? (
                     <>
                         <DialogHeader className="space-y-3">
-                            <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                                <Mail className="w-6 h-6 text-blue-600" />
+                            <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
+                                <Mail className="w-6 h-6 text-primary" />
                             </div>
-                            <DialogTitle className="text-center text-xl font-bold text-slate-900">
+                            <DialogTitle className="text-center text-xl font-bold text-primary">
                                 {title}
                             </DialogTitle>
-                            <DialogDescription className="text-center text-slate-600">
+                            <DialogDescription className="text-center text-muted-foreground">
                                 {description}
                             </DialogDescription>
                         </DialogHeader>
 
                         <div className="py-6 space-y-6">
                             {/* Benefits */}
-                            <div className="bg-slate-50 rounded-xl p-4 space-y-3">
-                                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                            <div className="bg-primary/5 rounded-2xl p-4 space-y-3 border border-primary/10">
+                                <p className="text-xs font-medium text-primary/70 uppercase tracking-wide">
                                     無料登録で使える機能
                                 </p>
                                 <div className="space-y-2">
                                     {BENEFITS.map((benefit, i) => (
                                         <div key={i} className="flex items-center gap-3">
-                                            <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                                                <benefit.icon className="w-3 h-3 text-green-600" />
+                                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                                <benefit.icon className="w-3 h-3 text-primary" />
                                             </div>
-                                            <span className="text-sm text-slate-700">{benefit.text}</span>
+                                            <span className="text-sm text-foreground">{benefit.text}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -114,7 +114,7 @@ export function RegistrationGateModal({ open, onClose, reason, onSuccess }: Regi
                             {/* Form */}
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 {error && (
-                                    <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg">
+                                    <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100">
                                         {error}
                                     </div>
                                 )}
@@ -125,12 +125,12 @@ export function RegistrationGateModal({ open, onClose, reason, onSuccess }: Regi
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
-                                        className="h-11"
+                                        className="h-11 bg-white border-primary/20 focus-visible:ring-primary"
                                     />
                                 </div>
                                 <Button
                                     type="submit"
-                                    className="w-full h-11 bg-slate-900 hover:bg-slate-800"
+                                    className="w-full h-11 bg-primary hover:bg-primary/90 text-white rounded-full hover:text-[#FFD700]"
                                     disabled={isLoading}
                                 >
                                     {isLoading ? (
@@ -142,7 +142,7 @@ export function RegistrationGateModal({ open, onClose, reason, onSuccess }: Regi
                                         "ログインリンクを送信"
                                     )}
                                 </Button>
-                                <p className="text-center text-xs text-slate-400">
+                                <p className="text-center text-xs text-muted-foreground">
                                     パスワード不要 · メールリンクでログイン
                                 </p>
                             </form>
@@ -150,34 +150,34 @@ export function RegistrationGateModal({ open, onClose, reason, onSuccess }: Regi
                     </>
                 ) : step === "sent" ? (
                     <div className="py-12 text-center space-y-4">
-                        <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center animate-in zoom-in duration-200">
-                            <Mail className="w-6 h-6 text-blue-600" />
+                        <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center animate-in zoom-in duration-200 border border-primary/20">
+                            <Mail className="w-6 h-6 text-primary" />
                         </div>
-                        <DialogTitle className="text-xl font-bold text-slate-900">
+                        <DialogTitle className="text-xl font-bold text-primary">
                             メールを送信しました
                         </DialogTitle>
-                        <DialogDescription className="text-slate-600">
-                            <span className="font-medium text-slate-800">{email}</span> 宛に
+                        <DialogDescription className="text-muted-foreground">
+                            <span className="font-medium text-foreground">{email}</span> 宛に
                             <br />ログインリンクを送信しました。
                             <br />メールに記載のリンクをクリックしてください。
                         </DialogDescription>
                         <Button
                             onClick={handleClose}
                             variant="outline"
-                            className="mt-4"
+                            className="mt-4 rounded-full border-primary/20 text-muted-foreground hover:bg-primary/5 hover:text-primary"
                         >
                             閉じる
                         </Button>
                     </div>
                 ) : (
                     <div className="py-12 text-center space-y-4">
-                        <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center animate-in zoom-in duration-200">
-                            <Check className="w-6 h-6 text-green-600" />
+                        <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center animate-in zoom-in duration-200 border border-primary/20">
+                            <Check className="w-6 h-6 text-primary" />
                         </div>
-                        <DialogTitle className="text-xl font-bold text-slate-900">
+                        <DialogTitle className="text-xl font-bold text-primary">
                             登録完了！
                         </DialogTitle>
-                        <DialogDescription className="text-slate-600">
+                        <DialogDescription className="text-muted-foreground">
                             機能が使えるようになりました
                         </DialogDescription>
                     </div>

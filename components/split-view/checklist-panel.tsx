@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { CheckpointItem, CheckpointResult } from "@/lib/rules/checkpoints-28";
 import { Check, AlertTriangle, AlertOctagon, Minus, ChevronDown, ChevronUp, Shield, Lightbulb, X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 interface ChecklistPanelProps {
@@ -31,26 +30,26 @@ export function ChecklistPanel({ result, onClose, onItemClick }: ChecklistPanelP
     const getStatusIcon = (status: CheckpointItem["status"]) => {
         switch (status) {
             case "clear":
-                return <Check className="w-4 h-4 text-emerald-600" />;
+                return <Check className="w-4 h-4 text-primary" />; // Emerald -> Primary
             case "warning":
                 return <AlertTriangle className="w-4 h-4 text-amber-500" />;
             case "critical":
                 return <AlertOctagon className="w-4 h-4 text-red-500" />;
             default:
-                return <Minus className="w-4 h-4 text-slate-400" />;
+                return <Minus className="w-4 h-4 text-muted-foreground" />;
         }
     };
 
     const getStatusStyle = (status: CheckpointItem["status"]) => {
         switch (status) {
             case "clear":
-                return "bg-emerald-50 border-emerald-200";
+                return "bg-primary/5 border-primary/20";
             case "warning":
                 return "bg-amber-50 border-amber-200";
             case "critical":
                 return "bg-red-50 border-red-200";
             default:
-                return "bg-slate-50 border-slate-200";
+                return "bg-white border-primary/10";
         }
     };
 
@@ -62,33 +61,33 @@ export function ChecklistPanel({ result, onClose, onItemClick }: ChecklistPanelP
     });
 
     return (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+            <div className="bg-background rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200 border border-primary/20">
                 {/* Header */}
-                <div className="p-6 border-b border-slate-200">
+                <div className="p-6 border-b border-primary/10">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md">
                                 <Shield className="w-5 h-5 text-white" />
                             </div>
                             <div>
-                                <h2 className="text-lg font-bold text-slate-900">28項目チェック</h2>
-                                <p className="text-xs text-slate-500">契約書の重要ポイントを100%正確にチェック</p>
+                                <h2 className="text-lg font-bold text-primary">28項目チェック</h2>
+                                <p className="text-xs text-muted-foreground">契約書の重要ポイントを100%正確にチェック</p>
                             </div>
                         </div>
                         <button
                             onClick={onClose}
-                            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                            className="p-2 hover:bg-primary/5 rounded-full transition-colors"
                         >
-                            <X className="w-5 h-5 text-slate-400" />
+                            <X className="w-5 h-5 text-muted-foreground hover:text-primary" />
                         </button>
                     </div>
 
                     {/* Summary Stats */}
                     <div className="flex items-center gap-6 mb-4">
                         <div className="flex items-center gap-2">
-                            <Check className="w-4 h-4 text-emerald-600" />
-                            <span className="text-sm font-medium text-emerald-700">{result.summary.clear} クリア</span>
+                            <Check className="w-4 h-4 text-primary" />
+                            <span className="text-sm font-medium text-primary">{result.summary.clear} クリア</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <AlertTriangle className="w-4 h-4 text-amber-500" />
@@ -107,8 +106,8 @@ export function ChecklistPanel({ result, onClose, onItemClick }: ChecklistPanelP
                         <button
                             onClick={() => setFilter("all")}
                             className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${filter === "all"
-                                    ? "bg-slate-900 text-white"
-                                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                ? "bg-primary text-white"
+                                : "bg-primary/5 text-muted-foreground hover:bg-primary/10 hover:text-primary"
                                 }`}
                         >
                             すべて ({result.items.length})
@@ -116,8 +115,8 @@ export function ChecklistPanel({ result, onClose, onItemClick }: ChecklistPanelP
                         <button
                             onClick={() => setFilter("issues")}
                             className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${filter === "issues"
-                                    ? "bg-amber-600 text-white"
-                                    : "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                                ? "bg-amber-500 text-white"
+                                : "bg-amber-100 text-amber-700 hover:bg-amber-200"
                                 }`}
                         >
                             要確認 ({result.summary.warning + result.summary.critical})
@@ -125,8 +124,8 @@ export function ChecklistPanel({ result, onClose, onItemClick }: ChecklistPanelP
                         <button
                             onClick={() => setFilter("clear")}
                             className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${filter === "clear"
-                                    ? "bg-emerald-600 text-white"
-                                    : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                                ? "bg-primary text-white"
+                                : "bg-primary/10 text-primary hover:bg-primary/20"
                                 }`}
                         >
                             クリア ({result.summary.clear})
@@ -150,23 +149,23 @@ export function ChecklistPanel({ result, onClose, onItemClick }: ChecklistPanelP
                                     className={`p-4 flex items-center gap-3 ${hasDetails ? "cursor-pointer" : ""}`}
                                     onClick={() => hasDetails && toggleExpanded(item.item_no)}
                                 >
-                                    <div className="w-8 h-8 rounded-full bg-white border flex items-center justify-center shrink-0">
+                                    <div className="w-8 h-8 rounded-full bg-white border border-primary/10 flex items-center justify-center shrink-0">
                                         {getStatusIcon(item.status)}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-xs text-slate-400 font-mono">#{item.item_no.toString().padStart(2, "0")}</span>
-                                            <h4 className="text-sm font-bold text-slate-800">{item.name}</h4>
+                                            <span className="text-xs text-muted-foreground/70 font-mono">#{item.item_no.toString().padStart(2, "0")}</span>
+                                            <h4 className="text-sm font-bold text-foreground">{item.name}</h4>
                                         </div>
                                         {item.status === "clear" && (
-                                            <p className="text-xs text-emerald-600">問題ありません</p>
+                                            <p className="text-xs text-primary/80">問題ありません</p>
                                         )}
                                         {item.status !== "clear" && item.message && (
-                                            <p className="text-xs text-slate-600 line-clamp-1">{item.message}</p>
+                                            <p className="text-xs text-muted-foreground line-clamp-1">{item.message}</p>
                                         )}
                                     </div>
                                     {hasDetails && (
-                                        <button className="p-1 text-slate-400">
+                                        <button className="p-1 text-muted-foreground hover:text-primary">
                                             {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                                         </button>
                                     )}
@@ -174,23 +173,23 @@ export function ChecklistPanel({ result, onClose, onItemClick }: ChecklistPanelP
 
                                 {/* Expanded Details */}
                                 {isExpanded && hasDetails && (
-                                    <div className="px-4 pb-4 pt-0 border-t border-slate-100 space-y-3 animate-in slide-in-from-top-2">
+                                    <div className="px-4 pb-4 pt-0 border-t border-primary/10 space-y-3 animate-in slide-in-from-top-2">
                                         {item.message && (
-                                            <div className="bg-white rounded-lg p-3 border border-slate-200">
-                                                <p className="text-xs text-slate-500 mb-1">問題</p>
-                                                <p className="text-sm text-slate-700">{item.message}</p>
+                                            <div className="bg-white rounded-lg p-3 border border-primary/10 mt-3">
+                                                <p className="text-xs text-muted-foreground mb-1">問題</p>
+                                                <p className="text-sm text-foreground">{item.message}</p>
                                             </div>
                                         )}
 
                                         {item.suggestion && (
                                             <div className="bg-white rounded-lg p-3 border border-emerald-200">
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <Lightbulb className="w-3.5 h-3.5 text-emerald-600" />
-                                                    <p className="text-xs text-emerald-600 font-medium">おすすめの対策</p>
+                                                    <Lightbulb className="w-3.5 h-3.5 text-primary" />
+                                                    <p className="text-xs text-primary font-medium">おすすめの対策</p>
                                                 </div>
-                                                <p className="text-sm text-slate-700">{item.suggestion}</p>
+                                                <p className="text-sm text-foreground">{item.suggestion}</p>
                                                 {item.benefit && (
-                                                    <p className="text-xs text-slate-500 mt-2">💡 {item.benefit}</p>
+                                                    <p className="text-xs text-muted-foreground mt-2">💡 {item.benefit}</p>
                                                 )}
                                             </div>
                                         )}
@@ -202,14 +201,14 @@ export function ChecklistPanel({ result, onClose, onItemClick }: ChecklistPanelP
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
+                <div className="p-4 border-t border-primary/10 bg-primary/5 rounded-b-2xl">
                     <div className="flex items-center justify-between">
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted-foreground">
                             ルールベースで100%正確にチェック
                         </p>
                         <Button
                             onClick={onClose}
-                            className="bg-slate-900 hover:bg-slate-800 text-white"
+                            className="bg-primary hover:bg-primary/90 text-white rounded-full hover:text-[#FFD700]"
                         >
                             閉じる
                         </Button>

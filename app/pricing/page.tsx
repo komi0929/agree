@@ -221,8 +221,8 @@ export default function PricingPage() {
                     </h2>
                     <div className="space-y-4">
                         {FAQ.map((item, i) => (
-                            <div key={i} className="bg-slate-50 rounded-xl p-5">
-                                <h3 className="font-medium text-slate-900 mb-2">{item.q}</h3>
+                            <div key={i} className="bg-primary/5 rounded-xl p-5 border border-primary/10">
+                                <h3 className="font-medium text-primary mb-2">{item.q}</h3>
                                 <p className="text-sm text-muted-foreground">{item.a}</p>
                             </div>
                         ))}

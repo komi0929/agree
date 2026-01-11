@@ -2,6 +2,7 @@
 
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 import { AlertTriangle, AlertOctagon, FileText, X, Shield } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export type RiskLevelFilter = "critical" | "high" | "medium" | "low" | null;
 
@@ -19,7 +20,6 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
     const highCount = data.risks.filter(r => r.risk_level === "high").length;
     const mediumCount = data.risks.filter(r => r.risk_level === "medium").length;
     const lowCount = data.risks.filter(r => r.risk_level === "low").length;
-
 
     const handleFilterClick = (level: RiskLevelFilter) => {
         if (!onFilterChange) return;
@@ -42,35 +42,41 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
     };
 
     return (
-        <div className="bg-playful-gradient border-b border-slate-200 px-6 py-5">
+        <div className="bg-background border-b border-primary/10 px-6 py-5">
             <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
                 {/* Summary without score - 確認事項のサマリー */}
                 <div className="flex items-center gap-5">
                     {/* Status indicator */}
                     <div className="relative w-16 h-16 flex items-center justify-center">
-                        <div className={`absolute inset-0 rounded-full ${criticalCount > 0 ? "bg-red-100" : highCount > 0 ? "bg-orange-100" : "bg-emerald-100"} blur-md opacity-50`} />
-                        <div className={`relative z-10 w-14 h-14 rounded-full flex flex-col items-center justify-center border-2 ${criticalCount > 0 ? "border-red-400 bg-red-50" : highCount > 0 ? "border-orange-400 bg-orange-50" : "border-emerald-400 bg-emerald-50"}`}>
-                            <span className="text-xl font-bold text-slate-800">{data.risks.filter(r => r.risk_level !== "low").length}</span>
-                            <span className="text-[8px] text-slate-500 uppercase tracking-wider">件</span>
+                        <div className={cn(
+                            "absolute inset-0 rounded-full blur-md opacity-50",
+                            criticalCount > 0 ? "bg-red-100" : highCount > 0 ? "bg-orange-100" : "bg-emerald-100"
+                        )} />
+                        <div className={cn(
+                            "relative z-10 w-14 h-14 rounded-full flex flex-col items-center justify-center border-2",
+                            criticalCount > 0 ? "border-red-400 bg-red-50" : highCount > 0 ? "border-orange-400 bg-orange-50" : "border-emerald-400 bg-emerald-50"
+                        )}>
+                            <span className="text-xl font-bold text-foreground">{data.risks.filter(r => r.risk_level !== "low").length}</span>
+                            <span className="text-[8px] text-muted-foreground uppercase tracking-wider">件</span>
                         </div>
                     </div>
 
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                            <h2 className="text-base font-bold text-slate-800">
+                            <h2 className="text-base font-bold text-foreground">
                                 {criticalCount > 0 ? "確認が必要な項目があります" : highCount > 0 ? "いくつか確認したい点があります" : "おおむね問題ありません"}
                             </h2>
                         </div>
-                        <p className="text-sm text-slate-600">
-                            {criticalCount > 0 && <span className="text-red-600 font-medium mr-2">重要 {criticalCount}件</span>}
-                            {highCount > 0 && <span className="text-orange-600 font-medium mr-2">確認推奨 {highCount}件</span>}
-                            {mediumCount > 0 && <span className="text-yellow-600 font-medium mr-2">参考 {mediumCount}件</span>}
-                            {lowCount > 0 && <span className="text-blue-600 font-medium">推奨 {lowCount}件</span>}
+                        <p className="text-sm text-muted-foreground">
+                            {criticalCount > 0 && <span className="text-red-500 font-medium mr-2">重要 {criticalCount}件</span>}
+                            {highCount > 0 && <span className="text-orange-500 font-medium mr-2">確認推奨 {highCount}件</span>}
+                            {mediumCount > 0 && <span className="text-amber-500 font-medium mr-2">参考 {mediumCount}件</span>}
+                            {lowCount > 0 && <span className="text-primary font-medium">推奨 {lowCount}件</span>}
                         </p>
                         {/* Contract Type Badge */}
                         {contractType && contractType !== "不明" && (
                             <div className="flex items-center gap-2 mt-2">
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 text-slate-600 text-xs rounded-full border border-slate-200 shadow-sm">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 text-muted-foreground text-xs rounded-full border border-primary/20 shadow-sm">
                                     <FileText className="w-3 h-3" />
                                     {contractType}として確認
                                 </span>
@@ -85,7 +91,7 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
                     {activeFilter && (
                         <button
                             onClick={() => onFilterChange?.(null)}
-                            className="flex items-center gap-1 px-2 py-1 text-xs text-slate-500 hover:text-slate-700 bg-white border border-slate-200 rounded-full shadow-sm transition-all"
+                            className="flex items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground bg-white border border-primary/20 rounded-full shadow-sm transition-all"
                         >
                             <X className="w-3 h-3" />
                             クリア
@@ -120,35 +126,35 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
                     {mediumCount > 0 && (
                         <button
                             onClick={() => handleFilterClick("medium")}
-                            className={`flex items-center gap-1.5 px-3 py-2 bg-yellow-50 border rounded-full shadow-sm transition-all cursor-pointer ${getPillClasses("medium", {
-                                active: "border-yellow-500 ring-2 ring-yellow-300 scale-105 bg-yellow-100",
-                                inactive: "border-yellow-200 opacity-50",
-                                default: "border-yellow-200 hover:scale-105 hover:bg-yellow-100"
+                            className={`flex items-center gap-1.5 px-3 py-2 bg-amber-50 border rounded-full shadow-sm transition-all cursor-pointer ${getPillClasses("medium", {
+                                active: "border-amber-500 ring-2 ring-amber-300 scale-105 bg-amber-100",
+                                inactive: "border-amber-200 opacity-50",
+                                default: "border-amber-200 hover:scale-105 hover:bg-amber-100"
                             })}`}
                         >
-                            <span className="text-xs font-medium text-yellow-700">ご参考まで {mediumCount}</span>
+                            <span className="text-xs font-medium text-amber-700">ご参考まで {mediumCount}</span>
                         </button>
                     )}
                     {lowCount > 0 && (
                         <button
                             onClick={() => handleFilterClick("low")}
-                            className={`flex items-center gap-1.5 px-3 py-2 bg-blue-50 border rounded-full shadow-sm transition-all cursor-pointer ${getPillClasses("low", {
-                                active: "border-blue-500 ring-2 ring-blue-300 scale-105 bg-blue-100",
-                                inactive: "border-blue-200 opacity-50",
-                                default: "border-blue-200 hover:scale-105 hover:bg-blue-100"
+                            className={`flex items-center gap-1.5 px-3 py-2 bg-primary/5 border rounded-full shadow-sm transition-all cursor-pointer ${getPillClasses("low", {
+                                active: "border-primary ring-2 ring-primary/30 scale-105 bg-primary/10",
+                                inactive: "border-primary/20 opacity-50",
+                                default: "border-primary/20 hover:scale-105 hover:bg-primary/10"
                             })}`}
                         >
-                            <span className="text-xs font-medium text-blue-600">あると安心 {lowCount}</span>
+                            <span className="text-xs font-medium text-primary">あると安心 {lowCount}</span>
                         </button>
                     )}
 
                     {/* 分離線 */}
-                    <div className="w-px h-6 bg-slate-300 mx-1" />
+                    <div className="w-px h-6 bg-primary/20 mx-1" />
 
                     {/* 28項目チェックボタン */}
                     <button
                         onClick={on28CheckClick}
-                        className="flex items-center gap-1.5 px-3 py-2 bg-slate-900 text-white rounded-full shadow-md hover:bg-slate-800 hover:scale-105 transition-all"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-full shadow-md hover:bg-primary/90 hover:scale-105 transition-all"
                     >
                         <Shield className="w-3.5 h-3.5" />
                         <span className="text-xs font-bold">28項目チェック</span>

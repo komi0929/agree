@@ -3,8 +3,7 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { AlertTriangle, AlertOctagon, Check, ChevronDown, ChevronUp, Lightbulb, CheckSquare, Square, FileText, HelpCircle, Sparkles, Shield, Bot, ShieldCheck } from "lucide-react";
+import { AlertTriangle, AlertOctagon, Check, ChevronDown, ChevronUp, Lightbulb, CheckSquare, Square, Sparkles, Shield, ShieldCheck } from "lucide-react";
 import { VIOLATED_LAW_EXPLANATIONS, ViolatedLaw } from "@/lib/types/clause-tags";
 import { RiskLevelFilter } from "./summary-header";
 
@@ -151,17 +150,17 @@ export function RiskPanel({
     };
 
     return (
-        <div className="h-full flex flex-col bg-slate-50">
+        <div className="h-full flex flex-col bg-background">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-slate-200">
+            <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-primary/10">
                 <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-slate-700">確認事項</span>
-                    <Badge variant="outline" className="rounded-full text-[10px] px-2">
+                    <span className="text-sm font-medium text-foreground">確認事項</span>
+                    <Badge variant="outline" className="rounded-full text-[10px] px-2 text-muted-foreground border-primary/20">
                         {risks.filter(r => r.risk_level !== "low").length}件
                     </Badge>
                 </div>
                 {/* Legend - 色分けの凡例 */}
-                <div className="flex items-center gap-3 text-[10px] text-slate-500">
+                <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
                     <span className="flex items-center gap-1">
                         <span className="w-2 h-2 rounded-full bg-red-500" />重要
                     </span>
@@ -213,8 +212,8 @@ export function RiskPanel({
                             className={`
                                 relative rounded-xl border shadow-sm transition-all duration-300
                                 border-l-4 ${styling.border} 
-                                ${isSelected ? "bg-blue-50/50 border-blue-200 ring-1 ring-blue-300" : styling.bg}
-                                ${isHighlighted ? "ring-2 ring-slate-400 shadow-md" : (!isSelected && "border-slate-200 hover:shadow-md")}
+                                ${isSelected ? "bg-primary/5 border-primary ring-1 ring-primary/20" : "bg-white"}
+                                ${isHighlighted ? "ring-2 ring-primary/30 shadow-md scale-[1.01]" : (!isSelected && "border-primary/10 hover:shadow-md hover:border-primary/20")}
                             `}
                             onMouseEnter={() => onRiskHover(index)}
                             onMouseLeave={() => onRiskHover(null)}
@@ -239,7 +238,7 @@ export function RiskPanel({
                                                 </span>
                                             )}
                                             {risk.source === "llm" && (
-                                                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200 flex items-center gap-1">
+                                                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/5 text-primary border border-primary/20 flex items-center gap-1">
                                                     <Sparkles className="w-3 h-3" />
                                                     AI分析
                                                 </span>
@@ -250,16 +249,16 @@ export function RiskPanel({
                                                     確認済み
                                                 </span>
                                             )}
-                                            <span className="text-[10px] text-slate-400">#{index + 1}</span>
+                                            <span className="text-[10px] text-muted-foreground">#{index + 1}</span>
                                         </div>
 
                                         {/* Title */}
-                                        <h4 className="text-sm font-bold text-slate-800 mb-1">
+                                        <h4 className="text-sm font-bold text-foreground mb-1">
                                             {risk.section_title || "条項"}
                                         </h4>
 
                                         {/* Quick Summary - First line of explanation */}
-                                        <p className="text-xs text-slate-600 line-clamp-2">
+                                        <p className="text-xs text-muted-foreground line-clamp-2">
                                             {risk.explanation.split("。")[0]}。
                                         </p>
                                     </div>
@@ -275,8 +274,8 @@ export function RiskPanel({
                                                 className={`
                                                     flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all
                                                     ${isSelected
-                                                        ? "bg-blue-600 text-white shadow-md hover:bg-blue-700"
-                                                        : "bg-white text-slate-500 border border-slate-200 hover:border-blue-400 hover:text-blue-600"
+                                                        ? "bg-primary text-white shadow-md hover:bg-primary/90"
+                                                        : "bg-white text-muted-foreground border border-primary/20 hover:border-primary/40 hover:text-primary"
                                                     }
                                                 `}
                                             >
@@ -293,7 +292,7 @@ export function RiskPanel({
                                                 )}
                                             </button>
                                         )}
-                                        <button className="p-1 text-slate-400 hover:text-slate-600">
+                                        <button className="p-1 text-muted-foreground hover:text-primary">
                                             {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                                         </button>
                                     </div>
@@ -302,16 +301,16 @@ export function RiskPanel({
 
                             {/* Expanded Content - Nani-style Rationale */}
                             {isExpanded && (
-                                <div className="px-4 pb-4 space-y-4 border-t border-slate-100 pt-4 animate-in slide-in-from-top-2 duration-200">
+                                <div className="px-4 pb-4 space-y-4 border-t border-primary/5 pt-4 animate-in slide-in-from-top-2 duration-200">
 
                                     {/* Section: 具体的にどうなる？ */}
                                     {risk.practical_impact && (
                                         <div className="space-y-2">
-                                            <div className="flex items-center gap-2 text-xs font-semibold text-slate-700">
-                                                <AlertTriangle className="w-4 h-4" />
+                                            <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                                                <AlertTriangle className="w-4 h-4 text-amber-500" />
                                                 具体的にどうなる？
                                             </div>
-                                            <div className="bg-slate-100 rounded-lg p-3 text-xs text-slate-700 leading-relaxed border border-slate-200">
+                                            <div className="bg-primary/5 rounded-lg p-3 text-xs text-foreground leading-relaxed border border-primary/10">
                                                 {risk.practical_impact}
                                             </div>
                                         </div>
@@ -320,15 +319,15 @@ export function RiskPanel({
                                     {/* Section: おすすめの対処法 */}
                                     {canAdopt && (
                                         <div className="space-y-2">
-                                            <div className="flex items-center gap-2 text-xs font-semibold text-slate-700">
-                                                <Lightbulb className="w-4 h-4" />
+                                            <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                                                <Lightbulb className="w-4 h-4 text-primary" />
                                                 おすすめの対処法
                                             </div>
-                                            <div className="bg-slate-50 rounded-lg p-3 space-y-2">
-                                                <p className="text-xs text-slate-700">{getWhatToDo(risk)}</p>
-                                                <div className="bg-white rounded-lg p-3 border border-slate-200">
-                                                    <p className="text-xs font-medium text-slate-800 mb-1">修正案</p>
-                                                    <p className="text-xs text-slate-700 leading-relaxed">
+                                            <div className="bg-muted/30 rounded-lg p-3 space-y-2">
+                                                <p className="text-xs text-foreground">{getWhatToDo(risk)}</p>
+                                                <div className="bg-white rounded-lg p-3 border border-primary/10">
+                                                    <p className="text-xs font-medium text-foreground mb-1">修正案</p>
+                                                    <p className="text-xs text-muted-foreground leading-relaxed">
                                                         {risk.suggestion.revised_text}
                                                     </p>
                                                 </div>
@@ -340,8 +339,8 @@ export function RiskPanel({
                                                     className={`
                                                         w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium transition-all
                                                         ${isSelected
-                                                            ? "bg-slate-800 text-white"
-                                                            : "bg-slate-700 text-white hover:bg-slate-600"
+                                                            ? "bg-primary text-white hover:bg-primary/90 hover:text-[#FFD700]"
+                                                            : "bg-white border border-primary/20 text-muted-foreground hover:bg-primary/5 hover:text-primary"
                                                         }
                                                     `}
                                                 >
@@ -365,13 +364,13 @@ export function RiskPanel({
 
                                     {/* Violated Laws */}
                                     {risk.violated_laws && risk.violated_laws.length > 0 && (
-                                        <div className="flex flex-wrap gap-1 pt-2 border-t border-slate-100">
-                                            <span className="text-[10px] text-slate-400 mr-1">関連法令:</span>
+                                        <div className="flex flex-wrap gap-1 pt-2 border-t border-primary/5">
+                                            <span className="text-[10px] text-muted-foreground mr-1">関連法令:</span>
                                             {risk.violated_laws.map((law, i) => (
                                                 <Badge
                                                     key={i}
                                                     variant="secondary"
-                                                    className="text-[9px] bg-slate-100 text-slate-600 rounded-full"
+                                                    className="text-[9px] bg-muted text-muted-foreground rounded-full"
                                                 >
                                                     {VIOLATED_LAW_EXPLANATIONS[law as ViolatedLaw]?.split("（")[0] || law}
                                                 </Badge>
@@ -382,7 +381,7 @@ export function RiskPanel({
                                     {/* Contract Link - only show if there is text to highlight */}
                                     {risk.original_text && risk.original_text.length > 0 && (
                                         <button
-                                            className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors"
+                                            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 onScrollToContract(index);

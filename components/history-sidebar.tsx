@@ -101,28 +101,28 @@ export function HistorySidebar({
             {!isOpen && (
                 <button
                     onClick={onToggle}
-                    className="fixed left-0 top-1/2 -translate-y-1/2 z-40 bg-white border border-l-0 border-slate-200 rounded-r-lg p-2 shadow-md hover:bg-slate-50 transition-colors"
+                    className="fixed left-0 top-1/2 -translate-y-1/2 z-40 bg-white border border-l-0 border-primary/20 rounded-r-lg p-2 shadow-md hover:bg-primary/5 transition-colors"
                 >
-                    <ChevronRight className="w-5 h-5 text-slate-600" />
+                    <ChevronRight className="w-5 h-5 text-primary" />
                 </button>
             )}
 
             {/* Sidebar */}
             <div
-                className={`fixed left-0 top-0 h-full bg-sidebar border-r border-sidebar-border z-50 transition-all duration-300 flex flex-col shadow-sm ${isOpen ? "w-72" : "w-0 overflow-hidden"
+                className={`fixed left-0 top-0 h-full bg-background border-r border-primary/10 z-50 transition-all duration-300 flex flex-col shadow-sm ${isOpen ? "w-72" : "w-0 overflow-hidden"
                     }`}
             >
                 {/* Header */}
-                <div className="p-5 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
+                <div className="p-5 border-b border-primary/10 flex items-center justify-between flex-shrink-0">
                     <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                        <h2 className="font-semibold text-slate-900 text-sm tracking-tight">診断履歴</h2>
+                        <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                        <h2 className="font-semibold text-primary text-sm tracking-tight">診断履歴</h2>
                     </div>
                     <button
                         onClick={onToggle}
-                        className="p-1.5 hover:bg-slate-200 rounded-lg transition-colors"
+                        className="p-1.5 hover:bg-primary/10 rounded-lg transition-colors"
                     >
-                        <ChevronLeft className="w-4 h-4 text-slate-500" />
+                        <ChevronLeft className="w-4 h-4 text-primary" />
                     </button>
                 </div>
 
@@ -130,9 +130,9 @@ export function HistorySidebar({
                 <div className="p-4 flex-shrink-0">
                     <button
                         onClick={onNewAnalysis}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 hover:border-slate-300 transition-all font-medium text-sm shadow-sm active:scale-[0.98]"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border border-primary/20 text-primary rounded-full hover:bg-primary/5 hover:border-primary/40 transition-all font-medium text-sm shadow-sm active:scale-[0.98]"
                     >
-                        <Plus className="w-4 h-4 text-slate-400" />
+                        <Plus className="w-4 h-4 text-primary" />
                         分析室へ戻る
                     </button>
                 </div>
@@ -140,12 +140,12 @@ export function HistorySidebar({
                 {/* History List */}
                 <div className="flex-1 overflow-y-auto px-3 pb-4">
                     {isLoading ? (
-                        <div className="text-center py-8 text-slate-400">
+                        <div className="text-center py-8 text-muted-foreground">
                             読み込み中...
                         </div>
                     ) : history.length === 0 ? (
-                        <div className="text-center py-8 text-slate-400 text-sm">
-                            <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <div className="text-center py-8 text-muted-foreground text-sm">
+                            <Clock className="w-8 h-8 mx-auto mb-2 opacity-50 text-primary" />
                             履歴がありません
                         </div>
                     ) : (
@@ -154,27 +154,27 @@ export function HistorySidebar({
                                 <button
                                     key={item.id}
                                     onClick={() => onSelectHistory(item.id)}
-                                    className={`w-full text-left p-3 rounded-lg transition-colors group ${currentHistoryId === item.id
-                                        ? "bg-slate-200"
-                                        : "hover:bg-slate-100"
+                                    className={`w-full text-left p-3 rounded-xl transition-colors group ${currentHistoryId === item.id
+                                        ? "bg-primary/10"
+                                        : "hover:bg-primary/5"
                                         }`}
                                 >
                                     <div className="flex items-start gap-3">
-                                        <FileText className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
+                                        <FileText className={`w-4 h-4 mt-0.5 flex-shrink-0 ${currentHistoryId === item.id ? "text-primary" : "text-muted-foreground"}`} />
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-slate-700 truncate">
+                                            <p className={`text-sm font-medium truncate ${currentHistoryId === item.id ? "text-primary" : "text-foreground"}`}>
                                                 {item.title}
                                             </p>
-                                            <p className="text-xs text-slate-400 mt-0.5">
+                                            <p className="text-xs text-muted-foreground mt-0.5">
                                                 {item.contract_type && `${item.contract_type} · `}
                                                 {formatDate(item.created_at)}
                                             </p>
                                         </div>
                                         <button
                                             onClick={(e) => deleteHistory(item.id, e)}
-                                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
+                                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-50 rounded transition-all"
                                         >
-                                            <Trash2 className="w-4 h-4 text-slate-400 hover:text-red-500" />
+                                            <Trash2 className="w-4 h-4 text-muted-foreground hover:text-red-500" />
                                         </button>
                                     </div>
                                 </button>
@@ -184,9 +184,9 @@ export function HistorySidebar({
                 </div>
 
                 {/* Footer / User Profile */}
-                <div className="p-4 border-t border-slate-100 flex-shrink-0 bg-white/50 backdrop-blur-sm">
+                <div className="p-4 border-t border-primary/10 flex-shrink-0 bg-white/50 backdrop-blur-sm">
                     <div className="flex items-center justify-between mb-4 px-1">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+                        <span className="text-[10px] uppercase font-bold text-primary/50 tracking-widest">
                             {history.length}件の履歴
                         </span>
                     </div>

@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Copy, Check, RefreshCw } from "lucide-react";
 import { useAuth } from "@/lib/auth/auth-context";
 import { RegistrationGateModal } from "@/components/auth/registration-gate-modal";
+import { cn } from "@/lib/utils";
 
 
 interface MessageCrafterProps {
@@ -155,7 +156,7 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
         }
     }, [risk, selectedRisks, tone, purpose, isMultiple, isEditing]);
 
-    if (!risk && !isMultiple) return <div className="p-8 text-center text-slate-400">項目を選択してください</div>;
+    if (!risk && !isMultiple) return <div className="p-8 text-center text-muted-foreground">項目を選択してください</div>;
 
     const handleCopy = () => {
         // Gate: require registration to copy
@@ -177,26 +178,28 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
     return (
         <div className="flex-1 flex flex-col p-6 space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="space-y-1">
-                <h3 className="text-lg font-bold text-slate-900">
+                <h3 className="text-lg font-bold text-foreground">
                     {isMultiple ? `${selectedRisks?.length}項目の修正依頼` : "メッセージ作成"}
                 </h3>
-                <p className="text-slate-500 text-sm">
+                <p className="text-muted-foreground text-sm">
                     トーンと目的を選んで、メッセージを生成できます。
                 </p>
             </div>
 
             {/* Tone Selection */}
             <div className="space-y-2">
-                <p className="text-xs font-medium text-slate-500">トーン</p>
+                <p className="text-xs font-medium text-muted-foreground">トーン</p>
                 <div className="flex gap-2">
                     {TONE_OPTIONS.map((option) => (
                         <button
                             key={option.value}
                             onClick={() => { setTone(option.value); setIsEditing(false); }}
-                            className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${tone === option.value
-                                ? "bg-slate-100 border-slate-400 text-slate-800"
-                                : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
-                                }`}
+                            className={cn(
+                                "flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all",
+                                tone === option.value
+                                    ? "bg-primary/5 border-primary text-primary"
+                                    : "bg-white border-primary/20 text-muted-foreground hover:border-primary/40 hover:text-primary"
+                            )}
                         >
                             {option.label}
                         </button>
@@ -206,16 +209,18 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
 
             {/* Purpose Selection */}
             <div className="space-y-2">
-                <p className="text-xs font-medium text-slate-500">目的</p>
+                <p className="text-xs font-medium text-muted-foreground">目的</p>
                 <div className="flex gap-2">
                     {PURPOSE_OPTIONS.map((option) => (
                         <button
                             key={option.value}
                             onClick={() => { setPurpose(option.value); setIsEditing(false); }}
-                            className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${purpose === option.value
-                                ? "bg-slate-100 border-slate-400 text-slate-800"
-                                : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
-                                }`}
+                            className={cn(
+                                "flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all",
+                                purpose === option.value
+                                    ? "bg-primary/5 border-primary text-primary"
+                                    : "bg-white border-primary/20 text-muted-foreground hover:border-primary/40 hover:text-primary"
+                            )}
                         >
                             {option.label}
                         </button>
@@ -226,10 +231,10 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
             {/* Message Area */}
             <div className="flex-1 flex flex-col min-h-0">
                 <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-medium text-slate-500">メッセージ</p>
+                    <p className="text-xs font-medium text-muted-foreground">メッセージ</p>
                     <button
                         onClick={handleRegenerate}
-                        className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
                     >
                         <RefreshCw className="w-3 h-3" />
                         再生成
@@ -238,7 +243,7 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
                 <Textarea
                     value={generatedMessage}
                     onChange={(e) => { setGeneratedMessage(e.target.value); setIsEditing(true); }}
-                    className="flex-1 min-h-[200px] resize-none p-4 text-sm leading-relaxed border-slate-200 focus-visible:ring-slate-300 bg-slate-50/50 rounded-xl"
+                    className="flex-1 min-h-[200px] resize-none p-4 text-sm leading-relaxed border-primary/20 focus-visible:ring-primary/30 bg-white/50 rounded-xl font-mono text-foreground"
                 />
             </div>
 
@@ -246,8 +251,10 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
             <div className="flex flex-col gap-2 pt-2">
                 <Button
                     onClick={handleCopy}
-                    className={`w-full rounded-lg shadow-sm transition-all duration-300 ${copied ? "bg-green-600 hover:bg-green-700" : "bg-slate-900 hover:bg-slate-800"
-                        }`}
+                    className={cn(
+                        "w-full rounded-lg shadow-sm transition-all duration-300",
+                        copied ? "bg-primary hover:bg-primary/90" : "bg-primary hover:bg-primary/90"
+                    )}
                 >
                     {copied ? (
                         <>
@@ -266,7 +273,7 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
                     <Button
                         onClick={onFinish}
                         variant="secondary"
-                        className="w-full rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200"
+                        className="w-full rounded-lg bg-white hover:bg-primary/5 text-muted-foreground border border-primary/20"
                     >
                         終了
                     </Button>

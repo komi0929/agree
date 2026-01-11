@@ -46,27 +46,27 @@ export function ProUpgradeModal({ open, onClose, reason }: ProUpgradeModalProps)
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md bg-background border border-primary/20 sm:rounded-2xl">
                 <DialogHeader className="space-y-3">
-                    <div className="mx-auto w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <Sparkles className="w-6 h-6 text-white" />
+                    <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
+                        <Sparkles className="w-6 h-6 text-primary" />
                     </div>
-                    <DialogTitle className="text-center text-xl font-bold text-slate-900">
+                    <DialogTitle className="text-center text-xl font-bold text-primary">
                         {title}
                     </DialogTitle>
-                    <DialogDescription className="text-center text-slate-600">
+                    <DialogDescription className="text-center text-muted-foreground">
                         {description}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="py-6 space-y-6">
                     {/* Pro Features */}
-                    <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl p-5 space-y-4 border border-slate-200">
+                    <div className="bg-primary/5 rounded-2xl p-5 space-y-4 border border-primary/20">
                         <div className="flex items-center justify-between">
-                            <span className="text-sm font-bold text-slate-900">Pro プラン</span>
+                            <span className="text-sm font-bold text-primary">Pro プラン</span>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-bold text-slate-900">¥980</span>
-                                <span className="text-sm text-slate-500">/ 月</span>
+                                <span className="text-2xl font-bold text-primary">¥980</span>
+                                <span className="text-sm text-muted-foreground">/ 月</span>
                             </div>
                         </div>
 
@@ -74,17 +74,17 @@ export function ProUpgradeModal({ open, onClose, reason }: ProUpgradeModalProps)
                             {PRO_FEATURES.map((feature, i) => (
                                 <div key={i} className="flex items-center gap-3">
                                     <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${feature.highlight
-                                            ? "bg-blue-100"
-                                            : "bg-slate-100"
+                                        ? "bg-primary/20"
+                                        : "bg-white border border-primary/10"
                                         }`}>
                                         <feature.icon className={`w-3.5 h-3.5 ${feature.highlight
-                                                ? "text-blue-600"
-                                                : "text-slate-600"
+                                            ? "text-primary"
+                                            : "text-muted-foreground"
                                             }`} />
                                     </div>
                                     <span className={`text-sm ${feature.highlight
-                                            ? "font-medium text-slate-900"
-                                            : "text-slate-700"
+                                        ? "font-medium text-primary"
+                                        : "text-muted-foreground"
                                         }`}>
                                         {feature.text}
                                     </span>
@@ -97,12 +97,12 @@ export function ProUpgradeModal({ open, onClose, reason }: ProUpgradeModalProps)
                     <div className="space-y-3">
                         <Button
                             onClick={handleUpgrade}
-                            className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium"
+                            className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-medium rounded-full hover:text-[#FFD700]"
                         >
                             <Sparkles className="w-4 h-4 mr-2" />
                             Proにアップグレード
                         </Button>
-                        <p className="text-center text-xs text-slate-400">
+                        <p className="text-center text-xs text-muted-foreground">
                             いつでもキャンセル可能
                         </p>
                     </div>
@@ -110,7 +110,7 @@ export function ProUpgradeModal({ open, onClose, reason }: ProUpgradeModalProps)
                     {/* Later option */}
                     <button
                         onClick={onClose}
-                        className="w-full text-center text-sm text-slate-400 hover:text-slate-600 transition-colors"
+                        className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors"
                     >
                         今はスキップ
                     </button>

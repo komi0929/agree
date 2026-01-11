@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { DailySummary, FunnelStep, TrafficSource, AnalyticsRecord } from "@/lib/analytics/types";
 import { RefreshCw, TrendingUp, TrendingDown, Minus, Activity, Users, CheckCircle, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface DashboardData {
     summary: DailySummary;
@@ -62,7 +63,7 @@ export default function AdminDashboard() {
     if (loading && !data) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                <RefreshCw className="w-8 h-8 text-blue-500 animate-spin" />
+                <RefreshCw className="w-8 h-8 text-primary animate-spin" />
             </div>
         );
     }
@@ -71,13 +72,13 @@ export default function AdminDashboard() {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
-                    <p className="text-red-400 mb-4">{error}</p>
-                    <button
+                    <p className="text-red-500 mb-4">{error}</p>
+                    <Button
                         onClick={fetchData}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500"
+                        className="rounded-full bg-primary hover:bg-primary/90 text-white"
                     >
                         再試行
-                    </button>
+                    </Button>
                 </div>
             </div>
         );
@@ -94,27 +95,27 @@ export default function AdminDashboard() {
         : "0.0";
 
     return (
-        <div className="p-6 max-w-7xl mx-auto">
+        <div className="p-6 max-w-7xl mx-auto font-sans text-foreground">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                        <Activity className="w-6 h-6 text-blue-500" />
+                    <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
+                        <Activity className="w-6 h-6 text-primary" />
                         agree Dashboard
                     </h1>
-                    <p className="text-slate-400 text-sm mt-1">日次メトリクス・ファネル分析</p>
+                    <p className="text-muted-foreground text-sm mt-1">日次メトリクス・ファネル分析</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <input
                         type="date"
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
-                        className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-3 py-2 bg-white border border-primary/20 rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                     <button
                         onClick={fetchData}
                         disabled={loading}
-                        className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors disabled:opacity-50"
+                        className="p-2 bg-white border border-primary/20 hover:bg-primary/5 rounded-lg text-primary transition-colors disabled:opacity-50"
                     >
                         <RefreshCw className={`w-5 h-5 ${loading ? "animate-spin" : ""}`} />
                     </button>
@@ -158,14 +159,14 @@ export default function AdminDashboard() {
             </div>
 
             {/* Funnel */}
-            <div className="bg-slate-800 rounded-xl p-6 mb-8 border border-slate-700">
-                <h2 className="text-lg font-semibold text-white mb-6">メインファネル</h2>
+            <div className="bg-white rounded-xl p-6 mb-8 border border-primary/20 shadow-sm">
+                <h2 className="text-lg font-semibold text-primary mb-6">メインファネル</h2>
                 <div className="flex items-end justify-between gap-4">
                     {funnel.map((step, i) => (
                         <div key={step.name} className="flex-1 text-center">
-                            <div className="text-slate-400 text-sm mb-2">{step.name}</div>
+                            <div className="text-muted-foreground text-sm mb-2">{step.name}</div>
                             <div
-                                className="bg-gradient-to-t from-blue-600 to-blue-400 rounded-t-lg mx-auto transition-all duration-500"
+                                className="bg-gradient-to-t from-primary to-primary/60 rounded-t-lg mx-auto transition-all duration-500"
                                 style={{
                                     height: `${Math.max(step.percentage * 1.5, 20)}px`,
                                     width: "60%",
@@ -173,11 +174,11 @@ export default function AdminDashboard() {
                                 }}
                             />
                             <div className="mt-2">
-                                <div className="text-xl font-bold text-white">{step.count}</div>
-                                <div className="text-sm text-slate-400">{step.percentage}%</div>
+                                <div className="text-xl font-bold text-primary">{step.count}</div>
+                                <div className="text-sm text-muted-foreground">{step.percentage}%</div>
                             </div>
                             {i < funnel.length - 1 && (
-                                <div className="text-slate-600 text-xs mt-2">→</div>
+                                <div className="text-muted-foreground/30 text-xs mt-2">→</div>
                             )}
                         </div>
                     ))}
@@ -187,8 +188,8 @@ export default function AdminDashboard() {
             {/* Charts Row */}
             <div className="grid lg:grid-cols-2 gap-6 mb-8">
                 {/* Trend Chart */}
-                <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                    <h2 className="text-lg font-semibold text-white mb-4">過去7日間の推移</h2>
+                <div className="bg-white rounded-xl p-6 border border-primary/20 shadow-sm">
+                    <h2 className="text-lg font-semibold text-primary mb-4">過去7日間の推移</h2>
                     <div className="h-48 flex items-end justify-between gap-2">
                         {trend.map((day, i) => {
                             const maxValue = Math.max(...trend.map(d => d.analysisCompleted), 1);
@@ -196,13 +197,13 @@ export default function AdminDashboard() {
                             return (
                                 <div key={day.date} className="flex-1 flex flex-col items-center">
                                     <div
-                                        className="w-full bg-gradient-to-t from-green-600 to-green-400 rounded-t transition-all duration-300"
+                                        className="w-full bg-gradient-to-t from-primary to-primary/60 rounded-t transition-all duration-300"
                                         style={{ height: `${Math.max(height, 5)}%` }}
                                     />
-                                    <div className="text-xs text-slate-500 mt-2 truncate w-full text-center">
+                                    <div className="text-xs text-muted-foreground mt-2 truncate w-full text-center">
                                         {new Date(day.date).getDate()}日
                                     </div>
-                                    <div className="text-xs text-slate-400">{day.analysisCompleted}</div>
+                                    <div className="text-xs text-muted-foreground">{day.analysisCompleted}</div>
                                 </div>
                             );
                         })}
@@ -210,21 +211,21 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Traffic Sources */}
-                <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                    <h2 className="text-lg font-semibold text-white mb-4">流入元内訳</h2>
+                <div className="bg-white rounded-xl p-6 border border-primary/20 shadow-sm">
+                    <h2 className="text-lg font-semibold text-primary mb-4">流入元内訳</h2>
                     <div className="space-y-3">
                         {sources.map((source) => (
                             <div key={source.source} className="flex items-center gap-3">
-                                <div className="w-20 text-sm text-slate-400">{source.source}</div>
-                                <div className="flex-1 bg-slate-700 rounded-full h-3 overflow-hidden">
+                                <div className="w-20 text-sm text-muted-foreground">{source.source}</div>
+                                <div className="flex-1 bg-primary/5 rounded-full h-3 overflow-hidden">
                                     <div
-                                        className="h-full bg-gradient-to-r from-purple-600 to-purple-400 transition-all duration-500"
+                                        className="h-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-500"
                                         style={{ width: `${source.percentage}%` }}
                                     />
                                 </div>
                                 <div className="w-16 text-right">
-                                    <span className="text-white font-medium">{source.count}</span>
-                                    <span className="text-slate-500 text-sm ml-1">({source.percentage}%)</span>
+                                    <span className="text-primary font-medium">{source.count}</span>
+                                    <span className="text-muted-foreground text-sm ml-1">({source.percentage}%)</span>
                                 </div>
                             </div>
                         ))}
@@ -233,24 +234,24 @@ export default function AdminDashboard() {
             </div>
 
             {/* Event Log */}
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                <h2 className="text-lg font-semibold text-white mb-4">直近のイベント</h2>
+            <div className="bg-white rounded-xl p-6 border border-primary/20 shadow-sm">
+                <h2 className="text-lg font-semibold text-primary mb-4">直近のイベント</h2>
                 <div className="space-y-2 max-h-80 overflow-y-auto">
                     {events.length === 0 ? (
-                        <p className="text-slate-500 text-center py-4">イベントがありません</p>
+                        <p className="text-muted-foreground text-center py-4">イベントがありません</p>
                     ) : (
                         events.map((event) => (
                             <div
                                 key={event.id}
-                                className="flex items-center gap-4 py-2 px-3 bg-slate-700/50 rounded-lg text-sm"
+                                className="flex items-center gap-4 py-2 px-3 bg-primary/5 rounded-lg text-sm"
                             >
-                                <div className="text-slate-500 w-16">
+                                <div className="text-muted-foreground w-16">
                                     {new Date(event.created_at).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}
                                 </div>
                                 <div className="flex-1">
-                                    <span className="text-blue-400 font-mono">{event.event_name}</span>
+                                    <span className="text-primary font-mono">{event.event_name}</span>
                                     {event.page_path && (
-                                        <span className="text-slate-500 ml-2">{event.page_path}</span>
+                                        <span className="text-muted-foreground ml-2">{event.page_path}</span>
                                     )}
                                 </div>
                             </div>
@@ -278,43 +279,39 @@ function SummaryCard({
     color: "blue" | "indigo" | "green" | "amber";
     isPercentage?: boolean;
 }) {
-    const colorClasses = {
-        blue: "from-blue-500/20 to-blue-600/10 border-blue-500/30",
-        indigo: "from-indigo-500/20 to-indigo-600/10 border-indigo-500/30",
-        green: "from-green-500/20 to-green-600/10 border-green-500/30",
-        amber: "from-amber-500/20 to-amber-600/10 border-amber-500/30",
-    };
+    // Aoki style gradients - all based on primary but with slight variations or just clean white
+    // For consistency, we'll use white cards with colored icons/borders
 
     const iconColors = {
-        blue: "text-blue-400",
-        indigo: "text-indigo-400",
-        green: "text-green-400",
-        amber: "text-amber-400",
+        blue: "text-blue-500",
+        indigo: "text-indigo-500",
+        green: "text-green-500",
+        amber: "text-amber-500",
     };
 
     const isPositive = comparison.percentage > 0;
     const isNegative = comparison.percentage < 0;
 
     return (
-        <div className={`bg-gradient-to-br ${colorClasses[color]} rounded-xl p-5 border`}>
+        <div className="bg-white rounded-xl p-5 border border-primary/20 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-                <span className="text-slate-400 text-sm">{title}</span>
+                <span className="text-muted-foreground text-sm">{title}</span>
                 <span className={iconColors[color]}>{icon}</span>
             </div>
-            <div className="text-3xl font-bold text-white mb-2">{value}</div>
+            <div className="text-3xl font-bold text-primary mb-2">{value}</div>
             {!isPercentage && (
                 <div className="flex items-center gap-1 text-sm">
                     {isPositive ? (
-                        <TrendingUp className="w-4 h-4 text-green-400" />
+                        <TrendingUp className="w-4 h-4 text-green-500" />
                     ) : isNegative ? (
-                        <TrendingDown className="w-4 h-4 text-red-400" />
+                        <TrendingDown className="w-4 h-4 text-red-500" />
                     ) : (
-                        <Minus className="w-4 h-4 text-slate-500" />
+                        <Minus className="w-4 h-4 text-muted-foreground" />
                     )}
-                    <span className={isPositive ? "text-green-400" : isNegative ? "text-red-400" : "text-slate-500"}>
+                    <span className={isPositive ? "text-green-500" : isNegative ? "text-red-500" : "text-muted-foreground"}>
                         {isPositive ? "+" : ""}{comparison.percentage}%
                     </span>
-                    <span className="text-slate-500">前日比</span>
+                    <span className="text-muted-foreground">前日比</span>
                 </div>
             )}
         </div>

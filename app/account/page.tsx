@@ -127,7 +127,7 @@ export default function AccountPage() {
                                     {formatLimit(checkCount, checkLimit)}
                                 </span>
                             </div>
-                            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-2 bg-primary/10 rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-blue-500 rounded-full transition-all"
                                     style={{
@@ -146,7 +146,7 @@ export default function AccountPage() {
                                     {formatLimit(generationCount, generationLimit)}
                                 </span>
                             </div>
-                            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-2 bg-primary/10 rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-purple-500 rounded-full transition-all"
                                     style={{

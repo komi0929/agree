@@ -9,12 +9,12 @@ interface CompletionCelebrationProps {
 }
 
 const CONFETTI_COLORS = [
-    "#6366f1", // indigo
-    "#a855f7", // purple
-    "#ec4899", // pink
-    "#f59e0b", // amber
-    "#10b981", // emerald
-    "#3b82f6", // blue
+    "#009E60", // Green
+    "#CDE8E5", // Light Blue
+    "#EEF7FF", // Alice Blue
+    "#FFD700", // Gold
+    "#7AB2D3", // Blue
+    "#4A4A4A", // Dark Gray
 ];
 
 export function CompletionCelebration({ show, onComplete }: CompletionCelebrationProps) {
@@ -64,26 +64,26 @@ export function CompletionCelebration({ show, onComplete }: CompletionCelebratio
 
             {/* Center Celebration */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-auto">
-                <div className="bg-white/95 backdrop-blur-md rounded-3xl p-8 shadow-2xl animate-bounce-in">
+                <div className="bg-white/95 backdrop-blur-md rounded-3xl p-8 shadow-2xl animate-bounce-in border border-primary/20">
                     <div className="flex flex-col items-center gap-4">
                         {/* Animated Checkmark */}
                         <div className="relative">
-                            <div className={`w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center ${showCheckmark ? "animate-circle-fill" : "opacity-0"}`}>
+                            <div className={`w-20 h-20 rounded-full bg-primary flex items-center justify-center ${showCheckmark ? "animate-circle-fill" : "opacity-0"}`}>
                                 <Check className={`w-10 h-10 text-white ${showCheckmark ? "animate-check-draw" : "opacity-0"}`} strokeWidth={3} />
                             </div>
                             {/* Sparkles around */}
-                            <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-amber-400 animate-sparkle" style={{ animationDelay: "0.2s" }} />
-                            <Sparkles className="absolute -bottom-1 -left-3 w-5 h-5 text-purple-400 animate-sparkle" style={{ animationDelay: "0.5s" }} />
+                            <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-[#FFD700] animate-sparkle" style={{ animationDelay: "0.2s" }} />
+                            <Sparkles className="absolute -bottom-1 -left-3 w-5 h-5 text-primary/60 animate-sparkle" style={{ animationDelay: "0.5s" }} />
                         </div>
 
                         {/* Text */}
                         <div className="text-center space-y-1">
-                            <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2 justify-center">
-                                <PartyPopper className="w-5 h-5 text-amber-500 animate-gentle-rotate" />
+                            <h3 className="text-xl font-bold text-primary flex items-center gap-2 justify-center">
+                                <PartyPopper className="w-5 h-5 text-[#FFD700] animate-gentle-rotate" />
                                 お疲れさまでした！
-                                <PartyPopper className="w-5 h-5 text-pink-500 animate-gentle-rotate" style={{ animationDelay: "0.5s" }} />
+                                <PartyPopper className="w-5 h-5 text-primary animate-gentle-rotate" style={{ animationDelay: "0.5s" }} />
                             </h3>
-                            <p className="text-sm text-slate-500">
+                            <p className="text-sm text-muted-foreground">
                                 確認が完了しました
                             </p>
                         </div>
@@ -109,14 +109,14 @@ export function LearningSummary({ risks, className = "" }: LearningSummaryProps)
     if (learningPoints.length === 0) return null;
 
     return (
-        <div className={`bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-100 ${className}`}>
+        <div className={`bg-primary/5 rounded-2xl p-5 border border-primary/20 ${className}`}>
             <div className="flex items-center gap-2 mb-3">
-                <h4 className="font-semibold text-slate-800">今回学べたこと</h4>
+                <h4 className="font-semibold text-primary">今回学べたこと</h4>
             </div>
             <ul className="space-y-2">
                 {learningPoints.map((point, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                        <span className="text-indigo-500 font-medium shrink-0">{["①", "②", "③", "④", "⑤"][i] || `${i + 1}.`}</span>
+                    <li key={i} className="flex items-start gap-2 text-sm text-foreground">
+                        <span className="text-primary font-medium shrink-0">{["①", "②", "③", "④", "⑤"][i] || `${i + 1}.`}</span>
                         <span>{point}</span>
                     </li>
                 ))}

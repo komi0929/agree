@@ -168,9 +168,9 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
     const selectedRisks = selectedRiskIndices.map(i => risks[i]);
 
     return (
-        <div className="h-screen w-full flex flex-col font-sans bg-slate-100">
+        <div className="h-screen w-full flex flex-col font-sans bg-background">
             {/* Header */}
-            <div className="flex-none z-10 sticky top-0 bg-white/80 backdrop-blur-md">
+            <div className="flex-none z-10 sticky top-0 bg-background/80 backdrop-blur-md">
                 <SummaryHeader
                     data={{ ...data, risks }}
                     contractType={contractType}
@@ -194,7 +194,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
             {/* Main Split View */}
             <div className="flex-1 flex overflow-hidden relative">
                 {/* Left Pane */}
-                <div className="w-full md:w-1/2 h-full flex flex-col border-r border-slate-200 bg-white overflow-hidden">
+                <div className="w-full md:w-1/2 h-full flex flex-col border-r border-primary/10 bg-background overflow-hidden">
                     {viewMode === "contract" ? (
                         <ContractViewer
                             text={text}
@@ -203,18 +203,18 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                             onHighlightClick={handleHighlightClick}
                         />
                     ) : (
-                        <div className="h-full flex flex-col bg-white">
-                            <div className="p-4 border-b border-slate-100 flex items-center bg-white">
+                        <div className="h-full flex flex-col bg-background">
+                            <div className="p-4 border-b border-primary/10 flex items-center bg-background">
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => setViewMode("contract")}
-                                    className="text-slate-500 hover:text-slate-900"
+                                    className="text-muted-foreground hover:text-foreground hover:bg-primary/5"
                                 >
                                     <ArrowLeft className="w-4 h-4 mr-1" />
                                     契約書に戻る
                                 </Button>
-                                <span className="ml-4 text-sm font-bold text-slate-800">
+                                <span className="ml-4 text-sm font-bold text-foreground">
                                     {selectedRiskIndices.length > 0 ? "一括メッセージ作成" : "メッセージ作成"}
                                 </span>
                             </div>
@@ -228,7 +228,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                 </div>
 
                 {/* Right Pane */}
-                <div className="w-full md:w-1/2 h-full flex flex-col bg-slate-50 overflow-hidden relative">
+                <div className="w-full md:w-1/2 h-full flex flex-col bg-muted/10 overflow-hidden relative">
                     <RiskPanel
                         risks={risks}
                         highlightedRiskIndex={highlightedRiskIndex}
@@ -244,16 +244,16 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                     <div className="absolute bottom-6 left-6 right-6 z-20 animate-in slide-in-from-bottom-4 fade-in duration-300">
                         {selectedRiskIndices.length > 0 ? (
                             // Selected state - full action bar
-                            <div className="bg-slate-900/95 backdrop-blur-md text-white p-4 rounded-xl shadow-2xl border border-slate-700 flex flex-wrap items-center justify-between gap-4">
+                            <div className="bg-foreground/95 backdrop-blur-md text-background p-4 rounded-xl shadow-2xl border border-primary/20 flex flex-wrap items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-2 px-3 py-1 bg-slate-800 rounded-full border border-slate-700">
-                                        <CheckSquareIcon className="w-4 h-4 text-blue-400" />
-                                        <span className="text-sm font-bold">{selectedRiskIndices.length}</span>
-                                        <span className="text-xs text-slate-400">件選択中</span>
+                                    <div className="flex items-center gap-2 px-3 py-1 bg-background/20 rounded-full border border-white/10">
+                                        <CheckSquareIcon className="w-4 h-4 text-primary-foreground" />
+                                        <span className="text-sm font-bold text-primary-foreground">{selectedRiskIndices.length}</span>
+                                        <span className="text-xs text-primary-foreground/70">件選択中</span>
                                     </div>
                                     <button
                                         onClick={handleClearSelection}
-                                        className="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1"
+                                        className="text-xs text-primary-foreground/60 hover:text-primary-foreground transition-colors flex items-center gap-1"
                                     >
                                         <X className="w-3 h-3" />
                                         クリア
@@ -264,7 +264,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                     <Button
                                         size="sm"
                                         variant="outline"
-                                        className="bg-transparent border-slate-600 text-slate-200 hover:bg-slate-800 hover:text-white"
+                                        className="bg-transparent border-white/20 text-primary-foreground hover:bg-white/10 hover:text-white"
                                         onClick={() => setViewMode("message")}
                                     >
                                         <Send className="w-4 h-4 mr-2" />
@@ -272,7 +272,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                     </Button>
                                     <Button
                                         size="sm"
-                                        className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20 border-t border-blue-400 font-bold"
+                                        className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 border-t border-white/20 font-bold"
                                         onClick={handleGenerateNewContract}
                                         disabled={isGenerating}
                                     >
@@ -292,14 +292,14 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                             </div>
                         ) : (
                             // Empty state - hint with disabled buttons
-                            <div className="bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-xl border border-slate-200 flex flex-wrap items-center justify-between gap-4">
-                                <div className="flex items-center gap-3 text-slate-600">
-                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                        <Lightbulb className="w-4 h-4 text-blue-600" />
+                            <div className="bg-background/95 backdrop-blur-md p-4 rounded-xl shadow-xl border border-primary/10 flex flex-wrap items-center justify-between gap-4">
+                                <div className="flex items-center gap-3 text-muted-foreground">
+                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <Lightbulb className="w-4 h-4 text-primary" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium">気になるところを選ぶと...</p>
-                                        <p className="text-xs text-slate-400">まとめて修正依頼や契約書作成ができます</p>
+                                        <p className="text-sm font-medium text-foreground">気になるところを選ぶと...</p>
+                                        <p className="text-xs text-muted-foreground">まとめて修正依頼や契約書作成ができます</p>
                                     </div>
                                 </div>
 
@@ -307,7 +307,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                     <Button
                                         size="sm"
                                         variant="outline"
-                                        className="border-slate-300 text-slate-400 cursor-not-allowed"
+                                        className="border-primary/20 text-muted-foreground cursor-not-allowed"
                                         disabled
                                     >
                                         <Send className="w-4 h-4 mr-2" />
@@ -315,7 +315,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                     </Button>
                                     <Button
                                         size="sm"
-                                        className="bg-slate-300 text-slate-500 cursor-not-allowed"
+                                        className="bg-muted text-muted-foreground cursor-not-allowed"
                                         disabled
                                     >
                                         <Sparkles className="w-4 h-4 mr-2" />

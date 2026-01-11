@@ -20,7 +20,7 @@ export default function PrivacyPage() {
 
                     <section>
                         <h2 className="text-base font-medium text-primary mb-4">2. アップロードデータの取扱い</h2>
-                        <p className="text-sm text-slate-500 leading-relaxed font-light mb-3">
+                        <p className="text-sm text-muted-foreground leading-relaxed font-light mb-3">
                             ユーザーが本サービスにアップロードした契約書ファイル（PDF等）および解析のために入力されたテキストデータ（以下「解析対象データ」）については、以下の通り取り扱います。
                         </p>
                         <ul className="list-disc pl-5 space-y-3 text-sm text-muted-foreground leading-relaxed font-light">
@@ -32,14 +32,14 @@ export default function PrivacyPage() {
 
                     <section>
                         <h2 className="text-base font-medium text-primary mb-4">3. 第三者提供</h2>
-                        <p className="text-sm text-slate-500 leading-relaxed font-light">
+                        <p className="text-sm text-muted-foreground leading-relaxed font-light">
                             当社は、法令に基づく場合または本人の同意がある場合を除き、個人情報を第三者に提供することはありません。（ただし、前項に定める解析処理のためのAPIプロバイダーへのデータ送信を除く）
                         </p>
                     </section>
 
                     <section>
                         <h2 className="text-base font-medium text-primary mb-4">4. お問い合わせ窓口</h2>
-                        <p className="text-sm text-slate-500 leading-relaxed font-light">
+                        <p className="text-sm text-muted-foreground leading-relaxed font-light">
                             本ポリシーに関するお問い合わせは、以下の連絡先までお願いいたします。
                         </p>
                         <p className="mt-4 text-sm text-foreground">

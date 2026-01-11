@@ -127,7 +127,7 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
     const renderContent = () => {
         if (matches.length === 0) {
             return text.split(/(\n)/).map((segment, i) => (
-                <span key={i} className="whitespace-pre-wrap text-slate-600">
+                <span key={i} className="whitespace-pre-wrap text-foreground">
                     {segment}
                 </span>
             ));
@@ -141,7 +141,7 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
             if (match.start > lastIdx) {
                 const beforeText = text.slice(lastIdx, match.start);
                 elements.push(
-                    <span key={`text-before-${i}`} className="whitespace-pre-wrap text-slate-600">
+                    <span key={`text-before-${i}`} className="whitespace-pre-wrap text-foreground">
                         {beforeText}
                     </span>
                 );
@@ -166,7 +166,7 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
         // Remaining text
         if (lastIdx < text.length) {
             elements.push(
-                <span key="text-remaining" className="whitespace-pre-wrap text-slate-600">
+                <span key="text-remaining" className="whitespace-pre-wrap text-foreground">
                     {text.slice(lastIdx)}
                 </span>
             );
@@ -176,25 +176,25 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
     };
 
     return (
-        <div className="h-full flex flex-col bg-slate-50">
+        <div className="h-full flex flex-col bg-background">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-slate-200">
+            <div className="flex items-center justify-between px-6 py-3 bg-background border-b border-primary/10">
                 <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm font-medium text-slate-700">契約書</span>
+                    <FileText className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground">契約書</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] text-muted-foreground bg-primary/5 px-2 py-0.5 rounded-full">
                         ハイライトをクリックしてリスクを確認
                     </span>
                 </div>
             </div>
 
             {/* Content Container */}
-            <div className="flex-1 overflow-auto bg-white">
+            <div className="flex-1 overflow-auto bg-background">
                 <div
                     ref={containerRef}
-                    className="max-w-3xl mx-auto p-12 lg:p-16 min-h-full shadow-inner bg-white font-serif leading-relaxed"
+                    className="max-w-3xl mx-auto p-12 lg:p-16 min-h-full bg-white font-serif leading-relaxed text-foreground"
                     style={{ fontSize: "15px" }}
                 >
                     <div className="space-y-1">
