@@ -12,10 +12,10 @@ interface AnalysisStep {
 }
 
 const ANALYSIS_STEPS: AnalysisStep[] = [
-    { id: "read", label: "契約書を解析しています", description: "データの読み込み中", duration: 2000 },
-    { id: "analyze", label: "条項を精査しています", description: "リーガルチェック実行中", duration: 4000 },
-    { id: "detect", label: "リスクポイントを整理しています", description: "懸念事項を特定中", duration: 5000 },
-    { id: "suggest", label: "診断レポートを生成しています", description: "アドバイスを作成中", duration: 3000 },
+    { id: "read", label: "契約書を受け取りました！", description: "さっそく見てみるね...", duration: 2000 },
+    { id: "analyze", label: "ひとつひとつの条項をチェック中...🔍", description: "リーガルチェック実行中", duration: 4000 },
+    { id: "detect", label: "気になるところを整理しているよ...", description: "懸念事項を特定中", duration: 5000 },
+    { id: "suggest", label: "もうすぐ終わるよ！レポートをまとめてる...✨", description: "アドバイスを作成中", duration: 3000 },
 ];
 
 interface AnalyzingProgressProps {
@@ -81,7 +81,7 @@ export function AnalyzingProgress({ isActive, loadingMessage }: AnalyzingProgres
         <div className="bg-white rounded-2xl border border-primary/20 shadow-xl p-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
             {/* Header with timer */}
             <div className="flex items-center justify-between mb-6">
-                <h3 className="text-base font-medium text-primary">確認しています...</h3>
+                <h3 className="text-base font-medium text-primary">ちょっと待っててね...👀</h3>
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Clock className="w-3 h-3" />
                     {formatTime(elapsedTime)}

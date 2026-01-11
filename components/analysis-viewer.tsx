@@ -268,7 +268,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                         onClick={() => setViewMode("message")}
                                     >
                                         <Send className="w-4 h-4 mr-2" />
-                                        修正依頼の文章作成
+                                        「直して」って伝える ✉️
                                     </Button>
                                     <Button
                                         size="sm"
@@ -284,7 +284,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                         ) : (
                                             <>
                                                 <Sparkles className="w-4 h-4 mr-2" />
-                                                選択した修正を反映
+                                                この内容で契約書を作り直す ✨
                                             </>
                                         )}
                                     </Button>
@@ -298,8 +298,8 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                         <Lightbulb className="w-4 h-4 text-primary" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-foreground">気になるところを選ぶと...</p>
-                                        <p className="text-xs text-muted-foreground">まとめて修正依頼や契約書作成ができます</p>
+                                        <p className="text-sm font-medium text-foreground">気になったところをタップしてね 👆</p>
+                                        <p className="text-xs text-muted-foreground">まとめて「ここ直して」って伝える文章を作れるよ</p>
                                     </div>
                                 </div>
 
@@ -311,7 +311,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                         disabled
                                     >
                                         <Send className="w-4 h-4 mr-2" />
-                                        修正依頼の文章作成
+                                        「直して」って伝える
                                     </Button>
                                     <Button
                                         size="sm"
@@ -319,7 +319,7 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                                         disabled
                                     >
                                         <Sparkles className="w-4 h-4 mr-2" />
-                                        選択した修正を反映
+                                        契約書を作り直す
                                     </Button>
                                 </div>
                             </div>

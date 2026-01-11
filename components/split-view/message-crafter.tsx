@@ -20,16 +20,16 @@ type MessageTone = "formal" | "neutral" | "casual";
 type MessagePurpose = "request" | "question" | "negotiate" | "yesBut";
 
 const TONE_OPTIONS = [
-    { value: "formal" as const, label: "丁寧に", description: "敬語で丁重に依頼" },
-    { value: "neutral" as const, label: "対等に", description: "ビジネスライクに" },
-    { value: "casual" as const, label: "カジュアル", description: "フレンドリーに" },
+    { value: "formal" as const, label: "かしこまって 🎩", description: "敬語で丁重に" },
+    { value: "neutral" as const, label: "ビジネスライクに 🤝", description: "対等な立場で" },
+    { value: "casual" as const, label: "フレンドリーに 😊", description: "気軽に" },
 ];
 
 const PURPOSE_OPTIONS = [
-    { value: "request" as const, label: "修正をお願い" },
-    { value: "question" as const, label: "質問する" },
-    { value: "negotiate" as const, label: "条件交渉" },
-    { value: "yesBut" as const, label: "Yes, But話法" },
+    { value: "request" as const, label: "直してほしい" },
+    { value: "question" as const, label: "確認したい" },
+    { value: "negotiate" as const, label: "条件を相談" },
+    { value: "yesBut" as const, label: "上手に断る" },
 ];
 
 export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafterProps) {
@@ -200,16 +200,16 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
         <div className="flex-1 flex flex-col p-6 space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="space-y-1">
                 <h3 className="text-lg font-bold text-foreground">
-                    {isMultiple ? `${selectedRisks?.length}項目の修正依頼` : "メッセージ作成"}
+                    {isMultiple ? `${selectedRisks?.length}項目の修正依頼` : "相手に送るメッセージを一緒に考えよう 💬"}
                 </h3>
                 <p className="text-muted-foreground text-sm">
-                    トーンと目的を選んで、メッセージを生成できます。
+                    角が立たない言い方で、ちゃんと主張を通すよ
                 </p>
             </div>
 
             {/* Tone Selection */}
             <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground">トーン</p>
+                <p className="text-xs font-medium text-muted-foreground">どんな雰囲気で？</p>
                 <div className="flex gap-2">
                     {TONE_OPTIONS.map((option) => (
                         <button
@@ -230,7 +230,7 @@ export function MessageCrafter({ risk, selectedRisks, onFinish }: MessageCrafter
 
             {/* Purpose Selection */}
             <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground">目的</p>
+                <p className="text-xs font-medium text-muted-foreground">何を伝えたい？</p>
                 <div className="flex gap-2">
                     {PURPOSE_OPTIONS.map((option) => (
                         <button

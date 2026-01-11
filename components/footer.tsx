@@ -5,13 +5,21 @@ export function Footer() {
         <footer className="bg-background border-t border-primary/10 py-12 px-6 font-sans">
             <div className="max-w-3xl mx-auto flex flex-col items-center">
 
+                {/* Guardian Manager Message */}
+                <div className="mb-8 text-center">
+                    <p className="text-sm text-primary/80 font-medium">
+                        面倒な契約書チェックは私に任せて。<br />
+                        <span className="text-muted-foreground">あなたは最高の作品を生み出すことに集中して。💪</span>
+                    </p>
+                </div>
+
                 {/* Service Navigation (Primary) - C-7: Use noun form */}
                 <div className="flex flex-wrap justify-center gap-x-10 gap-y-4 mb-10">
                     <Link href="/generate" className="text-sm font-medium text-primary hover:text-[#FFD700] transition-colors flex items-center gap-2">
                         契約書作成
                         <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">β</span>
                     </Link>
-                    <Link href="/how-to-use" className="text-sm font-medium text-primary hover:text-[#FFD700] transition-colors">ガイド</Link>
+                    <Link href="/how-to-use" className="text-sm font-medium text-primary hover:text-[#FFD700] transition-colors">使い方ガイド</Link>
                     <Link href="/check-policy" className="text-sm font-medium text-primary hover:text-[#FFD700] transition-colors">チェックポリシー</Link>
                 </div>
 

@@ -442,3 +442,137 @@
 .shadow-playful {
   box-shadow: 0 4px 14px -3px rgba(0, 0, 0, 0.08), 0 2px 6px -2px rgba(0, 0, 0, 0.05);
 }
+
+/* ============================================
+   Guardian Manager: Warm & Friendly Design
+   ============================================ */
+
+/* Warm gradient background - replaces cold dotted pattern */
+.bg-guardian-warm {
+  background: linear-gradient(135deg,
+      #fefefe 0%,
+      #f8faf7 50%,
+      #f5f9f4 100%);
+}
+
+/* Soft blob for friendlier feel */
+.bg-guardian-blob {
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-guardian-blob::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 30% 20%, rgba(0, 158, 96, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(0, 158, 96, 0.02) 0%, transparent 40%);
+  animation: blob-float 20s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes blob-float {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(10px, -10px) scale(1.02);
+  }
+
+  66% {
+    transform: translate(-5px, 5px) scale(0.98);
+  }
+}
+
+/* Manager-style card with warmth */
+.card-guardian {
+  background: linear-gradient(145deg, #ffffff 0%, #fafcfa 100%);
+  border: 1px solid rgba(0, 158, 96, 0.1);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 20px -5px rgba(0, 158, 96, 0.08);
+}
+
+/* Friendly button pulse */
+@keyframes friendly-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 158, 96, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 0 8px rgba(0, 158, 96, 0);
+  }
+}
+
+.btn-guardian-pulse {
+  animation: friendly-pulse 2.5s ease-in-out infinite;
+}
+
+/* Typing indicator for "manager is checking" feel */
+@keyframes typing-dot {
+
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+.typing-indicator span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  margin: 0 2px;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation: typing-dot 1.4s ease-in-out infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation: typing-dot 1.4s ease-in-out 0.2s infinite;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation: typing-dot 1.4s ease-in-out 0.4s infinite;
+}
+
+/* Emoji bounce for emphasis */
+@keyframes emoji-bounce {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+.emoji-bounce {
+  display: inline-block;
+  animation: emoji-bounce 0.6s ease-out;
+}
+
+/* Warm highlight for important text */
+.text-guardian-highlight {
+  background: linear-gradient(120deg, rgba(0, 158, 96, 0.1) 0%, rgba(0, 158, 96, 0.05) 100%);
+  padding: 0.1em 0.3em;
+  border-radius: 0.25em;
+}

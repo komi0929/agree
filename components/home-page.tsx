@@ -150,10 +150,10 @@ export function HomePage() {
 
         // Progressive loading messages
         const messages = [
-            "契約書を解析しています...",
-            "条項を精査しています...",
-            "リスクポイントを整理しています...",
-            "診断レポートを生成しています..."
+            "じっくり見ているよ...👀",
+            "条項をチェック中...🔍",
+            "気になるところを整理してる...",
+            "もうすぐ終わるよ！✨"
         ];
         let msgIndex = 0;
         const interval = setInterval(() => {
@@ -239,7 +239,7 @@ export function HomePage() {
                 } catch { }
             } else {
                 trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "analysis_failed" });
-                alert("確認できませんでした。もう一度お試しください。");
+                alert("うまく確認できなかったみたい。もう一度試してみてね！");
                 setStep("upload");
             }
         } catch (e) {
@@ -294,7 +294,7 @@ export function HomePage() {
     // Initially show the unified hero with upload section
     if (step === "upload" && !analysisData) {
         return (
-            <div className="min-h-screen flex flex-col bg-dotted-pattern text-slate-600 font-sans selection:bg-slate-100 selection:text-slate-900">
+            <div className="min-h-screen flex flex-col bg-guardian-warm bg-guardian-blob text-slate-600 font-sans selection:bg-slate-100 selection:text-slate-900">
                 {/* History Sidebar for logged-in users */}
                 {user && (
                     <HistorySidebar
@@ -332,14 +332,15 @@ export function HomePage() {
                         <SignatureLogo className="w-44 h-22 text-primary" />
                     </div>
 
-                    {/* Main Copy - Compact for unified view */}
+                    {/* Main Copy - Guardian Manager voice */}
                     <div className="text-center space-y-5 mb-14 animate-fade-in-delayed">
                         <p className="text-2xl leading-normal max-w-lg mx-auto font-bold text-primary text-balance tracking-tight">
-                            その契約書、不安はありませんか？
+                            契約書のチェックは任せて。<br />
+                            あなたは、その手で生み出すことに集中してほしいから。<span className="emoji-bounce">✨</span>
                         </p>
                         <p className="text-slate-600 text-[15px] leading-relaxed max-w-md mx-auto font-medium">
-                            AIがあなたの立場からリスクを解析、修正案をご提案。<br />
-                            登録不要、最短15秒で診断が完了します。
+                            複雑な契約書も、私がサッと目を通して気になるポイントをお伝えするよ。<br />
+                            あなたは最高の作品を作ることに集中して。<span className="emoji-bounce">💪</span>
                         </p>
                     </div>
 

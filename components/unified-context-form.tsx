@@ -123,8 +123,8 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                                     <Briefcase className="w-5 h-5 text-primary" />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-foreground">クイック診断を開始</p>
-                                    <p className="text-xs text-muted-foreground">標準設定で今すぐ解析する</p>
+                                    <p className="font-medium text-foreground">すぐに見てもらう 🚀</p>
+                                    <p className="text-xs text-muted-foreground">フリーランスの味方設定でサクッとチェック</p>
                                 </div>
                             </div>
                             <ArrowRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
@@ -147,7 +147,7 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
                         <StepBadge number={1} />
-                        <h3 className="text-sm font-medium text-primary">あなたは？</h3>
+                        <h3 className="text-sm font-medium text-primary">今回のあなたの立場は？</h3>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
@@ -180,7 +180,7 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
                         <StepBadge number={2} />
-                        <h3 className="text-sm font-medium text-primary">あなたの立場</h3>
+                        <h3 className="text-sm font-medium text-primary">普段のお仕事スタイル</h3>
                         <span className="text-xs text-muted-foreground">任意</span>
                     </div>
 
@@ -206,7 +206,7 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
                         <StepBadge number={3} />
-                        <h3 className="text-sm font-medium text-primary">事業形態</h3>
+                        <h3 className="text-sm font-medium text-primary">働き方</h3>
                         <span className="text-xs text-muted-foreground">任意</span>
                     </div>
 
@@ -236,8 +236,8 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
                         <StepBadge number={4} />
-                        <h3 className="text-sm font-medium text-primary">取引先の資本金</h3>
-                        <span className="text-xs text-muted-foreground">任意</span>
+                        <h3 className="text-sm font-medium text-primary">相手の規模感</h3>
+                        <span className="text-xs text-muted-foreground">わからなくてもOK！</span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
@@ -275,11 +275,11 @@ export function UnifiedContextForm({ extractionData, onComplete, onSkip }: Unifi
                 >
                     {isComplete ? (
                         <>
-                            契約書の解析を開始する
+                            チェックをお願いする 🛡️
                             <ArrowRight className="w-4 h-4 ml-2" />
                         </>
                     ) : (
-                        "「甲」または「乙」を選んでください"
+                        "「甲」または「乙」を選んでね"
                     )}
                 </Button>
                 {isComplete && (
