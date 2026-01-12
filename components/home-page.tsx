@@ -25,6 +25,7 @@ import {
     isContextMatch,
     getContextDiff
 } from "@/lib/speculative-analysis";
+import { useUsageLimit } from "@/hooks/use-usage-limit";
 
 // Phase 5: Dynamic imports for heavy components (reduces initial bundle)
 const AnalysisViewer = dynamic(
@@ -77,6 +78,9 @@ export function HomePage() {
 
     // Store the promise of the deep analysis so we can await it later
     const deepAnalysisPromiseRef = useRef<Promise<AnalysisState> | null>(null);
+
+    // Usage limit hook
+    const { hasReachedCheckLimit, incrementCheckCount } = useUsageLimit();
 
     // SPECULATIVE EXECUTION: Cache for pre-computed analysis
     const speculativeCacheRef = useRef<SpeculativeAnalysisCache | null>(null);
@@ -139,6 +143,20 @@ export function HomePage() {
     ) => {
         trackEvent(ANALYTICS_EVENTS.USER_CONTEXT_COMPLETED);
         trackEvent(ANALYTICS_EVENTS.ROLE_SELECTED, { role });
+
+        // Check usage limit
+        if (hasReachedCheckLimit) {
+            setShowGateModal(true);
+            return;
+        }
+
+        // Increment usage count
+        const allowed = await incrementCheckCount();
+        if (!allowed && !user) {
+            // Double check for anonymous users who might have just hit the limit
+            setShowGateModal(true);
+            return;
+        }
 
         // Show overlay instead of changing step
         setIsAnalyzing(true);
@@ -448,25 +466,28 @@ export function HomePage() {
                                 別の契約書を確認する
                             </Button>
                         )}
-                        {authLoading ? null : !user && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setShowAuthModal(true)}
-                                className="text-slate-500 hover:text-slate-900 rounded-full"
-                            >
-                                <LogIn className="w-4 h-4 mr-2" />
-                                ログイン
-                            </Button>
-                        )}
+                        {/* Login button moved to footer/actions in viewer for better flow */}
                     </div>
                 </header>
 
                 <div className={`flex-1 max-w-6xl mx-auto w-full px-8 pb-20`}>
                     {step === "complete" && analysisData ? (
                         <div className="h-[calc(100vh-5rem)] -mx-8 bg-slate-50">
-                            <AnalysisViewer data={analysisData} text={contractText} contractType={extractionData?.contract_type} />
-                        </div>
+                            <AnalysisViewer
+                                data={analysisData}
+                                text={contractText}
+                                contractType={extractionData?.contract_type || "契約書"}
+                                onSave={() => {
+                                    if (!user) {
+                                        setShowAuthModal(true);
+                                    } else {
+                                        if (extractionData) {
+                                            handleSaveToHistory(analysisData, contractText, extractionData.contract_type);
+                                        }
+                                    }
+                                }}
+                                isSaved={!!currentHistoryId}
+                            />        </div>
                     ) : (
                         <div className="py-20 flex flex-col items-center justify-center text-center">
                             <Loader2 className="w-8 h-8 animate-spin text-slate-300 mb-4" />

@@ -26,9 +26,11 @@ interface AnalysisViewerProps {
     data: EnhancedAnalysisResult;
     text: string;
     contractType?: string;
+    onSave?: () => void;
+    isSaved?: boolean;
 }
 
-export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps) {
+export function AnalysisViewer({ data, text, contractType, onSave, isSaved }: AnalysisViewerProps) {
     const router = useRouter();
     const [highlightedRiskIndex, setHighlightedRiskIndex] = useState<number | null>(null);
     const [selectedRiskIndex, setSelectedRiskIndex] = useState<number | null>(null);
@@ -77,23 +79,29 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
 
 
 
-    // Handle 28 checkpoints click
-    const handle28CheckClick = useCallback(() => {
-        if (!checkpointResult) {
-            // First time click: run analysis
-            let result = runAllCheckpoints(text);
-
-            // Reconcile with LLM data to ensure accuracy
-            if (data && data.risks) {
-                result = reconcileCheckpoints(result, data);
-            }
-
-            setCheckpointResult(result);
+    // Unified Checkpoint Calculation (Single Source of Truth)
+    const mergedCheckpoints = useMemo(() => {
+        let result = runAllCheckpoints(text);
+        if (data && data.risks) {
+            result = reconcileCheckpoints(result, data);
         }
-        setShowChecklist(true);
-    }, [checkpointResult, text, data]);
+        return result;
+    }, [text, data]);
 
-    const handleFinish = () => {
+    // Update state when modal opens (if needed) but rely on mergedCheckpoints for source
+    const handle28CheckClick = useCallback(() => {
+        setCheckpointResult(mergedCheckpoints);
+        setShowChecklist(true);
+    }, [mergedCheckpoints]);
+
+    // Handle finish/save (moved from header)
+    const handleSave = () => {
+        // Trigger save logic (Action will be handled by parent or separate component)
+        // For now, open auth modal if not logged in, or show success toast
+        // Implementation depends on parent 'onSave' prop which we might need to add or reuse existing flow
+        // The user just wants a clear "Save" button. 
+        // We can emit an event or just let the user know it's auto-saved if logged in.
+        // Given current architecture, 'AnalysisResult' is stateless regarding history saving unless passed from parent.
         setShowEngagement(true);
     };
 
@@ -188,6 +196,9 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
                     onFilterChange={setRiskFilter}
                     on28CheckClick={handle28CheckClick}
                     onShareClick={() => setShowShareModal(true)}
+                    checkpointResult={mergedCheckpoints}
+                    onSaveClick={onSave}
+                    isSaved={isSaved}
                 />
             </div>
 

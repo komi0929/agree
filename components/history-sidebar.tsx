@@ -49,9 +49,7 @@ export function HistorySidebar({
         setIsLoading(true);
         try {
             const response = await fetch("/api/history", {
-                headers: {
-                    Authorization: `Bearer ${session.access_token}`,
-                },
+                // Cookie auth handled automatically
             });
 
             if (response.ok) {
@@ -72,9 +70,7 @@ export function HistorySidebar({
         try {
             const response = await fetch(`/api/history/${id}`, {
                 method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${session.access_token}`,
-                },
+                // Cookie auth handled automatically
             });
 
             if (response.ok) {
@@ -241,7 +237,6 @@ export function useAnalysisHistory() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${session.access_token}`,
                 },
                 body: JSON.stringify({
                     title,
@@ -272,9 +267,7 @@ export function useAnalysisHistory() {
 
         try {
             const response = await fetch(`/api/history/${historyId}`, {
-                headers: {
-                    Authorization: `Bearer ${session.access_token}`,
-                },
+                // Cookie auth handled automatically
             });
 
             if (response.ok) {
