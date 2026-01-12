@@ -1,7 +1,7 @@
 "use client";
 
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
-import { AlertTriangle, AlertOctagon, FileText, X, Shield, Share2 } from "lucide-react";
+import { AlertTriangle, AlertOctagon, FileText, X, Shield, Share2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type RiskLevelFilter = "critical" | "high" | "medium" | "low" | null;
