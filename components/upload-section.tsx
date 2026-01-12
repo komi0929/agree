@@ -195,9 +195,9 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
 
             <Tabs defaultValue="upload" className="w-full" onValueChange={() => setError(null)}>
                 <TabsList className="grid w-full max-w-[340px] grid-cols-3 mb-8 bg-slate-100/50 p-1 rounded-full mx-auto">
-                    <TabsTrigger value="upload" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300">PDFをわたす</TabsTrigger>
-                    <TabsTrigger value="url" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300">URLを教える</TabsTrigger>
-                    <TabsTrigger value="text" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300">コピペする</TabsTrigger>
+                    <TabsTrigger value="upload" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300">PDFを選択</TabsTrigger>
+                    <TabsTrigger value="url" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300">URLを入力</TabsTrigger>
+                    <TabsTrigger value="text" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300">テキスト入力</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="upload">
@@ -213,7 +213,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                         {isUploading ? (
                             <div className="flex flex-col items-center space-y-4">
                                 <Loader2 className="h-6 w-6 text-primary animate-spin" />
-                                <p className="text-xs font-light text-primary/80 tracking-wider">見ているよ...👀</p>
+                                <p className="text-xs font-light text-primary/80 tracking-wider">解析中...</p>
                             </div>
                         ) : (
                             <>
@@ -272,7 +272,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                             {isUploading ? (
                                 <div className="flex items-center gap-2">
                                     <Loader2 className="h-3 w-3 animate-spin" />
-                                    <span className="text-xs">見ているよ...</span>
+                                    <span className="text-xs">解析中...</span>
                                 </div>
                             ) : "契約書をチェックする"}
                         </Button>
@@ -305,9 +305,9 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                             {isUploading ? (
                                 <div className="flex items-center gap-2">
                                     <Loader2 className="h-3 w-3 animate-spin" />
-                                    <span className="text-xs">見ているよ...</span>
+                                    <span className="text-xs">解析中...</span>
                                 </div>
-                            ) : "マネージャーにチェックを頼む 🛡️"}
+                            ) : "チェックを開始"}
                         </Button>
                     </div>
                 </TabsContent>

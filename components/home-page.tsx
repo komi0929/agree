@@ -142,7 +142,7 @@ export function HomePage() {
 
         // Show overlay instead of changing step
         setIsAnalyzing(true);
-        setLoadingMessage("契約書を拝見しています...");
+        setLoadingMessage("契約書を確認しています...");
 
         // Progressive loading messages
         const messages = [
@@ -307,12 +307,12 @@ export function HomePage() {
                         {/* Main Copy - Guardian Manager voice */}
                         <div className="text-center space-y-5 mb-14 animate-fade-in-delayed">
                             <p className="text-2xl leading-normal max-w-lg mx-auto font-bold text-primary text-balance tracking-tight">
-                                契約書のチェックはお任せください。<br />
-                                あなたは、創作に集中できます。
+                                契約書のリスクを高速チェック。<br />
+                                安心して契約を結ぶために。
                             </p>
                             <p className="text-slate-600 text-[15px] leading-relaxed max-w-md mx-auto font-medium">
-                                複雑な契約書も、重要なポイントを分かりやすくお伝えします。<br />
-                                安心してお仕事に取り組めるよう、しっかりサポートいたします。
+                                専門用語の解説から修正案まで、契約締結をサポートします。<br />
+                                重要なポイントを分かりやすくお伝えします。
                             </p>
                         </div>
 

@@ -80,7 +80,7 @@ export function CompletionCelebration({ show, onComplete }: CompletionCelebratio
                         <div className="text-center space-y-1">
                             <h3 className="text-xl font-bold text-primary flex items-center gap-2 justify-center">
                                 <PartyPopper className="w-5 h-5 text-[#FFD700] animate-gentle-rotate" />
-                                お疲れさまでした！
+                                分析が完了しました
                                 <PartyPopper className="w-5 h-5 text-primary animate-gentle-rotate" style={{ animationDelay: "0.5s" }} />
                             </h3>
                             <p className="text-sm text-muted-foreground">
@@ -111,7 +111,7 @@ export function LearningSummary({ risks, className = "" }: LearningSummaryProps)
     return (
         <div className={`bg-primary/5 rounded-2xl p-5 border border-primary/20 ${className}`}>
             <div className="flex items-center gap-2 mb-3">
-                <h4 className="font-semibold text-primary">今回学べたこと</h4>
+                <h4 className="font-semibold text-primary">チェックポイント</h4>
             </div>
             <ul className="space-y-2">
                 {learningPoints.map((point, i) => (
