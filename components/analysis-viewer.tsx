@@ -17,7 +17,9 @@ import { ContractInput, DEFAULT_CONTRACT_OPTIONS } from "@/lib/types/contract-in
 import { runAllCheckpoints, CheckpointResult, reconcileCheckpoints } from "@/lib/rules/checkpoints-28";
 import { ShareModal } from "@/components/share-modal";
 import { BulkActionContainer } from "@/components/bulk-action";
+import { useConnectionLine } from "@/components/split-view/connection-line";
 import dynamic from "next/dynamic";
+import { useRef } from "react";
 
 const ChecklistPanel = dynamic(() => import("@/components/split-view/checklist-panel").then(mod => mod.ChecklistPanel), {
     loading: () => null
@@ -51,6 +53,12 @@ export function AnalysisViewer({ data, text, contractType, onSave, isSaved }: An
 
     // Bulk action modal state
     const [showBulkAction, setShowBulkAction] = useState(false);
+
+    // Split view container ref for connection lines
+    const splitViewRef = useRef<HTMLDivElement>(null);
+
+    // Connection line hook for hover connections
+    const { updateLine, LineOverlay } = useConnectionLine(splitViewRef);
 
     // Page exit warning for unsaved analysis
     useEffect(() => {
@@ -90,6 +98,17 @@ export function AnalysisViewer({ data, text, contractType, onSave, isSaved }: An
         setHighlightedRiskIndex(index);
         setViewMode("contract");
     }, []);
+
+    // Handle hover on risk card - updates both highlight and connection line
+    const handleRiskHover = useCallback((index: number | null) => {
+        setHighlightedRiskIndex(index);
+        if (index !== null) {
+            const risk = data.risks[index];
+            updateLine(index, risk?.risk_level);
+        } else {
+            updateLine(null);
+        }
+    }, [data.risks, updateLine]);
 
     const handleHighlightClick = useCallback((index: number) => {
         setHighlightedRiskIndex(index);
@@ -254,7 +273,9 @@ export function AnalysisViewer({ data, text, contractType, onSave, isSaved }: An
             <GuideBar />
 
             {/* Main Split View */}
-            <div className="flex-1 flex overflow-hidden relative">
+            <div ref={splitViewRef} className="flex-1 flex overflow-hidden relative">
+                {/* Connection Line Overlay */}
+                {LineOverlay}
                 {/* Left Pane */}
                 <div className="w-full md:w-1/2 h-full flex flex-col border-r border-primary/10 bg-background overflow-hidden">
                     {viewMode === "contract" ? (
@@ -296,7 +317,7 @@ export function AnalysisViewer({ data, text, contractType, onSave, isSaved }: An
                         highlightedRiskIndex={highlightedRiskIndex}
                         selectedRiskIndices={selectedRiskIndices}
                         activeFilter={riskFilter}
-                        onRiskHover={setHighlightedRiskIndex}
+                        onRiskHover={handleRiskHover}
                         onRiskSelect={handleRiskSelect}
                         onRiskToggle={handleRiskToggle}
                         onScrollToContract={handleScrollToContract}

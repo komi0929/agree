@@ -155,6 +155,7 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
                     ref={isActive ? highlightRef : undefined}
                     onClick={() => onHighlightClick?.(match.riskIndex)}
                     className={getHighlightStyles(match.riskIndex)}
+                    data-highlight-index={match.riskIndex}
                 >
                     {text.slice(match.start, match.end)}
                 </span>

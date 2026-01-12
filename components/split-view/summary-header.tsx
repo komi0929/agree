@@ -18,15 +18,17 @@ interface SummaryHeaderProps {
 }
 
 export function SummaryHeader({ data, contractType, activeFilter, onFilterChange, on28CheckClick, onShareClick, onSaveClick, isSaved, checkpointResult }: SummaryHeaderProps & { checkpointResult?: any }) {
-    // Count risks based on Checkpoint Result (Single Source of Truth with Checklist Panel)
-    // If checkpointResult is provided, use its summary. Otherwise fall back to data.risks (should not happen in new flow)
+    // Count risks from actual data.risks array (Single Source of Truth with displayed cards)
+    // This ensures consistency between header counts and displayed cards
+    const criticalCount = data.risks.filter(r => r.risk_level === "critical").length;
+    const highCount = data.risks.filter(r => r.risk_level === "high").length;
+    const mediumCount = data.risks.filter(r => r.risk_level === "medium").length;
+    const lowCount = data.risks.filter(r => r.risk_level === "low").length;
 
-    const criticalCount = checkpointResult ? checkpointResult.summary.critical : data.risks.filter(r => r.risk_level === "critical").length;
-    const warningCount = checkpointResult ? checkpointResult.summary.warning : data.risks.filter(r => r.risk_level === "high" || r.risk_level === "medium").length;
-    // Note: We combine high/medium into "Warning" to match the 28-point concept if needed,
-    // OR we can trust the summary.warning which comes from the rule engine.
+    // Warning = High + Medium (matching the CHECK badge display)
+    const warningCount = highCount + mediumCount;
 
-    // Total issues found (Critical + Warning)
+    // Total issues found (Critical + Warning, excluding low/"あるとよい")
     const totalIssues = criticalCount + warningCount;
 
     const handleFilterClick = (level: RiskLevelFilter) => {
@@ -81,6 +83,17 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
                             <div className="flex flex-col leading-none">
                                 <span className="text-[10px] text-amber-600 font-bold uppercase tracking-wider">CHECK</span>
                                 <span className="text-sm font-bold text-amber-700">{warningCount}件</span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Low (Recommended - あるとよい) */}
+                    {lowCount > 0 && (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg">
+                            <Check className="w-4 h-4 text-blue-600" />
+                            <div className="flex flex-col leading-none">
+                                <span className="text-[10px] text-blue-600 font-bold uppercase tracking-wider">推奨</span>
+                                <span className="text-sm font-bold text-blue-700">{lowCount}件</span>
                             </div>
                         </div>
                     )}

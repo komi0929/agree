@@ -194,16 +194,16 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
             )}
 
             <Tabs defaultValue="upload" className="w-full" onValueChange={() => setError(null)}>
-                <TabsList className="grid w-full max-w-[340px] grid-cols-3 mb-8 bg-slate-100/50 p-1 rounded-full mx-auto">
-                    <TabsTrigger value="upload" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300">PDFを選択</TabsTrigger>
-                    <TabsTrigger value="url" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300">URLを入力</TabsTrigger>
-                    <TabsTrigger value="text" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300">テキスト入力</TabsTrigger>
+                <TabsList className="grid w-full max-w-[340px] grid-cols-3 mb-8 bg-slate-100 p-1 rounded-full mx-auto border border-slate-200">
+                    <TabsTrigger value="upload" className="rounded-full text-xs data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-300">PDFを選択</TabsTrigger>
+                    <TabsTrigger value="url" className="rounded-full text-xs data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-300">URLを入力</TabsTrigger>
+                    <TabsTrigger value="text" className="rounded-full text-xs data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-300">テキスト入力</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="upload">
                     <div
-                        className={`flex flex-col items-center justify-center space-y-4 py-16 border border-dashed rounded-xl transition-all duration-300 cursor-pointer group
-                      ${dragActive ? "border-primary bg-primary/5" : "border-primary/20 hover:border-primary/40 hover:bg-primary/5"}`}
+                        className={`flex flex-col items-center justify-center space-y-4 py-16 border-2 border-dashed rounded-xl transition-all duration-300 cursor-pointer group
+                      ${dragActive ? "border-primary bg-primary/5" : "border-slate-300 hover:border-primary/60 hover:bg-primary/5"}`}
                         onDragEnter={handleDrag}
                         onDragLeave={handleDrag}
                         onDragOver={handleDrag}
@@ -256,7 +256,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                                 value={url}
                                 onChange={(e) => setUrl(e.target.value)}
                                 disabled={isUploading}
-                                className="rounded-lg border-slate-200 focus-visible:ring-0 focus-visible:border-slate-400 bg-slate-50/50 text-center font-light placeholder:text-slate-300"
+                                className="rounded-lg border-slate-300 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary bg-white text-center font-light placeholder:text-slate-400"
                             />
                         </div>
                         {/* B-2: Specific button label */}
@@ -288,7 +288,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                                 value={textInput}
                                 onChange={(e) => setTextInput(e.target.value)}
                                 disabled={isUploading}
-                                className="w-full h-48 p-4 rounded-xl border-slate-200 focus:ring-0 focus:border-slate-400 bg-slate-50/50 font-light placeholder:text-slate-400 resize-none text-sm"
+                                className="w-full h-48 p-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white font-light placeholder:text-slate-400 resize-none text-sm"
                             />
                         </div>
                         <Button

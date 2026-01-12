@@ -198,6 +198,7 @@ export function RiskPanel({
                             ref={(el) => {
                                 if (el) cardRefs.current.set(index, el);
                             }}
+                            data-card-index={index}
                             className={`
                                 relative rounded-xl border shadow-sm transition-all duration-300
                                 border-l-4 ${styling.border} 
