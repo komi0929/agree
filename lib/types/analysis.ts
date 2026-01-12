@@ -6,6 +6,7 @@ export type ExtractionResult = {
     party_b: string;
     contract_type: string;
     estimated_contract_months: number | null;
+    client_party: "party_a" | "party_b" | "unknown";
 };
 
 export type NegotiationMessage = {

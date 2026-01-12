@@ -116,65 +116,63 @@ export function UnifiedContextForm({ extractionData, onComplete }: UnifiedContex
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
                         <StepBadge number={1} />
-                        <h3 className="text-sm font-medium text-primary">今回のあなたの立場</h3>
+                        <h3 className="text-sm font-medium text-primary">あなたはこの契約書のどちらですか？</h3>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                         <OptionCard
                             isSelected={selectedRole === "party_a"}
-                            onClick={() => setSelectedRole("party_a")}
+                            onClick={() => {
+                                setSelectedRole("party_a");
+                                // Auto-set user role based on AI detection
+                                const isClient = extractionData.client_party === "party_a";
+                                updateContext({ userRole: isClient ? "client" : "vendor" });
+                            }}
                             icon={
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${selectedRole === "party_a" ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-500"}`}>
                                     甲
                                 </div>
                             }
                             title={extractionData.party_a || "不明"}
-                            subtitle="契約書の「甲」"
+                            subtitle={
+                                extractionData.client_party === "party_a"
+                                    ? "発注者（クライアント）"
+                                    : extractionData.client_party === "party_b"
+                                        ? "受注者（ベンダー）"
+                                        : "契約書の「甲」"
+                            }
                         />
                         <OptionCard
                             isSelected={selectedRole === "party_b"}
-                            onClick={() => setSelectedRole("party_b")}
+                            onClick={() => {
+                                setSelectedRole("party_b");
+                                // Auto-set user role based on AI detection
+                                const isClient = extractionData.client_party === "party_b";
+                                updateContext({ userRole: isClient ? "client" : "vendor" });
+                            }}
                             icon={
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${selectedRole === "party_b" ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-500"}`}>
                                     乙
                                 </div>
                             }
                             title={extractionData.party_b || "不明"}
-                            subtitle="契約書の「乙」"
+                            subtitle={
+                                extractionData.client_party === "party_b"
+                                    ? "発注者（クライアント）"
+                                    : extractionData.client_party === "party_a"
+                                        ? "受注者（ベンダー）"
+                                        : "契約書の「乙」"
+                            }
                         />
                     </div>
                 </div>
 
-                {/* Section 2: User Role */}
-                <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                        <StepBadge number={2} />
-                        <h3 className="text-sm font-medium text-primary">普段のお仕事スタイル</h3>
-                        <span className="text-xs text-muted-foreground">任意</span>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                        <OptionCard
-                            isSelected={context.userRole === "vendor"}
-                            onClick={() => updateContext({ userRole: "vendor" })}
-                            icon={<User className="w-5 h-5" />}
-                            title="受注者"
-                            subtitle="仕事を請ける側"
-                        />
-                        <OptionCard
-                            isSelected={context.userRole === "client"}
-                            onClick={() => updateContext({ userRole: "client" })}
-                            icon={<Building2 className="w-5 h-5" />}
-                            title="発注者"
-                            subtitle="仕事を依頼する側"
-                        />
-                    </div>
-                </div>
 
                 {/* Section 3: Entity Type */}
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                        <StepBadge number={3} />
+                        <StepBadge number={2} />
                         <h3 className="text-sm font-medium text-primary">働き方</h3>
                         <span className="text-xs text-muted-foreground">任意</span>
                     </div>
@@ -204,7 +202,7 @@ export function UnifiedContextForm({ extractionData, onComplete }: UnifiedContex
                 {/* Section 4: Counterparty Capital */}
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                        <StepBadge number={4} />
+                        <StepBadge number={3} />
                         <h3 className="text-sm font-medium text-primary">相手の規模感</h3>
                         <span className="text-xs text-muted-foreground">わからなくてもOK！</span>
                     </div>

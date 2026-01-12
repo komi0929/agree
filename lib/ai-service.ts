@@ -32,6 +32,7 @@ const ExtractionSchema = z.object({
     party_b: z.string().describe("乙の名称（正式名称）"),
     contract_type: z.string().describe("契約書の種類（例：業務委託契約書、秘密保持契約書）"),
     estimated_contract_months: z.number().nullable().describe("推定される契約期間（月数）。不明な場合はnull"),
+    client_party: z.enum(["party_a", "party_b", "unknown"]).describe("どちらが「発注者（クライアント/支払う側）」か。不明な場合はunknown"),
 });
 
 export type ExtractionResult = z.infer<typeof ExtractionSchema>;
@@ -235,6 +236,7 @@ export async function extractContractParties(text: string): Promise<ExtractionRe
             party_b: "不明",
             contract_type: "不明",
             estimated_contract_months: null,
+            client_party: "unknown",
         };
     }
 
@@ -251,7 +253,8 @@ export async function extractContractParties(text: string): Promise<ExtractionRe
   "party_a": "甲の名称（正式名称）。不明な場合は「不明」",
   "party_b": "乙の名称（正式名称）。不明な場合は「不明」",
   "contract_type": "契約書の種類（例：業務委託契約書）。不明な場合は「契約書」",
-  "estimated_contract_months": 数値またはnull
+  "estimated_contract_months": 数値またはnull,
+  "client_party": "party_a" | "party_b" | "unknown" （どちらが発注者/支払う側か）
 }
 
 重要：必ず上記のキー名を使用してください。`,
@@ -277,6 +280,7 @@ export async function extractContractParties(text: string): Promise<ExtractionRe
             estimated_contract_months: typeof parsed.estimated_contract_months === "number"
                 ? parsed.estimated_contract_months
                 : null,
+            client_party: parsed.client_party || "unknown",
         };
 
         return result;
@@ -288,6 +292,7 @@ export async function extractContractParties(text: string): Promise<ExtractionRe
             party_b: "不明",
             contract_type: "契約書",
             estimated_contract_months: null,
+            client_party: "unknown",
         };
     }
 }
