@@ -51,11 +51,11 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
                     <div className="relative w-16 h-16 flex items-center justify-center">
                         <div className={cn(
                             "absolute inset-0 rounded-full blur-md opacity-50",
-                            criticalCount > 0 ? "bg-red-100" : highCount > 0 ? "bg-orange-100" : "bg-emerald-100"
+                            criticalCount > 0 ? "bg-red-100" : highCount > 0 ? "bg-orange-100" : mediumCount > 0 ? "bg-yellow-100" : "bg-blue-100"
                         )} />
                         <div className={cn(
                             "relative z-10 w-14 h-14 rounded-full flex flex-col items-center justify-center border-2",
-                            criticalCount > 0 ? "border-red-400 bg-red-50" : highCount > 0 ? "border-orange-400 bg-orange-50" : "border-emerald-400 bg-emerald-50"
+                            criticalCount > 0 ? "border-red-400 bg-red-50" : highCount > 0 ? "border-orange-400 bg-orange-50" : mediumCount > 0 ? "border-yellow-400 bg-yellow-50" : "border-blue-400 bg-blue-50"
                         )}>
                             <span className="text-xl font-bold text-foreground">{data.risks.filter(r => r.risk_level !== "low").length}</span>
                             <span className="text-[8px] text-muted-foreground uppercase tracking-wider">件</span>
@@ -122,13 +122,14 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
                     {lowCount > 0 && (
                         <button
                             onClick={() => handleFilterClick("low")}
-                            className={`flex items-center gap-1.5 px-3 py-2 bg-primary/5 border rounded-full shadow-sm transition-all cursor-pointer ${getPillClasses("low", {
-                                active: "border-primary ring-2 ring-primary/30 scale-105 bg-primary/10",
-                                inactive: "border-primary/20 opacity-50",
-                                default: "border-primary/20 hover:scale-105 hover:bg-primary/10"
+                            className={`flex items-center gap-1.5 px-3 py-2 bg-blue-50 border rounded-full shadow-sm transition-all cursor-pointer ${getPillClasses("low", {
+                                active: "border-blue-500 ring-2 ring-blue-300 scale-105 bg-blue-100",
+                                inactive: "border-blue-200 opacity-50",
+                                default: "border-blue-200 hover:scale-105 hover:bg-blue-100"
                             })}`}
                         >
-                            <span className="text-xs font-medium text-primary">あると安心 {lowCount}</span>
+                            <Shield className="w-3.5 h-3.5 text-blue-600" />
+                            <span className="text-xs font-medium text-blue-700">あると安心 {lowCount}</span>
                         </button>
                     )}
 

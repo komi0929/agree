@@ -98,6 +98,7 @@ export function RiskPanel({
                     icon: <AlertOctagon className="w-4 h-4 text-red-600" />,
                     highlightColor: "bg-red-100",
                     dotColor: "bg-red-500",
+                    hoverBorder: "hover:border-red-300",
                 };
             case "high":
                 return {
@@ -109,6 +110,7 @@ export function RiskPanel({
                     icon: <AlertTriangle className="w-4 h-4 text-orange-500" />,
                     highlightColor: "bg-orange-100",
                     dotColor: "bg-orange-400",
+                    hoverBorder: "hover:border-orange-300",
                 };
             case "medium":
                 return {
@@ -120,6 +122,7 @@ export function RiskPanel({
                     icon: <AlertTriangle className="w-4 h-4 text-yellow-600" />,
                     highlightColor: "bg-yellow-100",
                     dotColor: "bg-yellow-400",
+                    hoverBorder: "hover:border-yellow-300",
                 };
             default:
                 return {
@@ -131,6 +134,7 @@ export function RiskPanel({
                     icon: <Check className="w-4 h-4 text-blue-500" />,
                     highlightColor: "bg-blue-100",
                     dotColor: "bg-blue-400",
+                    hoverBorder: "hover:border-blue-300",
                 };
         }
     };
@@ -198,7 +202,7 @@ export function RiskPanel({
                                 relative rounded-xl border shadow-sm transition-all duration-300
                                 border-l-4 ${styling.border} 
                                 ${isSelected ? "bg-primary/5 border-primary ring-1 ring-primary/20" : "bg-white"}
-                                ${isHighlighted ? "ring-2 ring-primary/30 shadow-md scale-[1.01]" : (!isSelected && "border-primary/10 hover:shadow-md hover:border-primary/20")}
+                                ${isHighlighted ? "ring-2 ring-primary/30 shadow-md scale-[1.01]" : (!isSelected && `border-primary/10 hover:shadow-md ${styling.hoverBorder}`)}
                             `}
                             onClick={() => onScrollToContract(index)} // Fallback click handler if header catches events
                             onMouseEnter={() => onRiskHover(index)}
