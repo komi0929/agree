@@ -71,7 +71,7 @@ export function HomePage() {
     const { saveToHistory, loadFromHistory } = useAnalysisHistory();
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [showGateModal, setShowGateModal] = useState(false);
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
     const [currentHistoryId, setCurrentHistoryId] = useState<string | undefined>();
     const [showSavePrompt, setShowSavePrompt] = useState(false);
 
@@ -87,12 +87,7 @@ export function HomePage() {
         trackPageView();
     }, []);
 
-    // Auto-open sidebar for logged-in users
-    useEffect(() => {
-        if (user && !authLoading) {
-            setSidebarOpen(true);
-        }
-    }, [user, authLoading]);
+
 
     const handleAnalysisStart = () => {
         setLoading(true);
@@ -297,43 +292,45 @@ export function HomePage() {
                 />
 
                 {/* Usage limit banner */}
-                <UsageLimitBanner type="check" onRegisterClick={() => setShowGateModal(true)} />
+                <div className={`flex-1 flex flex-col w-full transition-all duration-300 ${sidebarOpen ? "md:ml-72" : ""}`}>
+                    <UsageLimitBanner type="check" onRegisterClick={() => setShowGateModal(true)} />
 
-                <section className="flex-1 flex flex-col items-center pt-32 pb-16 px-6 max-w-2xl mx-auto w-full transition-all duration-500">
-                    {/* Minimalist Logo - Optimized size/aspect for new branding */}
-                    <div className="mb-14 flex flex-col items-center">
-                        <SignatureLogo className="w-56" />
-                    </div>
+                    <section className="flex-1 flex flex-col items-center pt-32 pb-16 px-6 max-w-2xl mx-auto w-full transition-all duration-500">
+                        {/* Minimalist Logo - Optimized size/aspect for new branding */}
+                        <div className="mb-14 flex flex-col items-center">
+                            <SignatureLogo className="w-56" />
+                        </div>
 
-                    {/* Main Copy - Guardian Manager voice */}
-                    <div className="text-center space-y-5 mb-14 animate-fade-in-delayed">
-                        <p className="text-2xl leading-normal max-w-lg mx-auto font-bold text-primary text-balance tracking-tight">
-                            契約書のチェックはお任せください。<br />
-                            あなたは、創作に集中できます。
-                        </p>
-                        <p className="text-slate-600 text-[15px] leading-relaxed max-w-md mx-auto font-medium">
-                            複雑な契約書も、重要なポイントを分かりやすくお伝えします。<br />
-                            安心してお仕事に取り組めるよう、しっかりサポートいたします。
-                        </p>
-                    </div>
+                        {/* Main Copy - Guardian Manager voice */}
+                        <div className="text-center space-y-5 mb-14 animate-fade-in-delayed">
+                            <p className="text-2xl leading-normal max-w-lg mx-auto font-bold text-primary text-balance tracking-tight">
+                                契約書のチェックはお任せください。<br />
+                                あなたは、創作に集中できます。
+                            </p>
+                            <p className="text-slate-600 text-[15px] leading-relaxed max-w-md mx-auto font-medium">
+                                複雑な契約書も、重要なポイントを分かりやすくお伝えします。<br />
+                                安心してお仕事に取り組めるよう、しっかりサポートいたします。
+                            </p>
+                        </div>
 
-                    {/* Unified Upload Section */}
-                    <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <UploadSection
-                            onAnalysisStart={handleAnalysisStart}
-                            onAnalysisComplete={handleExtractionComplete}
-                        />
-                    </div>
+                        {/* Unified Upload Section */}
+                        <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <UploadSection
+                                onAnalysisStart={handleAnalysisStart}
+                                onAnalysisComplete={handleExtractionComplete}
+                            />
+                        </div>
 
-                    {/* Link to how-to-use */}
-                    <div className="mt-10">
-                        <Link href="/how-to-use" className="inline-block text-sm text-slate-400 hover:text-slate-600 border-b border-dashed border-slate-300 pb-0.5 transition-colors">
-                            agreeの使い方を確認する
-                        </Link>
-                    </div>
-                </section>
+                        {/* Link to how-to-use */}
+                        <div className="mt-10">
+                            <Link href="/how-to-use" className="inline-block text-sm text-slate-400 hover:text-slate-600 border-b border-dashed border-slate-300 pb-0.5 transition-colors">
+                                agreeの使い方を確認する
+                            </Link>
+                        </div>
+                    </section>
 
-                <Footer />
+                    <Footer />
+                </div>
 
                 {/* Auth Modal */}
                 <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
@@ -417,61 +414,63 @@ export function HomePage() {
                 onLoginClick={() => setShowAuthModal(true)}
             />
 
-            <header className="h-20 px-8 flex items-center justify-between max-w-5xl mx-auto w-full">
-                <div
-                    className="flex items-center gap-3 cursor-pointer"
-                    onClick={() => {
-                        setAnalysisData(null);
-                        setStep("upload");
-                        setCurrentHistoryId(undefined);
-                        // Clear speculative cache
-                        speculativeCacheRef.current = null;
-                        speculativePromiseRef.current = null;
-                    }}
-                >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/logo.png" alt="agree" className="h-16 w-auto" />
-                </div>
-                <div className="flex items-center gap-3">
-                    {analysisData && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                                setAnalysisData(null);
-                                setStep("upload");
-                                setCurrentHistoryId(undefined);
-                            }}
-                            className="text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-full font-normal"
-                        >
-                            別の契約書を確認する
-                        </Button>
-                    )}
-                    {authLoading ? null : !user && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowAuthModal(true)}
-                            className="text-slate-500 hover:text-slate-900 rounded-full"
-                        >
-                            <LogIn className="w-4 h-4 mr-2" />
-                            ログイン
-                        </Button>
-                    )}
-                </div>
-            </header>
+            <div className={`flex-1 w-full transition-all duration-300 ${sidebarOpen ? "md:ml-72" : ""}`}>
+                <header className="h-20 px-8 flex items-center justify-between max-w-5xl mx-auto w-full">
+                    <div
+                        className="flex items-center gap-3 cursor-pointer"
+                        onClick={() => {
+                            setAnalysisData(null);
+                            setStep("upload");
+                            setCurrentHistoryId(undefined);
+                            // Clear speculative cache
+                            speculativeCacheRef.current = null;
+                            speculativePromiseRef.current = null;
+                        }}
+                    >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/logo.png" alt="agree" className="h-16 w-auto" />
+                    </div>
+                    <div className="flex items-center gap-3">
+                        {analysisData && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    setAnalysisData(null);
+                                    setStep("upload");
+                                    setCurrentHistoryId(undefined);
+                                }}
+                                className="text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-full font-normal"
+                            >
+                                別の契約書を確認する
+                            </Button>
+                        )}
+                        {authLoading ? null : !user && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setShowAuthModal(true)}
+                                className="text-slate-500 hover:text-slate-900 rounded-full"
+                            >
+                                <LogIn className="w-4 h-4 mr-2" />
+                                ログイン
+                            </Button>
+                        )}
+                    </div>
+                </header>
 
-            <div className={`flex-1 max-w-6xl mx-auto w-full px-8 pb-20 transition-all duration-300`}>
-                {step === "complete" && analysisData ? (
-                    <div className="h-[calc(100vh-5rem)] -mx-8 bg-slate-50">
-                        <AnalysisViewer data={analysisData} text={contractText} contractType={extractionData?.contract_type} />
-                    </div>
-                ) : (
-                    <div className="py-20 flex flex-col items-center justify-center text-center">
-                        <Loader2 className="w-8 h-8 animate-spin text-slate-300 mb-4" />
-                        <p className="text-slate-400">結果を読み込んでいます...</p>
-                    </div>
-                )}
+                <div className={`flex-1 max-w-6xl mx-auto w-full px-8 pb-20`}>
+                    {step === "complete" && analysisData ? (
+                        <div className="h-[calc(100vh-5rem)] -mx-8 bg-slate-50">
+                            <AnalysisViewer data={analysisData} text={contractText} contractType={extractionData?.contract_type} />
+                        </div>
+                    ) : (
+                        <div className="py-20 flex flex-col items-center justify-center text-center">
+                            <Loader2 className="w-8 h-8 animate-spin text-slate-300 mb-4" />
+                            <p className="text-slate-400">結果を読み込んでいます...</p>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Save prompt for non-logged-in users */}
