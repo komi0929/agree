@@ -75,6 +75,12 @@ export interface UserContext {
      * 6ヶ月以上の場合、育児・介護配慮義務が発生
      */
     contractDurationMonths: number | null;
+
+    /**
+     * P_CONTRACT_ROLE: 契約書上の立場（甲・乙）
+     * これにより、「甲は〜」という条項が自分に対するものかを判定
+     */
+    contractRole: "party_a" | "party_b" | null;
 }
 
 /**
@@ -89,4 +95,5 @@ export const DEFAULT_USER_CONTEXT: UserContext = {
     isInvoiceRegistered: null,
     expectedContractType: "unknown",
     contractDurationMonths: null,
+    contractRole: null,
 };

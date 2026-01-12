@@ -274,7 +274,9 @@ export function HomePage() {
     };
     // Handler for when user completes context selection
     const handleContextComplete = (ctx: UserContext, role: "party_a" | "party_b") => {
-        handleAutoAnalysis(contractText, extractionData!, ctx, role);
+        // Merge role into context
+        const contextWithRole = { ...ctx, contractRole: role };
+        handleAutoAnalysis(contractText, extractionData!, contextWithRole, role);
     };
 
     // Initially show the unified hero with upload section

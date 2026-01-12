@@ -93,6 +93,7 @@ const EnhancedAnalysisSchema = z.object({
 
 function buildEnhancedSystemPrompt(ctx: UserContext, laws: ApplicableLaws): string {
     const userRoleJa = ctx.userRole === "vendor" ? "受注者（フリーランス）" : "発注者";
+    const contractRoleJa = ctx.contractRole === "party_a" ? "甲" : ctx.contractRole === "party_b" ? "乙" : "不明";
 
     let lawContext = "";
     if (laws.freelanceNewLawStrict) {
@@ -124,6 +125,7 @@ function buildEnhancedSystemPrompt(ctx: UserContext, laws: ApplicableLaws): stri
 
 【ユーザー情報】
 - 立場：${userRoleJa}
+- 契約書上の呼称：${contractRoleJa} （特に「${contractRoleJa}」の義務・責任・禁止事項を重点的にチェックしてください）
 - 視点：${ctx.userRole === "vendor" ? "ユーザーにとって不利な条項を指摘" : "法令遵守の観点から問題点を指摘"}
 
 ${lawContext}
