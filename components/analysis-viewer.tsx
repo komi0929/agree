@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, FileText, Send, Sparkles, Loader2, X, Lightbulb } from "lucide-react";
 import { modifyContractAction } from "@/app/generate/actions";
 import { ContractInput, DEFAULT_CONTRACT_OPTIONS } from "@/lib/types/contract-input";
-import { runAllCheckpoints, CheckpointResult } from "@/lib/rules/checkpoints-28";
+import { runAllCheckpoints, CheckpointResult, reconcileCheckpoints } from "@/lib/rules/checkpoints-28";
 import { ShareModal } from "@/components/share-modal";
 import dynamic from "next/dynamic";
 
@@ -81,11 +81,17 @@ export function AnalysisViewer({ data, text, contractType }: AnalysisViewerProps
     const handle28CheckClick = useCallback(() => {
         if (!checkpointResult) {
             // First time click: run analysis
-            const result = runAllCheckpoints(text);
+            let result = runAllCheckpoints(text);
+
+            // Reconcile with LLM data to ensure accuracy
+            if (data && data.risks) {
+                result = reconcileCheckpoints(result, data);
+            }
+
             setCheckpointResult(result);
         }
         setShowChecklist(true);
-    }, [checkpointResult, text]);
+    }, [checkpointResult, text, data]);
 
     const handleFinish = () => {
         setShowEngagement(true);

@@ -63,8 +63,8 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
                     </div>
 
                     <div className="flex-1 min-w-0">
-                        <h2 className="text-base font-bold text-foreground">
-                            {criticalCount > 0 ? "確認が必要な項目があります" : highCount > 0 ? "いくつか確認したい点があります" : "おおむね問題ありません"}
+                        <h2 className="text-base font-bold text-foreground whitespace-nowrap">
+                            {data.risks.filter(r => r.risk_level !== "low").length}件の確認ポイント発見！
                         </h2>
                     </div>
                 </div>

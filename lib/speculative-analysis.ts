@@ -21,6 +21,7 @@ export const SPECULATIVE_DEFAULT_CONTEXT: UserContext = {
     isInvoiceRegistered: null,             // インボイス状況は不明
     expectedContractType: "unknown",       // 契約類型は不明
     contractDurationMonths: null,          // 契約期間は不明
+    contractRole: null,                    // 契約上の立場は不明
 };
 
 /**

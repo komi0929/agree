@@ -200,9 +200,17 @@ export function RiskPanel({
                                 ${isSelected ? "bg-primary/5 border-primary ring-1 ring-primary/20" : "bg-white"}
                                 ${isHighlighted ? "ring-2 ring-primary/30 shadow-md scale-[1.01]" : (!isSelected && "border-primary/10 hover:shadow-md hover:border-primary/20")}
                             `}
+                            onClick={() => onScrollToContract(index)} // Fallback click handler if header catches events
                             onMouseEnter={() => onRiskHover(index)}
                             onMouseLeave={() => onRiskHover(null)}
                         >
+                            {/* Connector Line Stub - visible when highlighted or expanded */}
+                            <div className={`
+                                absolute -left-4 top-8 w-4 h-[2px] bg-primary
+                                ${isHighlighted || isExpanded ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"}
+                                origin-right transition-all duration-300 pointer-events-none
+                                shadow-[0_0_4px_rgba(var(--primary-rgb),0.5)]
+                            `} />
                             {/* Compact Header - Always Visible */}
                             <div
                                 className="p-4 cursor-pointer"
@@ -222,9 +230,9 @@ export function RiskPanel({
                                             {risk.section_title || "条項"}
                                         </h4>
 
-                                        {/* Quick Summary - First line of explanation */}
-                                        <p className="text-xs text-muted-foreground line-clamp-2">
-                                            {risk.explanation.split("。")[0]}。
+                                        {/* Quick Summary - Full text when expanded */}
+                                        <p className={`text-xs text-muted-foreground ${isExpanded ? "" : "line-clamp-2"}`}>
+                                            {risk.explanation}
                                         </p>
                                     </div>
 
@@ -281,15 +289,11 @@ export function RiskPanel({
                                         </div>
                                     )}
 
-                                    {/* Section: おすすめの対処法 */}
+                                    {/* Section: おすすめの対処法 (Simplified) */}
                                     {canAdopt && (
                                         <div className="space-y-2">
-                                            <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-                                                <Lightbulb className="w-4 h-4 text-primary" />
-                                                おすすめの対処法
-                                            </div>
+                                            {/* Removed text explanation per user request */}
                                             <div className="bg-muted/30 rounded-lg p-3 space-y-2">
-                                                <p className="text-xs text-foreground">{getWhatToDo(risk)}</p>
                                                 <div className="bg-white rounded-lg p-3 border border-primary/10">
                                                     <p className="text-xs font-medium text-foreground mb-1">修正案</p>
                                                     <p className="text-xs text-muted-foreground leading-relaxed">
@@ -328,18 +332,7 @@ export function RiskPanel({
 
 
 
-                                    {/* Contract Link - only show if there is text to highlight */}
-                                    {risk.original_text && risk.original_text.length > 0 && (
-                                        <button
-                                            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onScrollToContract(index);
-                                            }}
-                                        >
-                                            該当箇所を見る
-                                        </button>
-                                    )}
+
                                 </div>
                             )}
                         </div>

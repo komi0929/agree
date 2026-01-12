@@ -72,7 +72,7 @@ export function ChecklistPanel({ result, onClose, onItemClick }: ChecklistPanelP
                             </div>
                             <div>
                                 <h2 className="text-lg font-bold text-primary">28項目チェック</h2>
-                                <p className="text-xs text-muted-foreground">契約書の重要ポイントを100%正確にチェック</p>
+                                <p className="text-xs text-muted-foreground">契約書の重要ポイントをチェック</p>
                             </div>
                         </div>
                         <button
@@ -204,7 +204,7 @@ export function ChecklistPanel({ result, onClose, onItemClick }: ChecklistPanelP
                 <div className="p-4 border-t border-primary/10 bg-primary/5 rounded-b-2xl">
                     <div className="flex items-center justify-between">
                         <p className="text-xs text-muted-foreground">
-                            ルールベースで100%正確にチェック
+                            ルールベースで高速チェック
                         </p>
                         <Button
                             onClick={onClose}

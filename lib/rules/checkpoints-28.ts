@@ -9,6 +9,7 @@ import { checkDangerPatterns, DangerPatternMatch, DANGER_PATTERNS } from "./dang
 import { checkRequiredClauses, RequiredClause, REQUIRED_CLAUSES } from "./required-clauses";
 import { checkRecommendedClauses, RecommendedClause, RECOMMENDED_CLAUSES } from "./recommended-clauses";
 import { analyzePaymentTerms } from "./payment-calculator";
+import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 
 export type CheckpointStatus = "clear" | "warning" | "critical" | "not_applicable";
 export type RiskLevel = "critical" | "high" | "medium" | "low";
@@ -209,5 +210,113 @@ export function generateCheckpointSummary(result: CheckpointResult): string {
         return `${summary.warning}件の確認推奨事項があります。${summary.clear}/${summary.total}項目はクリアです。`;
     } else {
         return `すべての${summary.total}項目がクリアです。契約書の品質は良好です。`;
+    }
+}
+
+/**
+ * AIによる解析結果を用いてルールベース判定を補正（Reconciliation）する
+ * ルールベースで見逃したリスクをAIが発見した場合、こちらを優先する
+ */
+export function reconcileCheckpoints(
+    ruleResult: CheckpointResult,
+    llmResult: EnhancedAnalysisResult
+): CheckpointResult {
+    // Clone items
+    const newItems = [...ruleResult.items];
+
+    // Map logic: clause_tag -> Checkpoint ID
+    // 複数のチェックポイントに該当する可能性があるため、マッピングは慎重に行う
+    llmResult.risks.forEach(risk => {
+        if (risk.risk_level === "low") return;
+
+        const targetIds: string[] = [];
+
+        switch (risk.clause_tag) {
+            case "CLAUSE_LIABILITY":
+                targetIds.push("CP003"); // 損害賠償上限
+                break;
+            case "CLAUSE_PAYMENT":
+                if (risk.violated_laws?.includes("freelance_new_law_art4")) {
+                    targetIds.push("CP001"); // 60日ルール
+                }
+                if (risk.explanation.includes("手形") || risk.explanation.includes("起算")) {
+                    targetIds.push("CP002"); // 起算点
+                }
+                break;
+            case "CLAUSE_PROHIBITED":
+                targetIds.push("CP004"); // 禁止行為
+                break;
+            case "CLAUSE_IP":
+                targetIds.push("CP005"); // 著作権
+                break;
+            case "CLAUSE_SCOPE":
+                targetIds.push("CP006"); // 業務範囲
+                break;
+            case "CLAUSE_NON_COMPETE":
+                targetIds.push("CP007"); // 競業避止
+                break;
+            case "CLAUSE_ACCEPTANCE":
+                targetIds.push("CP012"); // みなし検収(Recommended) -> But strictly rule based, maybe upgrade if critical?
+                break;
+            case "CLAUSE_JURISDICTION":
+                targetIds.push("CP009"); // 裁判管轄
+                break;
+            case "CLAUSE_REDELEGATE":
+                targetIds.push("CP010"); // 偽装請負（再委託禁止による指揮命令示唆など）
+                break;
+            case "CLAUSE_HARASSMENT":
+                targetIds.push("CP026"); // ハラスメント
+                break;
+        }
+        // AI specifically checking "Term" (Termination) vs "Cancellation"
+        if (risk.clause_tag === "CLAUSE_TERMINATION") {
+            targetIds.push("CP017"); // 中途解約
+        }
+
+        // Apply to identified checkpoints
+        targetIds.forEach(targetId => {
+            const itemIndex = newItems.findIndex(i => i.id === targetId);
+            if (itemIndex === -1) return;
+
+            const item = newItems[itemIndex];
+            const currentLevel = getRiskLevelScore(item.risk_level);
+            const newLevel = getRiskLevelScore(risk.risk_level);
+
+            // AIのリスクレベルが高い場合、情報を上書きまたは補強
+            if (newLevel > currentLevel) {
+                // Remove [NEW] notation if present to keep it clean, but indicates source
+                const aiPrefix = "【AI検出】";
+
+                newItems[itemIndex] = {
+                    ...item,
+                    status: risk.risk_level === "critical" ? "critical" : "warning",
+                    risk_level: risk.risk_level,
+                    message: `${aiPrefix} ${risk.explanation.substring(0, 100)}${risk.explanation.length > 100 ? "..." : ""}`,
+                    detected_text: risk.original_text || item.detected_text,
+                    suggestion: risk.suggestion.revised_text || item.suggestion
+                };
+            }
+        });
+    });
+
+    // Recalculate summary
+    const summary = {
+        total: newItems.length,
+        clear: newItems.filter(i => i.status === "clear").length,
+        warning: newItems.filter(i => i.status === "warning").length,
+        critical: newItems.filter(i => i.status === "critical").length,
+    };
+
+    return { items: newItems, summary };
+}
+
+function getRiskLevelScore(level?: RiskLevel): number {
+    if (!level) return 0;
+    switch (level) {
+        case "critical": return 3;
+        case "high": return 2;
+        case "medium": return 1;
+        case "low": return 0;
+        default: return 0;
     }
 }
