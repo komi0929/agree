@@ -259,7 +259,8 @@ export function HomePage() {
                 party_a: "",
                 party_b: "",
                 contract_type: data.contractType || "",
-                estimated_contract_months: 12
+                estimated_contract_months: 12,
+                client_party: "unknown"
             });
             setCurrentHistoryId(historyId);
             setStep("complete");
