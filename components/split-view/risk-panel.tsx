@@ -151,28 +151,13 @@ export function RiskPanel({
 
     return (
         <div className="h-full flex flex-col bg-background">
-            {/* Header */}
+            {/* Header - Simplified */}
             <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-primary/10">
                 <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-foreground">確認事項</span>
                     <Badge variant="outline" className="rounded-full text-[10px] px-2 text-muted-foreground border-primary/20">
                         {risks.filter(r => r.risk_level !== "low").length}件
                     </Badge>
-                </div>
-                {/* Legend - 色分けの凡例 */}
-                <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-red-500" />重要
-                    </span>
-                    <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-orange-400" />確認推奨
-                    </span>
-                    <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-yellow-400" />参考
-                    </span>
-                    <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-blue-400" />推奨
-                    </span>
                 </div>
             </div>
 
@@ -225,31 +210,11 @@ export function RiskPanel({
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="flex-1 min-w-0">
-                                        {/* Risk Level Badge + Source Badge */}
-                                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                        {/* Risk Level Badge only - removed source badges and index */}
+                                        <div className="flex items-center gap-2 mb-2">
                                             <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${styling.badge}`}>
                                                 {styling.label}
                                             </span>
-                                            {/* Source Badge - 検出ソースの信頼度表示 */}
-                                            {risk.source === "rule" && (
-                                                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                                                    <Shield className="w-3 h-3" />
-                                                    確実
-                                                </span>
-                                            )}
-                                            {risk.source === "llm" && (
-                                                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/5 text-primary border border-primary/20 flex items-center gap-1">
-                                                    <Sparkles className="w-3 h-3" />
-                                                    AI分析
-                                                </span>
-                                            )}
-                                            {risk.source === "both" && (
-                                                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                                                    <ShieldCheck className="w-3 h-3" />
-                                                    確認済み
-                                                </span>
-                                            )}
-                                            <span className="text-[10px] text-muted-foreground">#{index + 1}</span>
                                         </div>
 
                                         {/* Title */}
@@ -362,21 +327,6 @@ export function RiskPanel({
 
 
 
-                                    {/* Violated Laws */}
-                                    {risk.violated_laws && risk.violated_laws.length > 0 && (
-                                        <div className="flex flex-wrap gap-1 pt-2 border-t border-primary/5">
-                                            <span className="text-[10px] text-muted-foreground mr-1">関連法令:</span>
-                                            {risk.violated_laws.map((law, i) => (
-                                                <Badge
-                                                    key={i}
-                                                    variant="secondary"
-                                                    className="text-[9px] bg-muted text-muted-foreground rounded-full"
-                                                >
-                                                    {VIOLATED_LAW_EXPLANATIONS[law as ViolatedLaw]?.split("（")[0] || law}
-                                                </Badge>
-                                            ))}
-                                        </div>
-                                    )}
 
                                     {/* Contract Link - only show if there is text to highlight */}
                                     {risk.original_text && risk.original_text.length > 0 && (

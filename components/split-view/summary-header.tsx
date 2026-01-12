@@ -63,26 +63,9 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
                     </div>
 
                     <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                            <h2 className="text-base font-bold text-foreground">
-                                {criticalCount > 0 ? "確認が必要な項目があります" : highCount > 0 ? "いくつか確認したい点があります" : "おおむね問題ありません"}
-                            </h2>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                            {criticalCount > 0 && <span className="text-red-500 font-medium mr-2">重要 {criticalCount}件</span>}
-                            {highCount > 0 && <span className="text-orange-500 font-medium mr-2">確認推奨 {highCount}件</span>}
-                            {mediumCount > 0 && <span className="text-amber-500 font-medium mr-2">参考 {mediumCount}件</span>}
-                            {lowCount > 0 && <span className="text-primary font-medium">推奨 {lowCount}件</span>}
-                        </p>
-                        {/* Contract Type Badge */}
-                        {contractType && contractType !== "不明" && (
-                            <div className="flex items-center gap-2 mt-2">
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 text-muted-foreground text-xs rounded-full border border-primary/20 shadow-sm">
-                                    <FileText className="w-3 h-3" />
-                                    {contractType}として確認
-                                </span>
-                            </div>
-                        )}
+                        <h2 className="text-base font-bold text-foreground">
+                            {criticalCount > 0 ? "確認が必要な項目があります" : highCount > 0 ? "いくつか確認したい点があります" : "おおむね問題ありません"}
+                        </h2>
                     </div>
                 </div>
 
