@@ -112,8 +112,8 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
                             onClick={onSaveClick}
                             disabled={isSaved}
                             className={`flex items-center gap-1.5 px-3 py-2 rounded-full shadow-sm transition-all ${isSaved
-                                    ? "bg-slate-100 text-slate-500 cursor-default"
-                                    : "bg-primary text-white hover:bg-primary/90 hover:scale-105 shadow-md"
+                                ? "bg-slate-100 text-slate-500 cursor-default"
+                                : "bg-primary text-white hover:bg-primary/90 hover:scale-105 shadow-md"
                                 }`}
                         >
                             {isSaved ? (
@@ -134,4 +134,4 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
         </div>
     );
 }
-```
+
