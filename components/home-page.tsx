@@ -436,7 +436,7 @@ export function HomePage() {
             />
 
             <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "md:ml-72" : ""}`}>
-                <header className="h-20 px-8 flex items-center justify-between max-w-5xl mx-auto w-full">
+                <header className="h-20 px-8 flex items-center gap-8 max-w-5xl mx-auto w-full">
                     <div
                         className="flex items-center gap-3 cursor-pointer"
                         onClick={() => {
@@ -499,7 +499,7 @@ export function HomePage() {
 
             {/* Save prompt for non-logged-in users */}
             {showSavePrompt && !user && step === "complete" && (
-                <div className="fixed bottom-4 right-4 bg-white rounded-xl shadow-lg border border-slate-200 p-4 max-w-sm animate-in slide-in-from-bottom-4 z-50">
+                <div className="fixed bottom-4 left-4 bg-white rounded-xl shadow-lg border border-slate-200 p-4 max-w-sm animate-in slide-in-from-bottom-4 z-50">
                     <p className="text-sm text-slate-700 mb-3">
                         診断結果を保存しませんか？<br />
                         <span className="text-slate-500">登録すると履歴がいつでも確認できます。</span>

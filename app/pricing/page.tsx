@@ -16,7 +16,7 @@ const FEATURES = [
         registeredCheck: true,
     },
     {
-        name: "28項目レポート",
+        name: "28項目一覧",
         anonymous: true,
         registered: true,
         anonymousCheck: true,

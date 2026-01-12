@@ -141,7 +141,7 @@ export function HistorySidebar({
                         // Non-logged-in: Show placeholder with lock icon
                         <div className="text-center py-8 text-muted-foreground text-sm">
                             <Lock className="w-8 h-8 mx-auto mb-2 opacity-50 text-primary" />
-                            <p className="text-xs">端末に保存済み</p>
+                            <p className="text-xs">ログインして履歴を表示</p>
                         </div>
                     ) : isLoading ? (
                         <div className="text-center py-8 text-muted-foreground">

@@ -94,7 +94,7 @@ export function SummaryHeader({ data, contractType, activeFilter, onFilterChange
                         className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-full shadow-sm hover:bg-primary/90 hover:scale-[1.02] transition-all"
                     >
                         <Shield className="w-4 h-4" />
-                        <span className="text-sm font-bold">28項目レポート</span>
+                        <span className="text-sm font-bold">28項目一覧</span>
                     </button>
 
                     {/* 共有ボタン */}

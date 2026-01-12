@@ -225,25 +225,7 @@ export function ContractViewer({ text, risks, highlightedRiskIndex, onHighlightC
                     </div>
                 </div>
 
-                {/* Minimap - Risk markers on the right edge */}
-                {minimapMarkers.length > 0 && (
-                    <div
-                        className="absolute right-2 top-0 bottom-0 w-3 pointer-events-auto z-20"
-                        style={{ marginTop: '48px' }} // Account for header
-                    >
-                        <div className="relative h-full">
-                            {minimapMarkers.map((marker, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => handleMinimapClick(marker.riskIndex)}
-                                    className={`absolute right-0 w-3 h-2 rounded-l transition-all hover:w-5 hover:shadow-md ${getMinimapMarkerColor(marker.riskLevel)} ${highlightedRiskIndex === marker.riskIndex ? 'w-5 ring-2 ring-white shadow-lg' : 'opacity-70 hover:opacity-100'}`}
-                                    style={{ top: `${marker.position}%` }}
-                                    title={`リスク #${marker.riskIndex + 1}`}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                )}
+
             </div>
         </div>
     );

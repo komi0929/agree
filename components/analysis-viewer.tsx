@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
 import { SummaryHeader, RiskLevelFilter } from "@/components/split-view/summary-header";
@@ -11,11 +11,12 @@ import { EngagementModal } from "@/components/engagement-modal";
 import { GuideBar } from "@/components/onboarding/guide-bar";
 import { WelcomeModal } from "@/components/onboarding/welcome-modal";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileText, Send, Sparkles, Loader2, X, Lightbulb } from "lucide-react";
+import { ArrowLeft, FileText, Send, Sparkles, Loader2, X, Lightbulb, Layers } from "lucide-react";
 import { modifyContractAction } from "@/app/generate/actions";
 import { ContractInput, DEFAULT_CONTRACT_OPTIONS } from "@/lib/types/contract-input";
 import { runAllCheckpoints, CheckpointResult, reconcileCheckpoints } from "@/lib/rules/checkpoints-28";
 import { ShareModal } from "@/components/share-modal";
+import { BulkActionContainer } from "@/components/bulk-action";
 import dynamic from "next/dynamic";
 
 const ChecklistPanel = dynamic(() => import("@/components/split-view/checklist-panel").then(mod => mod.ChecklistPanel), {
@@ -47,6 +48,23 @@ export function AnalysisViewer({ data, text, contractType, onSave, isSaved }: An
 
     // Share modal state
     const [showShareModal, setShowShareModal] = useState(false);
+
+    // Bulk action modal state
+    const [showBulkAction, setShowBulkAction] = useState(false);
+
+    // Page exit warning for unsaved analysis
+    useEffect(() => {
+        if (!isSaved) {
+            const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+                e.preventDefault();
+                // Modern browsers require returnValue to be set
+                e.returnValue = '分析結果がまだ保存されていません。ページを離れますか？';
+                return e.returnValue;
+            };
+            window.addEventListener('beforeunload', handleBeforeUnload);
+            return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+        }
+    }, [isSaved]);
 
     // Toggle risk selection
     const handleRiskToggle = useCallback((index: number) => {
@@ -211,6 +229,19 @@ export function AnalysisViewer({ data, text, contractType, onSave, isSaved }: An
                 contractType={contractType}
             />
 
+            {/* Bulk Action Modal */}
+            {showBulkAction && (
+                <BulkActionContainer
+                    risks={risks}
+                    onComplete={(accepted, rejected) => {
+                        // Handle the bulk action completion - could update selected indices, trigger message creation, etc.
+                        setSelectedRiskIndices(accepted);
+                        setShowBulkAction(false);
+                    }}
+                    onClose={() => setShowBulkAction(false)}
+                />
+            )}
+
             {/* 28 Checkpoints Panel (Modal) */}
             {showChecklist && checkpointResult && (
                 <ChecklistPanel
@@ -335,6 +366,15 @@ export function AnalysisViewer({ data, text, contractType, onSave, isSaved }: An
                                 </div>
 
                                 <div className="flex flex-wrap items-center gap-2 justify-end">
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="border-primary/20 text-primary hover:bg-primary/5"
+                                        onClick={() => setShowBulkAction(true)}
+                                    >
+                                        <Layers className="w-4 h-4 mr-2" />
+                                        一括処理
+                                    </Button>
                                     <Button
                                         size="sm"
                                         variant="outline"
