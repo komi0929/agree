@@ -118,7 +118,7 @@ export function HistorySidebar({
                 <div className="p-5 border-b border-primary/10 flex items-center justify-between flex-shrink-0">
                     <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                        <h2 className="font-semibold text-primary text-sm tracking-tight">診断履歴</h2>
+                        <h2 className="font-semibold text-primary text-sm tracking-tight">契約書チェック履歴</h2>
                     </div>
                     <button
                         onClick={onToggle}
@@ -135,7 +135,7 @@ export function HistorySidebar({
                         className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border border-primary/20 text-primary rounded-full hover:bg-primary/5 hover:border-primary/40 transition-all font-medium text-sm shadow-sm active:scale-[0.98]"
                     >
                         <Plus className="w-4 h-4 text-primary" />
-                        分析室へ戻る
+                        新たな契約書をチェック
                     </button>
                 </div>
 
