@@ -252,7 +252,7 @@ export function AnalysisViewer({ data, text, contractType, onSave, isSaved }: An
                             <MessageCrafter
                                 risk={selectedRiskIndex !== null ? risks[selectedRiskIndex] : null}
                                 selectedRisks={selectedRisks.length > 0 ? selectedRisks : undefined}
-                                onFinish={handleFinish}
+                                onFinish={handleSave}
                             />
                         </div>
                     )}
