@@ -521,7 +521,8 @@ export function HomePage() {
                                 party_a: "株式会社グッドカンパニー",
                                 party_b: "田中花子",
                                 contract_type: "業務委託基本契約書",
-                                estimated_contract_months: 12
+                                estimated_contract_months: 12,
+                                client_party: "party_a"
                             });
                             setStep("complete");
                         }}
