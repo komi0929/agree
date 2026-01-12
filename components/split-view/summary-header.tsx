@@ -13,9 +13,11 @@ interface SummaryHeaderProps {
     onFilterChange?: (filter: RiskLevelFilter) => void;
     on28CheckClick?: () => void;
     onShareClick?: () => void;  // 共有ボタンのコールバック
+    onSaveClick?: () => void;   // 保存ボタンのコールバック
+    isSaved?: boolean;          // 保存済みステータス
 }
 
-export function SummaryHeader({ data, contractType, activeFilter, onFilterChange, on28CheckClick, onShareClick, checkpointResult }: SummaryHeaderProps & { checkpointResult?: any }) {
+export function SummaryHeader({ data, contractType, activeFilter, onFilterChange, on28CheckClick, onShareClick, onSaveClick, isSaved, checkpointResult }: SummaryHeaderProps & { checkpointResult?: any }) {
     // Count risks based on Checkpoint Result (Single Source of Truth with Checklist Panel)
     // If checkpointResult is provided, use its summary. Otherwise fall back to data.risks (should not happen in new flow)
 
