@@ -295,7 +295,7 @@ export function HomePage() {
                 />
 
                 {/* Usage limit banner */}
-                <div className={`flex-1 flex flex-col w-full transition-all duration-300 ${sidebarOpen ? "md:ml-72" : ""}`}>
+                <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarOpen ? "md:ml-72" : ""}`}>
                     <UsageLimitBanner type="check" onRegisterClick={() => setShowGateModal(true)} />
 
                     <section className="flex-1 flex flex-col items-center pt-32 pb-16 px-6 max-w-2xl mx-auto w-full transition-all duration-500">
@@ -417,7 +417,7 @@ export function HomePage() {
                 onLoginClick={() => setShowAuthModal(true)}
             />
 
-            <div className={`flex-1 w-full transition-all duration-300 ${sidebarOpen ? "md:ml-72" : ""}`}>
+            <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "md:ml-72" : ""}`}>
                 <header className="h-20 px-8 flex items-center justify-between max-w-5xl mx-auto w-full">
                     <div
                         className="flex items-center gap-3 cursor-pointer"
