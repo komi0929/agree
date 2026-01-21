@@ -12,7 +12,7 @@ import { SignatureLogo } from "@/components/signature-logo";
 import { analyzeDeepAction, AnalysisState } from "@/app/actions";
 import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
 import { Loader2, LogIn, Sparkles, Settings2 } from "lucide-react";
-import { MatrixLoading } from "@/components/matrix-loading";
+import { AnalyzingOverlay } from "@/components/analyzing-overlay";
 import { ScoreReveal } from "@/components/score-reveal";
 import { CorrectedContractReader, DiffMetadata } from "@/components/corrected-contract-reader";
 import { useAuth } from "@/lib/auth/auth-context";
@@ -423,8 +423,8 @@ export function HomePage() {
                     onClose={() => setShowGateModal(false)}
                     reason="limit"
                 />
-                {/* Matrix Loading Overlay - shows on top without page transition */}
-                <MatrixLoading isActive={isAnalyzing} />
+                {/* Analyzing Overlay - shows step-by-step progress */}
+                <AnalyzingOverlay isActive={isAnalyzing} onCancel={handleCancelAnalysis} />
             </div>
         );
     }
@@ -433,8 +433,8 @@ export function HomePage() {
     if (step === "unified_context" && extractionData) {
         return (
             <div className="min-h-screen flex flex-col bg-guardian-warm bg-guardian-blob text-slate-600 font-sans">
-                {/* Matrix Loading Overlay - shows when analysis completes */}
-                <MatrixLoading isActive={isAnalyzing} />
+                {/* Analyzing Overlay - shows step-by-step progress */}
+                <AnalyzingOverlay isActive={isAnalyzing} onCancel={handleCancelAnalysis} />
 
                 {/* Header */}
                 <header className="absolute top-0 left-0 right-0 p-4 z-40 flex justify-between items-center">
@@ -558,7 +558,7 @@ export function HomePage() {
 
             {/* Save prompt for non-logged-in users */}
             {showSavePrompt && !user && step === "complete" && (
-                <div className="fixed bottom-4 left-4 bg-white rounded-xl shadow-lg border border-slate-200 p-4 max-w-sm animate-in slide-in-from-bottom-4 z-50">
+                <div className="fixed bottom-20 left-4 bg-white rounded-xl shadow-lg border border-slate-200 p-4 max-w-sm animate-in slide-in-from-bottom-4 z-[60]">
                     <p className="text-sm text-slate-700 mb-3">
                         診断結果を保存しませんか？<br />
                         <span className="text-slate-500">登録すると履歴をいつでも確認できます！</span>
