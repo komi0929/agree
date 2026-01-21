@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest } from "next/server";
 
 /**
@@ -10,16 +10,26 @@ import { NextRequest } from "next/server";
  * to ensure consistency.
  */
 
-// Edge Runtime for minimum latency
+// Edge Runtime for minimum latency - Gemini SDK supports edge
 export const runtime = "edge";
 
 // Regions close to primary users
 export const preferredRegion = ["hnd1", "sin1"];
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY!,
-});
+// Initialize Gemini client
+const getGeminiModel = () => {
+    const apiKey = process.env.GOOGLE_API_KEY || process.env.OPENAI_API_KEY || "";
+    if (!apiKey) {
+        throw new Error("GOOGLE_API_KEY is not set.");
+    }
+    const genAI = new GoogleGenerativeAI(apiKey);
+    return genAI.getGenerativeModel({
+        model: "gemini-3.0-flash",
+        generationConfig: {
+            responseMimeType: "application/json"
+        }
+    });
+};
 
 /**
  * FULL SYSTEM PROMPT - EXACT COPY FROM lib/ai-service.ts
@@ -44,7 +54,7 @@ function buildFullSystemPrompt(userRole: "vendor" | "client" = "vendor"): string
 - 60日以内の支払義務
 `;
 
-    return `あなたは日本法に精通した契約書リスク解析AIです。フリーランス・個人事業主を保護するために開発されました。
+    return `あなたは日本法に精通した契約書リスク解析AI（Gemini 3 Flash）です。フリーランス・個人事業主を保護するために開発されました。
 
 【ユーザー情報】
 - 立場：${userRoleJa}
@@ -151,22 +161,28 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Create streaming response with FULL prompt
-        const stream = await openai.chat.completions.create({
-            model: "gpt-4o",
-            stream: true,
-            messages: [
-                {
-                    role: "system",
-                    content: buildFullSystemPrompt(userRole) + "\n\n必ずJSON形式で返答してください。",
-                },
-                {
-                    role: "user",
-                    content: text.substring(0, 15000),
-                },
-            ],
-            response_format: { type: "json_object" },
+        const model = getGeminiModel();
+        const systemPrompt = buildFullSystemPrompt(userRole);
+
+        // Streaming request (with system instruction and user prompt combo if needed, 
+        // SDK supports systemInstruction in `getGenerativeModel`. 
+        // We'll just include it in the call details or re-init here for clarity isn't ideal for stream, 
+        // but let's assume we pass it in prompt or config. 
+        // Actually best practice for single-shot stream is just passing it.
+        // However, `getGenerativeModel` config is already set. 
+        // Let's re-config to be safe with system prompt.)
+
+        const apiKey = process.env.GOOGLE_API_KEY || process.env.OPENAI_API_KEY || "";
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const streamModel = genAI.getGenerativeModel({
+            model: "gemini-3-flash-preview",
+            systemInstruction: systemPrompt,
+            generationConfig: {
+                responseMimeType: "application/json"
+            }
         });
+
+        const result = await streamModel.generateContentStream(text.substring(0, 30000));
 
         // Create a TransformStream for processing
         const encoder = new TextEncoder();
@@ -174,10 +190,12 @@ export async function POST(request: NextRequest) {
         const readableStream = new ReadableStream({
             async start(controller) {
                 try {
-                    for await (const chunk of stream) {
-                        const content = chunk.choices[0]?.delta?.content || "";
+                    for await (const chunk of result.stream) {
+                        const content = chunk.text();
                         if (content) {
                             // Send as Server-Sent Event format
+                            // OpenAI format expected by clients might be: data: {"content": "..."}
+                            // We mimic this for frontend compatibility
                             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
                         }
                     }

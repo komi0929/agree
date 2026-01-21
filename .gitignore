@@ -42,3 +42,7 @@ next-env.d.ts
 
 .vercel
 .env*.local
+
+# temporary verification files
+check_models.js
+models_list.json

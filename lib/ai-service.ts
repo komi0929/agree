@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { z } from "zod";
 import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
 import { determineApplicableLaws, ApplicableLaws } from "@/lib/legal/law-applicability";
@@ -8,19 +8,23 @@ import { EnhancedAnalysisResult, AnalysisResult } from "@/lib/types/analysis";
 // Re-export for backward compatibility
 export type { EnhancedAnalysisResult, AnalysisResult };
 
-// 遅延初期化でOpenAIクライアントを作成（サーバーサイドでのみ使用される）
-let _openai: OpenAI | null = null;
+// 遅延初期化でGeminiライアントを作成
+let _genAI: GoogleGenerativeAI | null = null;
 
-function getOpenAIClient(): OpenAI {
-    if (!_openai) {
-        if (!process.env.OPENAI_API_KEY) {
-            throw new Error("OPENAI_API_KEY environment variable is not set. Please configure it in Vercel.");
+function getGeminiClient(): GoogleGenerativeAI {
+    if (!_genAI) {
+        // Fallback to OPENAI_API_KEY if GOOGLE_API_KEY is not set (for transitions)
+        // detailed check for GOOGLE_API_KEY
+        if (!process.env.GOOGLE_API_KEY) {
+            console.warn("GOOGLE_API_KEY is not set. Trying OPENAI_API_KEY as fallback (might fail if not compatible).");
         }
-        _openai = new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY,
-        });
+        const apiKey = process.env.GOOGLE_API_KEY || process.env.OPENAI_API_KEY || "";
+        if (!apiKey) {
+            throw new Error("GOOGLE_API_KEY environment variable is not set.");
+        }
+        _genAI = new GoogleGenerativeAI(apiKey);
     }
-    return _openai;
+    return _genAI;
 }
 
 // ============================================
@@ -122,7 +126,7 @@ function buildEnhancedSystemPrompt(ctx: UserContext, laws: ApplicableLaws): stri
 `;
     }
 
-    return `あなたは日本法に精通した契約書リスク解析AIです。フリーランス・個人事業主を保護するために開発されました。
+    return `あなたは日本法に精通した契約書リスク解析AI（Gemini 3 Flash）です。フリーランス・個人事業主を保護するために開発されました。
 
 【ユーザー情報】
 - 立場：${userRoleJa}
@@ -186,31 +190,12 @@ ${lawContext}
 - unknown：判別不能
 
 【重要：出力形式】
-以下の形式で必ずJSONを出力してください：
+JSONスキーマに従って出力してください。特に以下の構造を守ってください：
 {
-  "summary": "契約書全体の要約と主なリスクの概要（2-3文で）",
-  "contract_classification": "ukeoi | jun_inin_hourly | jun_inin_result | mixed | unknown",
-  "risks": [
-    {
-      "clause_tag": "CLAUSE_PAYMENT | CLAUSE_IP | CLAUSE_LIABILITY | CLAUSE_SCOPE | CLAUSE_TERMINATION | CLAUSE_NON_COMPETE | CLAUSE_OTHER",
-      "section_title": "条項のタイトル（例：第4条 支払条件）",
-      "original_text": "【最重要】問題がある箇所の原文を『完全に一致する形式』で20〜80文字程度で抜粋。ハイライト表示に使用するため、改行や空白も含め正確に。長すぎるとハイライトが埋もれるため、核心部分のみを抽出してください。",
-      "risk_level": "critical | high | medium | low",
-      "violated_laws": ["該当する法律のコード"],
-      "explanation": "なぜこの条項にリスクがあるのかの説明",
-      "practical_impact": "【重要】具体的な実害を平易な言葉で説明（例：「ポートフォリオに載せられなくなる」「2ヶ月間報酬が入らない可能性がある」）",
-      "suggestion": {
-        "revised_text": "修正案の文面（現実的で受け入れやすい妥協案を提案）",
-        "negotiation_message": {
-          "formal": "【重要】risk_levelがcritical/highの場合は「必ず修正いただきたい」旨を、medium/lowの場合は「ご検討いただけると助かる」旨を伝える。単なる問題の指摘ではなく、相手が理解しやすい形で、なぜ問題なのか、どう修正してほしいのかを具体的に書く。1つの項目について3-4文程度。",
-          "neutral": "カジュアルすぎず、フォーマルすぎない文体。「〜について相談させてください」「〜の点を調整いただけると助かります」のように、対等な立場での依頼文。",
-          "casual": "気軽な口調で「ここ、ちょっと気になったんですが」「〜だと厳しいので、相談させてもらえますか」のように。"
-        },
-        "legal_basis": "法的根拠の説明"
-      }
-    }
-  ],
-  "missing_clauses": ["欠落している重要条項のリスト"]
+  "summary": "契約書全体の要約",
+  "contract_classification": "ukeoi 等",
+  "risks": [ ... ],
+  "missing_clauses": [ ... ]
 }
 
 【original_textに関する重要事項 - ハイライト表示に必須】
@@ -240,7 +225,6 @@ ${lawContext}
 export async function extractContractParties(text: string): Promise<ExtractionResult> {
     // Check if text is valid
     if (!text || text.trim().length < 50) {
-        // Return fallback for very short/empty text
         return {
             party_a: "不明",
             party_b: "不明",
@@ -251,39 +235,37 @@ export async function extractContractParties(text: string): Promise<ExtractionRe
     }
 
     try {
-        const completion = await getOpenAIClient().chat.completions.create({
-            model: "gpt-4o-mini",
-            temperature: 0,  // Deterministic output
-            seed: 42,        // Fixed seed for reproducibility
-            messages: [
-                {
-                    role: "system",
-                    content: `契約書のテキストから以下を抽出し、必ず以下のJSON形式で返答してください：
-    {
-        "party_a": "甲の名称（正式名称）。不明な場合は「不明」",
-            "party_b": "乙の名称（正式名称）。不明な場合は「不明」",
-                "contract_type": "契約書の種類（例：業務委託契約書）。不明な場合は「契約書」",
-                    "estimated_contract_months": 数値またはnull,
-                        "client_party": "party_a" | "party_b" | "unknown" （どちらが発注者 / 支払う側か）
-    }
-
-    重要：必ず上記のキー名を使用してください。`,
-                },
-                {
-                    role: "user",
-                    content: text.substring(0, 8000), // Limit text length
-                },
-            ],
-            response_format: { type: "json_object" },
+        const genAI = getGeminiClient();
+        // Use Gemini 3 Flash (or latest available 2.0-flash-exp if 3.0 not yet aliased)
+        const model = genAI.getGenerativeModel({
+            model: "gemini-3-flash-preview", // Corrected to actual API model ID
+            generationConfig: {
+                responseMimeType: "application/json"
+            }
         });
 
-        const content = completion.choices[0].message.content;
-        if (!content) throw new Error("Failed to extract parties");
+        const prompt = `
+契約書のテキストから以下を抽出し、必ず以下のJSON形式で返答してください：
+{
+  "party_a": "甲の名称（正式名称）。不明な場合は「不明」",
+  "party_b": "乙の名称（正式名称）。不明な場合は「不明」",
+  "contract_type": "契約書の種類（例：業務委託契約書）。不明な場合は「契約書」",
+  "estimated_contract_months": 数値またはnull,
+  "client_party": "party_a" | "party_b" | "unknown" （どちらが発注者/支払う側か）
+}
 
-        const parsed = JSON.parse(content);
+重要：必ず上記のキー名を使用してください。
+\n\n契約書テキスト:\n${text.substring(0, 15000)}`;
+
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
+
+        if (!responseText) throw new Error("Failed to extract parties");
+
+        const parsed = JSON.parse(responseText);
 
         // Provide fallbacks for missing fields
-        const result: ExtractionResult = {
+        const resultData: ExtractionResult = {
             party_a: parsed.party_a || parsed.partyA || parsed["甲"] || "不明",
             party_b: parsed.party_b || parsed.partyB || parsed["乙"] || "不明",
             contract_type: parsed.contract_type || parsed.contractType || parsed["契約種類"] || "契約書",
@@ -293,10 +275,9 @@ export async function extractContractParties(text: string): Promise<ExtractionRe
             client_party: parsed.client_party || "unknown",
         };
 
-        return result;
+        return resultData;
     } catch (error) {
         console.error("Extraction error:", error);
-        // Return fallback on any error
         return {
             party_a: "不明",
             party_b: "不明",
@@ -311,16 +292,14 @@ export async function analyzeContractText(
     text: string,
     userContext: UserContext = DEFAULT_USER_CONTEXT
 ): Promise<EnhancedAnalysisResult> {
-    // Fallback result for errors
     const fallbackResult: EnhancedAnalysisResult = {
-        summary: "契約書の解析に問題が発生しました。再度お試しいただくか、別のファイルでお試しください。",
+        summary: "契約書の解析に問題が発生しました。",
         risks: [],
         contract_classification: "unknown",
         missing_clauses: [],
     };
 
     try {
-        // Check if text is valid
         if (!text || text.trim().length < 100) {
             return {
                 ...fallbackResult,
@@ -328,42 +307,30 @@ export async function analyzeContractText(
             };
         }
 
-        // 適用法規を決定
         const applicableLaws = determineApplicableLaws(userContext);
-
-        // 動的プロンプトを生成
         const systemPrompt = buildEnhancedSystemPrompt(userContext, applicableLaws);
 
-        // モデル選択: 環境変数で切り替え可能（デフォルト: gpt-4o-mini でコスト最適化）
-        const analysisModel = process.env.ANALYSIS_MODEL || "gpt-4o-mini";
-
-        const completion = await getOpenAIClient().chat.completions.create({
-            model: analysisModel,
-            temperature: 0,  // Deterministic output
-            seed: 42,        // Fixed seed for reproducibility
-            messages: [
-                {
-                    role: "system",
-                    content: systemPrompt + "\n\n必ずJSON形式で返答してください。",
-                },
-                {
-                    role: "user",
-                    content: text.substring(0, 15000), // Limit to avoid token limits
-                },
-            ],
-            response_format: { type: "json_object" },
+        const genAI = getGeminiClient();
+        const model = genAI.getGenerativeModel({
+            model: "gemini-3-flash-preview",
+            generationConfig: {
+                responseMimeType: "application/json"
+            },
+            systemInstruction: systemPrompt
         });
 
-        const content = completion.choices[0].message.content;
-        if (!content) {
+        const result = await model.generateContent(text.substring(0, 30000)); // Gemini has larger context window
+        const responseText = result.response.text();
+
+        if (!responseText) {
             console.error("AI returned empty content");
             return fallbackResult;
         }
 
-        const parsed = JSON.parse(content);
+        const parsed = JSON.parse(responseText);
 
         // Manually construct result with fallbacks for each field
-        const result: EnhancedAnalysisResult = {
+        const resultData: EnhancedAnalysisResult = {
             summary: parsed.summary || "解析結果のサマリーを取得できませんでした。",
             risks: Array.isArray(parsed.risks) ? parsed.risks.map((r: any) => ({
                 clause_tag: r.clause_tag || "CLAUSE_OTHER",
@@ -383,7 +350,7 @@ export async function analyzeContractText(
             missing_clauses: Array.isArray(parsed.missing_clauses) ? parsed.missing_clauses : [],
         };
 
-        return result;
+        return resultData;
     } catch (error) {
         console.error("Contract analysis error:", error);
         return fallbackResult;
