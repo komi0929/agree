@@ -12,7 +12,9 @@ import { SignatureLogo } from "@/components/signature-logo";
 import { analyzeDeepAction, AnalysisState } from "@/app/actions";
 import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
 import { Loader2, LogIn, Sparkles, Settings2 } from "lucide-react";
-import { AnalyzingOverlay } from "@/components/analyzing-overlay";
+import { MatrixLoading } from "@/components/matrix-loading";
+import { ScoreReveal } from "@/components/score-reveal";
+import { CorrectedContractReader, DiffMetadata } from "@/components/corrected-contract-reader";
 import { useAuth } from "@/lib/auth/auth-context";
 import { AuthModal } from "@/components/auth/auth-modal";
 import { HistorySidebar, useAnalysisHistory } from "@/components/history-sidebar";
@@ -35,7 +37,7 @@ const AnalysisViewer = dynamic(
             <div className="min-h-screen flex items-center justify-center bg-slate-50">
                 <div className="flex items-center gap-3">
                     <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
-                    <span className="text-slate-500">結果を表示中...</span>
+                    <span className="text-slate-500">結果を表示しています...</span>
                 </div>
             </div>
         ),
@@ -55,17 +57,68 @@ const UnifiedContextForm = dynamic(
     }
 );
 
+// Helper: Generate corrected text from analysis
+function generateCorrectedText(originalText: string, analysis: EnhancedAnalysisResult): string {
+    let correctedText = originalText;
+
+    // Apply suggestions in reverse order to maintain indices
+    const sortedRisks = [...analysis.risks]
+        .filter(r => r.suggestion?.revised_text && r.original_text)
+        .sort((a, b) => {
+            const indexA = originalText.indexOf(a.original_text);
+            const indexB = originalText.indexOf(b.original_text);
+            return indexB - indexA; // Reverse order
+        });
+
+    for (const risk of sortedRisks) {
+        if (risk.suggestion?.revised_text && risk.original_text) {
+            correctedText = correctedText.replace(risk.original_text, risk.suggestion.revised_text);
+        }
+    }
+
+    return correctedText;
+}
+
+// Helper: Generate diff metadata from analysis
+function generateDiffsFromAnalysis(analysis: EnhancedAnalysisResult, originalText: string): DiffMetadata[] {
+    const diffs: DiffMetadata[] = [];
+    let diffIdCounter = 0;
+
+    // Generate corrected text first to get proper indices
+    const correctedText = generateCorrectedText(originalText, analysis);
+
+    for (const risk of analysis.risks) {
+        if (!risk.suggestion?.revised_text || !risk.original_text) continue;
+
+        const startIndex = correctedText.indexOf(risk.suggestion.revised_text);
+        if (startIndex === -1) continue;
+
+        diffs.push({
+            id: `diff-${diffIdCounter++}`,
+            type: "modified",
+            startIndex,
+            endIndex: startIndex + risk.suggestion.revised_text.length,
+            originalText: risk.original_text,
+            correctedText: risk.suggestion.revised_text,
+            reason: risk.explanation || "リスク軽減のため修正",
+            riskLevel: risk.risk_level,
+        });
+    }
+
+    return diffs;
+}
+
 export function HomePage() {
     const [analysisData, setAnalysisData] = useState<EnhancedAnalysisResult | null>(null);
     const [extractionData, setExtractionData] = useState<ExtractionResult | null>(null);
     const [contractText, setContractText] = useState<string>("");
     const [loading, setLoading] = useState(false);
     // Full flow: upload -> unified_context -> complete (analyzing happens via overlay)
-    const [step, setStep] = useState<"upload" | "unified_context" | "complete">("upload");
-    // Overlay state for analyzing
+    const [step, setStep] = useState<"upload" | "unified_context" | "score_reveal" | "complete">("upload");
+    // Overlay state for analyzing (now uses Matrix loading)
     const [isAnalyzing, setIsAnalyzing] = useState(false);
-    // Progressive loading messages
-    const [loadingMessage, setLoadingMessage] = useState("契約書を解析しています...");
+    // Score reveal data
+    const [scoreData, setScoreData] = useState<{ score: number; grade: "A" | "B" | "C" | "D" | "F"; topRisks: Array<{ title: string; description: string; level: "critical" | "high" | "medium" }> } | null>(null);
 
     // Auth & History state
     const { user, isLoading: authLoading } = useAuth();
@@ -144,36 +197,27 @@ export function HomePage() {
         trackEvent(ANALYTICS_EVENTS.USER_CONTEXT_COMPLETED);
         trackEvent(ANALYTICS_EVENTS.ROLE_SELECTED, { role });
 
+        // ========================================
+        // 🔧 TESTING MODE - 使用制限チェック無効化
+        // 復旧時はコメントを外してください
+        // ========================================
         // Check usage limit
-        if (hasReachedCheckLimit) {
-            setShowGateModal(true);
-            return;
-        }
+        // if (hasReachedCheckLimit) {
+        //     setShowGateModal(true);
+        //     return;
+        // }
 
         // Increment usage count
-        const allowed = await incrementCheckCount();
-        if (!allowed && !user) {
-            // Double check for anonymous users who might have just hit the limit
-            setShowGateModal(true);
-            return;
-        }
+        // const allowed = await incrementCheckCount();
+        // if (!allowed && !user) {
+        //     // Double check for anonymous users who might have just hit the limit
+        //     setShowGateModal(true);
+        //     return;
+        // }
+        console.log("[TESTING MODE] Usage limit check bypassed");
 
         // Show overlay instead of changing step
         setIsAnalyzing(true);
-        setLoadingMessage("契約書を確認しています...");
-
-        // Progressive loading messages
-        const messages = [
-            "内容を確認しています...",
-            "条項をチェックしています...",
-            "重要なポイントを整理しています...",
-            "まもなく完了します..."
-        ];
-        let msgIndex = 0;
-        const interval = setInterval(() => {
-            msgIndex = Math.min(msgIndex + 1, messages.length - 1);
-            setLoadingMessage(messages[msgIndex]);
-        }, 2000);
 
         try {
             let result: AnalysisState;
@@ -192,11 +236,20 @@ export function HomePage() {
             if (cache && isContextMatch(ctx, cache.usedContext)) {
                 // FAST PATH: Use cached results immediately
                 console.log("[Speculative] Context matches! Using cached results (INSTANT)");
-                clearInterval(interval);
                 setAnalysisData(cache.analysisResult);
+                // Calculate score for ScoreReveal
+                const criticalCount = cache.analysisResult.risks.filter(r => r.risk_level === "critical").length;
+                const highCount = cache.analysisResult.risks.filter(r => r.risk_level === "high").length;
+                const score = Math.max(0, 100 - (criticalCount * 20) - (highCount * 10));
+                const grade = score >= 90 ? "A" : score >= 75 ? "B" : score >= 60 ? "C" : score >= 40 ? "D" : "F";
+                const topRisks = cache.analysisResult.risks
+                    .filter(r => r.risk_level === "critical" || r.risk_level === "high")
+                    .slice(0, 3)
+                    .map(r => ({ title: r.section_title, description: r.explanation, level: r.risk_level as "critical" | "high" | "medium" }));
+                setScoreData({ score, grade, topRisks });
                 trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED, { speculative: true });
                 setIsAnalyzing(false);
-                setStep("complete");
+                setStep("score_reveal");
 
                 // Save to history
                 if (user) {
@@ -218,13 +271,22 @@ export function HomePage() {
             // Full analysis with actual context
             console.log("[Analysis] Running full analysis...");
             result = await analyzeDeepAction(text, ctx);
-            clearInterval(interval);
 
             if (result.data) {
                 setAnalysisData(result.data);
+                // Calculate score for ScoreReveal
+                const criticalCount = result.data.risks.filter(r => r.risk_level === "critical").length;
+                const highCount = result.data.risks.filter(r => r.risk_level === "high").length;
+                const score = Math.max(0, 100 - (criticalCount * 20) - (highCount * 10));
+                const grade = score >= 90 ? "A" : score >= 75 ? "B" : score >= 60 ? "C" : score >= 40 ? "D" : "F";
+                const topRisks = result.data.risks
+                    .filter(r => r.risk_level === "critical" || r.risk_level === "high")
+                    .slice(0, 3)
+                    .map(r => ({ title: r.section_title, description: r.explanation, level: r.risk_level as "critical" | "high" | "medium" }));
+                setScoreData({ score, grade, topRisks });
                 trackEvent(ANALYTICS_EVENTS.ANALYSIS_COMPLETED);
                 setIsAnalyzing(false);
-                setStep("complete");
+                setStep("score_reveal");
 
                 if (user) {
                     await handleSaveToHistory(result.data, text, extraction.contract_type);
@@ -241,15 +303,14 @@ export function HomePage() {
                 } catch { }
             } else {
                 trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "analysis_failed" });
-                alert("分析中にエラーが発生しました。もう一度お試しください。");
+                alert("分析中にエラーが発生しました。もう一度お試しください！");
                 setIsAnalyzing(false);
                 setStep("upload");
             }
         } catch (e) {
-            clearInterval(interval);
             console.error(e);
             trackEvent(ANALYTICS_EVENTS.ANALYSIS_ERROR, { reason: "exception" });
-            alert("エラーが発生しました");
+            alert("エラーが発生しました。もう一度お試しください！");
             setIsAnalyzing(false);
             setStep("upload");
         }
@@ -325,12 +386,12 @@ export function HomePage() {
                         {/* Main Copy - Guardian Manager voice */}
                         <div className="text-center space-y-5 mb-14 animate-fade-in-delayed">
                             <p className="text-2xl leading-normal max-w-lg mx-auto font-bold text-primary text-balance tracking-tight">
-                                契約書のリスクを高速チェック。<br />
-                                安心して契約を結ぶために。
+                                契約書のリスクを高速チェック！<br />
+                                安心して契約を結べるようサポートします。
                             </p>
                             <p className="text-slate-600 text-[15px] leading-relaxed max-w-md mx-auto font-medium">
-                                専門用語の解説から修正案まで、契約締結をサポートします。<br />
-                                重要なポイントを分かりやすくお伝えします。
+                                専門用語の解説から修正案まで、<br />
+                                AIがバシッと分かりやすくお伝えします！
                             </p>
                         </div>
 
@@ -362,12 +423,8 @@ export function HomePage() {
                     onClose={() => setShowGateModal(false)}
                     reason="limit"
                 />
-                {/* Analyzing Overlay - shows on top without page transition */}
-                <AnalyzingOverlay
-                    isActive={isAnalyzing}
-                    loadingMessage={loadingMessage}
-                    onCancel={handleCancelAnalysis}
-                />
+                {/* Matrix Loading Overlay - shows on top without page transition */}
+                <MatrixLoading isActive={isAnalyzing} />
             </div>
         );
     }
@@ -376,12 +433,8 @@ export function HomePage() {
     if (step === "unified_context" && extractionData) {
         return (
             <div className="min-h-screen flex flex-col bg-guardian-warm bg-guardian-blob text-slate-600 font-sans">
-                {/* Analyzing Overlay - shows when analysis completes */}
-                <AnalyzingOverlay
-                    isActive={isAnalyzing}
-                    loadingMessage={loadingMessage}
-                    onCancel={handleCancelAnalysis}
-                />
+                {/* Matrix Loading Overlay - shows when analysis completes */}
+                <MatrixLoading isActive={isAnalyzing} />
 
                 {/* Header */}
                 <header className="absolute top-0 left-0 right-0 p-4 z-40 flex justify-between items-center">
@@ -419,6 +472,20 @@ export function HomePage() {
 
                 <Footer />
             </div>
+        );
+    }
+
+    // Score Reveal step - shows score animation before detailed results
+    if (step === "score_reveal" && scoreData && analysisData) {
+        return (
+            <ScoreReveal
+                score={scoreData.score}
+                grade={scoreData.grade}
+                risks={scoreData.topRisks}
+                isLoggedIn={!!user}
+                onLoginClick={() => setShowAuthModal(true)}
+                onContinue={() => setStep("complete")}
+            />
         );
     }
 
@@ -463,7 +530,7 @@ export function HomePage() {
                                 }}
                                 className="text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-full font-normal"
                             >
-                                別の契約書を確認する
+                                別の契約書をチェックする
                             </Button>
                         )}
                         {/* Login button moved to footer/actions in viewer for better flow */}
@@ -472,22 +539,14 @@ export function HomePage() {
 
                 <div className={`flex-1 max-w-6xl mx-auto w-full px-8 pb-20`}>
                     {step === "complete" && analysisData ? (
-                        <div className="h-[calc(100vh-5rem)] -mx-8 bg-slate-50">
-                            <AnalysisViewer
-                                data={analysisData}
-                                text={contractText}
-                                contractType={extractionData?.contract_type || "契約書"}
-                                onSave={() => {
-                                    if (!user) {
-                                        setShowAuthModal(true);
-                                    } else {
-                                        if (extractionData) {
-                                            handleSaveToHistory(analysisData, contractText, extractionData.contract_type);
-                                        }
-                                    }
-                                }}
-                                isSaved={!!currentHistoryId}
-                            />        </div>
+                        <div className="h-[calc(100vh-5rem)] -mx-8">
+                            <CorrectedContractReader
+                                originalText={contractText}
+                                correctedText={generateCorrectedText(contractText, analysisData)}
+                                diffs={generateDiffsFromAnalysis(analysisData, contractText)}
+                                onCopy={() => trackEvent(ANALYTICS_EVENTS.SUGGESTION_COPIED)}
+                            />
+                        </div>
                     ) : (
                         <div className="py-20 flex flex-col items-center justify-center text-center">
                             <Loader2 className="w-8 h-8 animate-spin text-slate-300 mb-4" />
@@ -502,7 +561,7 @@ export function HomePage() {
                 <div className="fixed bottom-4 left-4 bg-white rounded-xl shadow-lg border border-slate-200 p-4 max-w-sm animate-in slide-in-from-bottom-4 z-50">
                     <p className="text-sm text-slate-700 mb-3">
                         診断結果を保存しませんか？<br />
-                        <span className="text-slate-500">登録すると履歴がいつでも確認できます。</span>
+                        <span className="text-slate-500">登録すると履歴をいつでも確認できます！</span>
                     </p>
                     <div className="flex gap-2">
                         <Button

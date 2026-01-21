@@ -576,3 +576,141 @@
   padding: 0.1em 0.3em;
   border-radius: 0.25em;
 }
+
+/* ============================================
+   Matrix Loading Animation
+   ============================================ */
+
+@keyframes matrix-fall {
+  0% {
+    transform: translateY(-100vh);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+.animate-matrix-fall {
+  animation: matrix-fall 5s linear infinite;
+}
+
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-progress-indeterminate {
+  animation: progress-indeterminate 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   Score Drum Roll Animation
+   ============================================ */
+
+@keyframes drum-roll {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  10% {
+    transform: translateY(-100%);
+  }
+  20% {
+    transform: translateY(-200%);
+  }
+  30% {
+    transform: translateY(-300%);
+  }
+  40% {
+    transform: translateY(-400%);
+  }
+  50% {
+    transform: translateY(-500%);
+  }
+  60% {
+    transform: translateY(-600%);
+  }
+  70% {
+    transform: translateY(-700%);
+  }
+  80% {
+    transform: translateY(-800%);
+  }
+  90% {
+    transform: translateY(-900%);
+  }
+}
+
+.animate-drum-roll {
+  animation: drum-roll 0.5s ease-out;
+}
+
+@keyframes score-reveal {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-score-reveal {
+  animation: score-reveal 0.8s ease-out forwards;
+}
+
+@keyframes danger-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px 20px rgba(239, 68, 68, 0);
+  }
+}
+
+.animate-danger-pulse {
+  animation: danger-pulse 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   Highlight Colors for Contract Editor
+   ============================================ */
+
+.highlight-modified {
+  background-color: rgba(250, 204, 21, 0.3);
+  border-bottom: 2px solid #facc15;
+}
+
+.highlight-added {
+  background-color: rgba(59, 130, 246, 0.2);
+  border-bottom: 2px solid #3b82f6;
+}
+
+.highlight-deleted {
+  background-color: rgba(239, 68, 68, 0.1);
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+
+/* Bottom Sheet Animation */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out forwards;
+}

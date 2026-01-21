@@ -13,10 +13,10 @@ interface AnalysisStep {
 }
 
 const ANALYSIS_STEPS: AnalysisStep[] = [
-    { id: "read", label: "契約書を受け取りました", description: "内容を確認中...", duration: 2000 },
-    { id: "analyze", label: "条項を確認しています", description: "リーガルチェック実行中", duration: 4000 },
+    { id: "read", label: "契約書を受け取りました！", description: "内容を確認中...", duration: 2000 },
+    { id: "analyze", label: "条項をチェックしています", description: "リーガルチェック実行中", duration: 4000 },
     { id: "detect", label: "重要なポイントを整理しています", description: "懸念事項を特定中", duration: 5000 },
-    { id: "suggest", label: "レポートを作成しています", description: "アドバイスを作成中", duration: 3000 },
+    { id: "suggest", label: "レポートを作成しています！", description: "アドバイスを作成中", duration: 3000 },
 ];
 
 interface AnalyzingOverlayProps {
@@ -108,7 +108,7 @@ export function AnalyzingOverlay({ isActive, loadingMessage, onCancel }: Analyzi
 
                 {/* Header with timer */}
                 <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-base font-medium text-primary">分析中です。少々お待ちください...</h3>
+                    <h3 className="text-base font-medium text-primary">確認中です。少々お待ちください...</h3>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                         <Clock className="w-3 h-3" />
                         {formatTime(elapsedTime)}
@@ -171,7 +171,7 @@ export function AnalyzingOverlay({ isActive, loadingMessage, onCancel }: Analyzi
                 {/* Tips section */}
                 <div className="mt-6 p-3 bg-primary/5 rounded-xl border border-primary/10">
                     <p className="text-xs text-muted-foreground text-center">
-                        💡 通常10〜15秒ほどで完了します
+                        💡 通常10〜15秒ほどで完了します！
                     </p>
                 </div>
             </div>

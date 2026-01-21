@@ -213,7 +213,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                         {isUploading ? (
                             <div className="flex flex-col items-center space-y-4">
                                 <Loader2 className="h-6 w-6 text-primary animate-spin" />
-                                <p className="text-xs font-light text-primary/80 tracking-wider">解析中...</p>
+                                <p className="text-xs font-light text-primary/80 tracking-wider">解析しています...</p>
                             </div>
                         ) : (
                             <>
@@ -274,7 +274,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                                     <Loader2 className="h-3 w-3 animate-spin" />
                                     <span className="text-xs">解析中...</span>
                                 </div>
-                            ) : "契約書をチェックする"}
+                            ) : "チェックを開始！"}
                         </Button>
                     </div>
                 </TabsContent>
@@ -307,7 +307,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete }: UploadSec
                                     <Loader2 className="h-3 w-3 animate-spin" />
                                     <span className="text-xs">解析中...</span>
                                 </div>
-                            ) : "チェックを開始"}
+                            ) : "チェックを開始！"}
                         </Button>
                     </div>
                 </TabsContent>

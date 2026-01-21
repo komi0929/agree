@@ -70,3 +70,44 @@ export type EnhancedAnalysisResult = {
 
 // Backward compatibility
 export type AnalysisResult = EnhancedAnalysisResult;
+
+// ============================================
+// Reverse Proposal UI Types
+// ============================================
+
+export type DiffType = "modified" | "added" | "deleted";
+
+export interface DiffMetadata {
+    id: string;
+    type: DiffType;
+    startIndex: number;
+    endIndex: number;
+    originalText: string;
+    correctedText: string;
+    reason: string;
+    riskLevel: "critical" | "high" | "medium" | "low";
+    clauseTag?: string;
+}
+
+export interface CorrectedContractResult {
+    // 修正済み全文
+    correctedFullText: string;
+    // 差分メタデータ
+    diffs: DiffMetadata[];
+    // スコア
+    score: number;
+    grade: "A" | "B" | "C" | "D" | "F";
+    // スコア内訳
+    breakdown?: {
+        critical: number;
+        high: number;
+        medium: number;
+        low: number;
+    };
+    // 主要リスク（スコア表示用）
+    topRisks: Array<{
+        title: string;
+        description: string;
+        level: "critical" | "high" | "medium";
+    }>;
+}

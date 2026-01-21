@@ -12,6 +12,12 @@ import {
     REGISTERED_GENERATION_LIMIT,
 } from "@/lib/storage/anonymous-usage";
 
+// ========================================
+// 🔧 TESTING MODE - 使用回数制限を一時停止
+// 復旧時は false に戻してください
+// ========================================
+const TESTING_MODE = true;
+
 // Admin emails with unlimited access (comma-separated in env var)
 const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
 
@@ -41,6 +47,8 @@ export interface UsageState {
  * Limits:
  * - Anonymous: 3 checks/month, no generation
  * - Registered: 10 checks/month, 5 generations/month
+ * 
+ * NOTE: TESTING_MODE=true bypasses all limits
  */
 export function useUsageLimit(): UsageState & {
     incrementCheckCount: () => Promise<boolean>;
@@ -53,18 +61,19 @@ export function useUsageLimit(): UsageState & {
     const [isLoading, setIsLoading] = useState(true);
 
     const isRegistered = !!user;
-    const isAdmin = user?.email ? ADMIN_EMAILS.includes(user.email.toLowerCase()) : false;
+    // TESTING_MODE makes everyone an "admin" effectively
+    const isAdmin = TESTING_MODE || (user?.email ? ADMIN_EMAILS.includes(user.email.toLowerCase()) : false);
     const plan: UserPlan = isAdmin ? "admin" : isRegistered ? "registered" : "anonymous";
 
-    // Limits based on plan (admin = unlimited)
+    // Limits based on plan (admin/testing = unlimited)
     const checkLimit = isAdmin ? Infinity : isRegistered ? REGISTERED_CHECK_LIMIT : ANONYMOUS_CHECK_LIMIT;
     const generationLimit = isAdmin ? Infinity : isRegistered ? REGISTERED_GENERATION_LIMIT : 0;
 
-    // Calculated values
+    // Calculated values - TESTING_MODE always returns 0 for hasReached
     const checkRemaining = Math.max(0, checkLimit - checkCount);
-    const hasReachedCheckLimit = checkCount >= checkLimit;
+    const hasReachedCheckLimit = TESTING_MODE ? false : checkCount >= checkLimit;
     const generationRemaining = Math.max(0, generationLimit - generationCount);
-    const hasReachedGenerationLimit = generationCount >= generationLimit;
+    const hasReachedGenerationLimit = TESTING_MODE ? false : generationCount >= generationLimit;
 
     const loadUsage = useCallback(async () => {
         setIsLoading(true);
