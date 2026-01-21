@@ -115,7 +115,7 @@ function convertRuleBasedRisk(risk: RuleBasedRisk): MergedRisk {
         explanation: risk.explanation,
         violated_laws: risk.law ? [risk.law] : [],
         suggestion: {
-            revised_text: risk.suggested_fix || "具体的な修正案については専門家にご相談ください。",
+            revised_text: risk.suggested_fix || "（修正案を自動生成できませんでした。リスク内容を確認して修正をご検討ください。）",
             negotiation_message: generateMessages(),
             legal_basis: risk.details || (risk.law ? VIOLATED_LAW_EXPLANATIONS[risk.law] : ""),
         },

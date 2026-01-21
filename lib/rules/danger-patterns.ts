@@ -17,6 +17,7 @@ export interface DangerPattern {
     title: string;
     explanation: string;
     note?: string;
+    suggested_fix?: string; // Specific fix for this pattern
 }
 
 /**
@@ -43,6 +44,7 @@ export const DANGER_PATTERNS: Record<string, DangerPattern[]> = {
             law: "freelance_new_law_art4",
             title: "60日ルール違反の可能性",
             explanation: "翌々月末払いは、納品日から最長90日程度かかる可能性があり、フリーランス新法第4条（60日以内の支払義務）に違反する可能性が極めて高いです。",
+            suggested_fix: "委託料は、乙が成果物を納品した日から60日以内に支払うものとする。",
         },
         {
             id: "payment_002",
@@ -51,6 +53,7 @@ export const DANGER_PATTERNS: Record<string, DangerPattern[]> = {
             law: "freelance_new_law_art4",
             title: "60日ルール違反",
             explanation: "90日の支払期間は、フリーランス新法第4条（60日以内の支払義務）に明確に違反します。",
+            suggested_fix: "委託料は、乙が成果物を納品した日から60日以内に支払うものとする。",
         },
         {
             id: "payment_003",
@@ -83,6 +86,7 @@ export const DANGER_PATTERNS: Record<string, DangerPattern[]> = {
             law: "civil_code_conformity",
             title: "無制限の損害賠償責任",
             explanation: "「一切の損害を賠償」という文言は、損害賠償に上限がなく、報酬額を大幅に超える賠償を請求される可能性があります。",
+            suggested_fix: "乙の損害賠償責任は、直接かつ現実に生じた通常の損害に限定され、かつ、本契約に基づき甲が乙に支払った委託料の総額を上限とする。",
         },
         {
             id: "liability_002",
@@ -91,6 +95,7 @@ export const DANGER_PATTERNS: Record<string, DangerPattern[]> = {
             law: "civil_code_conformity",
             title: "全額賠償条項",
             explanation: "全額賠償の規定は、予期せぬ大きな損害が発生した場合のリスクが非常に高いです。",
+            suggested_fix: "乙の損害賠償責任は、本契約に基づき甲が乙に支払った委託料の総額を上限とする。",
         },
         {
             id: "liability_003",
@@ -99,6 +104,7 @@ export const DANGER_PATTERNS: Record<string, DangerPattern[]> = {
             law: "civil_code_conformity",
             title: "賠償上限なしの明記",
             explanation: "損害賠償の上限を設けないことが明記されています。これは受注者にとって極めて危険です。",
+            suggested_fix: "乙の損害賠償責任は、過去6ヶ月間に甲が乙に支払った委託料の総額を上限とする。",
         },
         {
             id: "liability_004",
@@ -121,6 +127,7 @@ export const DANGER_PATTERNS: Record<string, DangerPattern[]> = {
             law: "freelance_new_law_art5",
             title: "受領拒否条項",
             explanation: "発注者の都合による受領拒否は、フリーランス新法第5条で明確に禁止されています。",
+            suggested_fix: "甲は、成果物に契約不適合がある場合を除き、受領を拒否することはできない。",
         },
         {
             id: "prohibited_002",
@@ -129,6 +136,7 @@ export const DANGER_PATTERNS: Record<string, DangerPattern[]> = {
             law: "freelance_new_law_art5",
             title: "一方的な報酬減額",
             explanation: "発注後に予算の都合等で報酬を減額することは、フリーランス新法第5条で禁止されています。",
+            suggested_fix: "甲は、乙の責めに帰すべき事由がある場合を除き、委託料を減額することはできない。",
         },
         {
             id: "prohibited_003",

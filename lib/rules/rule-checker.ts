@@ -70,6 +70,7 @@ function convertDangerPattern(pattern: DangerPatternMatch): RuleBasedRisk {
         details: pattern.note,
         law: pattern.law,
         matched_text: pattern.matched_text, // Include matched text for highlighting
+        suggested_fix: pattern.suggested_fix,
     };
 }
 
