@@ -9,39 +9,40 @@ interface DiffBottomSheetProps {
     diff: DiffMetadata | null;
     onClose: () => void;
     onEdit?: (diff: DiffMetadata) => void;
+    onApply?: (diff: DiffMetadata) => void;
 }
 
-export function DiffBottomSheet({ diff, onClose, onEdit }: DiffBottomSheetProps) {
+const getTypeLabel = (type: DiffType) => {
+    switch (type) {
+        case "modified": return "修正";
+        case "added": return "追記";
+        case "deleted": return "削除";
+    }
+};
+
+const getTypeColor = (type: DiffType) => {
+    switch (type) {
+        case "modified": return "bg-yellow-100 text-yellow-700 border-yellow-200";
+        case "added": return "bg-blue-100 text-blue-700 border-blue-200";
+        case "deleted": return "bg-red-100 text-red-700 border-red-200";
+    }
+};
+
+const getRiskIcon = (level: string) => {
+    switch (level) {
+        case "critical":
+            return <AlertOctagon className="w-4 h-4 text-red-500" />;
+        case "high":
+            return <AlertTriangle className="w-4 h-4 text-orange-500" />;
+        case "medium":
+            return <AlertTriangle className="w-4 h-4 text-yellow-600" />;
+        default:
+            return <Check className="w-4 h-4 text-blue-500" />;
+    }
+};
+
+export function DiffBottomSheet({ diff, onClose, onEdit, onApply }: DiffBottomSheetProps) {
     if (!diff) return null;
-
-    const getTypeLabel = (type: DiffType) => {
-        switch (type) {
-            case "modified": return "修正";
-            case "added": return "追記";
-            case "deleted": return "削除";
-        }
-    };
-
-    const getTypeColor = (type: DiffType) => {
-        switch (type) {
-            case "modified": return "bg-yellow-100 text-yellow-700 border-yellow-200";
-            case "added": return "bg-blue-100 text-blue-700 border-blue-200";
-            case "deleted": return "bg-red-100 text-red-700 border-red-200";
-        }
-    };
-
-    const getRiskIcon = (level: string) => {
-        switch (level) {
-            case "critical":
-                return <AlertOctagon className="w-4 h-4 text-red-500" />;
-            case "high":
-                return <AlertTriangle className="w-4 h-4 text-orange-500" />;
-            case "medium":
-                return <AlertTriangle className="w-4 h-4 text-yellow-600" />;
-            default:
-                return <Check className="w-4 h-4 text-blue-500" />;
-        }
-    };
 
     return (
         <>
@@ -147,14 +148,14 @@ export function DiffBottomSheet({ diff, onClose, onEdit }: DiffBottomSheetProps)
                             className="flex-1 rounded-full border-primary/20 hover:bg-primary/5"
                         >
                             <Edit3 className="w-4 h-4 mr-2" />
-                            自分で編集する
+                            元に戻す
                         </Button>
                         <Button
-                            onClick={onClose}
+                            onClick={() => onApply?.(diff)}
                             className="flex-1 rounded-full bg-primary hover:bg-primary/90 text-white"
                         >
                             <Check className="w-4 h-4 mr-2" />
-                            この修正を適用
+                            修正を適用
                         </Button>
                     </div>
                 </div>

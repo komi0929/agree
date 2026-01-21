@@ -58,7 +58,8 @@ const UnifiedContextForm = dynamic(
 );
 
 // Helper: Generate corrected text from analysis
-function generateCorrectedText(originalText: string, analysis: EnhancedAnalysisResult): string {
+// Helper: Generate corrected text from analysis
+function generateCorrectedText(originalText: string, analysis: EnhancedAnalysisResult, rejectedIds: Set<string>): string {
     let correctedText = originalText;
 
     // Apply suggestions in reverse order to maintain indices
@@ -71,6 +72,9 @@ function generateCorrectedText(originalText: string, analysis: EnhancedAnalysisR
         });
 
     for (const risk of sortedRisks) {
+        // Skip if this risk was rejected by user
+        if (rejectedIds.has(risk.original_text)) continue;
+
         if (risk.suggestion?.revised_text && risk.original_text) {
             correctedText = correctedText.replace(risk.original_text, risk.suggestion.revised_text);
         }
@@ -80,15 +84,27 @@ function generateCorrectedText(originalText: string, analysis: EnhancedAnalysisR
 }
 
 // Helper: Generate diff metadata from analysis
-function generateDiffsFromAnalysis(analysis: EnhancedAnalysisResult, originalText: string): DiffMetadata[] {
+// Helper: Generate diff metadata from analysis
+function generateDiffsFromAnalysis(analysis: EnhancedAnalysisResult, originalText: string, rejectedIds: Set<string>): DiffMetadata[] {
     const diffs: DiffMetadata[] = [];
     let diffIdCounter = 0;
 
     // Generate corrected text first to get proper indices
-    const correctedText = generateCorrectedText(originalText, analysis);
+    const correctedText = generateCorrectedText(originalText, analysis, rejectedIds);
 
     for (const risk of analysis.risks) {
         if (!risk.suggestion?.revised_text || !risk.original_text) continue;
+
+        // Determine if this risk is rejected
+        const isRejected = rejectedIds.has(risk.original_text);
+        if (isRejected) {
+            // If rejected, we don't show it as a "modified" diff in the *result*, 
+            // BUT we might want to allow re-applying it? 
+            // For now, if rejected, it simply doesn't appear as a diff (text remains original).
+            // To support "Re-apply", we would need to track it differently.
+            // With the current UI, "Skip" means "Keep Original".
+            continue;
+        }
 
         const startIndex = correctedText.indexOf(risk.suggestion.revised_text);
         if (startIndex === -1) continue;
@@ -135,6 +151,9 @@ export function HomePage() {
     // Usage limit hook
     const { hasReachedCheckLimit, incrementCheckCount } = useUsageLimit();
 
+    // Track rejected risks (user chose to keep original text)
+    const [rejectedRiskIds, setRejectedRiskIds] = useState<Set<string>>(new Set());
+
     // SPECULATIVE EXECUTION: Cache for pre-computed analysis
     const speculativeCacheRef = useRef<SpeculativeAnalysisCache | null>(null);
     const speculativePromiseRef = useRef<Promise<SpeculativeAnalysisCache | null> | null>(null);
@@ -154,6 +173,7 @@ export function HomePage() {
         setStep("upload");
         setCurrentHistoryId(undefined);
         setShowSavePrompt(false);
+        setRejectedRiskIds(new Set());
         // Clear speculative cache
         speculativeCacheRef.current = null;
         speculativePromiseRef.current = null;
@@ -542,8 +562,20 @@ export function HomePage() {
                         <div className="h-[calc(100vh-5rem)] -mx-8">
                             <CorrectedContractReader
                                 originalText={contractText}
-                                correctedText={generateCorrectedText(contractText, analysisData)}
-                                diffs={generateDiffsFromAnalysis(analysisData, contractText)}
+                                correctedText={generateCorrectedText(contractText, analysisData, rejectedRiskIds)}
+                                diffs={generateDiffsFromAnalysis(analysisData, contractText, rejectedRiskIds)}
+                                onApplyDiff={(diff) => {
+                                    // Already applied by default. Ensure it's not in rejected list
+                                    const next = new Set(rejectedRiskIds);
+                                    next.delete(diff.originalText);
+                                    setRejectedRiskIds(next);
+                                }}
+                                onSkipDiff={(diff) => {
+                                    // User wants to keep original (reject the fix)
+                                    const next = new Set(rejectedRiskIds);
+                                    next.add(diff.originalText);
+                                    setRejectedRiskIds(next);
+                                }}
                                 onCopy={() => trackEvent(ANALYTICS_EVENTS.SUGGESTION_COPIED)}
                             />
                         </div>

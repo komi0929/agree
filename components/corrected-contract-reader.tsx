@@ -23,6 +23,8 @@ interface CorrectedContractReaderProps {
     originalText: string;
     correctedText: string;
     diffs: DiffMetadata[];
+    onApplyDiff?: (diff: DiffMetadata) => void;
+    onSkipDiff?: (diff: DiffMetadata) => void;
     onCopy?: () => void;
     onExportDocs?: () => void;
 }
@@ -31,6 +33,8 @@ export function CorrectedContractReader({
     originalText,
     correctedText,
     diffs,
+    onApplyDiff,
+    onSkipDiff,
     onCopy,
     onExportDocs,
 }: CorrectedContractReaderProps) {
@@ -206,6 +210,18 @@ export function CorrectedContractReader({
             {/* Bottom Sheet */}
             <DiffBottomSheet
                 diff={selectedDiff}
+                onEdit={() => {
+                    if (selectedDiff && onSkipDiff) {
+                        onSkipDiff(selectedDiff);
+                        setSelectedDiff(null);
+                    }
+                }}
+                onApply={() => {
+                    if (selectedDiff && onApplyDiff) {
+                        onApplyDiff(selectedDiff);
+                        setSelectedDiff(null);
+                    }
+                }}
                 onClose={() => setSelectedDiff(null)}
             />
         </div>
