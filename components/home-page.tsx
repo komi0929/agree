@@ -85,42 +85,52 @@ function generateCorrectedText(originalText: string, analysis: EnhancedAnalysisR
 
 // Helper: Generate diff metadata from analysis
 // Helper: Generate diff metadata from analysis
+
+// Calculate real-time score based on accepted/rejected fixes
+function calculateCurrentScore(initialScore: number, totalRisks: number, rejectedCount: number): number {
+    if (totalRisks === 0) return 100;
+    const resolvedCount = totalRisks - rejectedCount;
+    // Linear interpolation: Initial -> 100
+    const potentialGain = 100 - initialScore;
+    const gain = potentialGain * (resolvedCount / totalRisks);
+    return Math.min(100, Math.round(initialScore + gain));
+}
+
 function generateDiffsFromAnalysis(analysis: EnhancedAnalysisResult, originalText: string, rejectedIds: Set<string>): DiffMetadata[] {
     const diffs: DiffMetadata[] = [];
     let diffIdCounter = 0;
 
     // Generate corrected text first to get proper indices
+    // Note: for "risk_remaining", we still need to map them to the text
     const correctedText = generateCorrectedText(originalText, analysis, rejectedIds);
 
     for (const risk of analysis.risks) {
-        if (!risk.suggestion?.revised_text || !risk.original_text) continue;
+        if (!risk.original_text) continue;
 
-        // Determine if this risk is rejected
         const isRejected = rejectedIds.has(risk.original_text);
-        if (isRejected) {
-            // If rejected, we don't show it as a "modified" diff in the *result*, 
-            // BUT we might want to allow re-applying it? 
-            // For now, if rejected, it simply doesn't appear as a diff (text remains original).
-            // To support "Re-apply", we would need to track it differently.
-            // With the current UI, "Skip" means "Keep Original".
-            continue;
-        }
 
-        const startIndex = correctedText.indexOf(risk.suggestion.revised_text);
+        // Find position in the *corrected* text
+        // If rejected, the text in correctedText is the ORIGINAL text.
+        // If accepted, the text in correctedText is the REVISED text.
+        const searchTarget = isRejected ? risk.original_text : risk.suggestion?.revised_text;
+
+        if (!searchTarget) continue;
+
+        // Simple strict search (might fail if duplicates exist, but sufficient for now)
+        const startIndex = correctedText.indexOf(searchTarget);
         if (startIndex === -1) continue;
 
         diffs.push({
             id: `diff-${diffIdCounter++}`,
-            type: "modified",
-            startIndex,
-            endIndex: startIndex + risk.suggestion.revised_text.length,
+            type: isRejected ? "risk_remaining" : (risk.suggestion?.revised_text ? "modified" : "deleted"), // Assuming modified for accepted
+            startIndex: startIndex,
+            endIndex: startIndex + searchTarget.length,
             originalText: risk.original_text,
-            correctedText: risk.suggestion.revised_text,
-            reason: risk.explanation || "リスク軽減のため修正",
-            riskLevel: risk.risk_level,
+            correctedText: risk.suggestion?.revised_text || "",
+            reason: risk.explanation || "修正が推奨されます",
+            riskLevel: risk.risk_level
         });
     }
-
     return diffs;
 }
 
@@ -564,6 +574,7 @@ export function HomePage() {
                                 originalText={contractText}
                                 correctedText={generateCorrectedText(contractText, analysisData, rejectedRiskIds)}
                                 diffs={generateDiffsFromAnalysis(analysisData, contractText, rejectedRiskIds)}
+                                score={scoreData ? calculateCurrentScore(scoreData.score, analysisData.risks.length, rejectedRiskIds.size) : 0}
                                 onApplyDiff={(diff) => {
                                     // Already applied by default. Ensure it's not in rejected list
                                     const next = new Set(rejectedRiskIds);

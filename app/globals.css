@@ -586,6 +586,7 @@
     transform: translateY(-100vh);
     opacity: 1;
   }
+
   100% {
     transform: translateY(100vh);
     opacity: 0;
@@ -600,6 +601,7 @@
   0% {
     transform: translateX(-100%);
   }
+
   100% {
     transform: translateX(200%);
   }
@@ -614,33 +616,44 @@
    ============================================ */
 
 @keyframes drum-roll {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   10% {
     transform: translateY(-100%);
   }
+
   20% {
     transform: translateY(-200%);
   }
+
   30% {
     transform: translateY(-300%);
   }
+
   40% {
     transform: translateY(-400%);
   }
+
   50% {
     transform: translateY(-500%);
   }
+
   60% {
     transform: translateY(-600%);
   }
+
   70% {
     transform: translateY(-700%);
   }
+
   80% {
     transform: translateY(-800%);
   }
+
   90% {
     transform: translateY(-900%);
   }
@@ -655,9 +668,11 @@
     transform: scale(0.5);
     opacity: 0;
   }
+
   50% {
     transform: scale(1.2);
   }
+
   100% {
     transform: scale(1);
     opacity: 1;
@@ -669,9 +684,12 @@
 }
 
 @keyframes danger-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
   }
+
   50% {
     box-shadow: 0 0 40px 20px rgba(239, 68, 68, 0);
   }
@@ -706,6 +724,222 @@
   from {
     transform: translateY(100%);
   }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Typing indicator for "manager is checking" feel */
+@keyframes typing-dot {
+
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+.typing-indicator span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  margin: 0 2px;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation: typing-dot 1.4s ease-in-out infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation: typing-dot 1.4s ease-in-out 0.2s infinite;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation: typing-dot 1.4s ease-in-out 0.4s infinite;
+}
+
+/* Emoji bounce for emphasis */
+@keyframes emoji-bounce {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+.emoji-bounce {
+  display: inline-block;
+  animation: emoji-bounce 0.6s ease-out;
+}
+
+/* Warm highlight for important text */
+.text-guardian-highlight {
+  background: linear-gradient(120deg, rgba(0, 158, 96, 0.1) 0%, rgba(0, 158, 96, 0.05) 100%);
+  padding: 0.1em 0.3em;
+  border-radius: 0.25em;
+}
+
+/* ============================================
+   Matrix Loading Animation
+   ============================================ */
+
+@keyframes matrix-fall {
+  0% {
+    transform: translateY(-100vh);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+.animate-matrix-fall {
+  animation: matrix-fall 5s linear infinite;
+}
+
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-progress-indeterminate {
+  animation: progress-indeterminate 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   Score Drum Roll Animation
+   ============================================ */
+
+@keyframes drum-roll {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  10% {
+    transform: translateY(-100%);
+  }
+
+  20% {
+    transform: translateY(-200%);
+  }
+
+  30% {
+    transform: translateY(-300%);
+  }
+
+  40% {
+    transform: translateY(-400%);
+  }
+
+  50% {
+    transform: translateY(-500%);
+  }
+
+  60% {
+    transform: translateY(-600%);
+  }
+
+  70% {
+    transform: translateY(-700%);
+  }
+
+  80% {
+    transform: translateY(-800%);
+  }
+
+  90% {
+    transform: translateY(-900%);
+  }
+}
+
+.animate-drum-roll {
+  animation: drum-roll 0.5s ease-out;
+}
+
+@keyframes score-reveal {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-score-reveal {
+  animation: score-reveal 0.8s ease-out forwards;
+}
+
+@keyframes danger-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 40px 20px rgba(239, 68, 68, 0);
+  }
+}
+
+.animate-danger-pulse {
+  animation: danger-pulse 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   Highlight Colors for Contract Editor
+   ============================================ */
+
+.highlight-modified {
+  background-color: rgba(250, 204, 21, 0.3);
+  border-bottom: 2px solid #facc15;
+}
+
+.highlight-added {
+  background-color: rgba(59, 130, 246, 0.2);
+  border-bottom: 2px solid #3b82f6;
+}
+
+.highlight-deleted {
+  background-color: rgba(239, 68, 68, 0.1);
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+
+/* Bottom Sheet Animation */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+
   to {
     transform: translateY(0);
   }
@@ -713,4 +947,13 @@
 
 .animate-slide-up {
   animation: slide-up 0.3s ease-out forwards;
+}
+
+.highlight-risk-remaining {
+  background-color: rgba(254, 226, 226, 0.5);
+  /* red-100 with opacity */
+  border-bottom: 2px solid #f87171;
+  /* red-400 */
+  color: #991b1b;
+  /* red-800 */
 }

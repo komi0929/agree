@@ -6,7 +6,7 @@ import { Copy, FileText, Check, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DiffBottomSheet } from "./diff-bottom-sheet";
 
-export type DiffType = "modified" | "added" | "deleted";
+export type DiffType = "modified" | "added" | "deleted" | "risk_remaining";
 
 export interface DiffMetadata {
     id: string;
@@ -23,6 +23,7 @@ interface CorrectedContractReaderProps {
     originalText: string;
     correctedText: string;
     diffs: DiffMetadata[];
+    score?: number; // Added score prop
     onApplyDiff?: (diff: DiffMetadata) => void;
     onSkipDiff?: (diff: DiffMetadata) => void;
     onCopy?: () => void;
@@ -33,6 +34,7 @@ export function CorrectedContractReader({
     originalText,
     correctedText,
     diffs,
+    score,
     onApplyDiff,
     onSkipDiff,
     onCopy,
@@ -79,8 +81,22 @@ export function CorrectedContractReader({
                         ⛔ 削除された条項
                     </button>
                 );
+            } else if (diff.type === "risk_remaining") {
+                // Show remaining risk (red highlight)
+                elements.push(
+                    <button
+                        key={`diff-${diff.id}`}
+                        onClick={() => setSelectedDiff(diff)}
+                        className={cn(
+                            "highlight-risk-remaining",
+                            "hover:bg-red-100 transition-colors cursor-pointer rounded px-0.5"
+                        )}
+                    >
+                        {diff.originalText}
+                    </button>
+                );
             } else {
-                // Show highlighted text
+                // Show modified/added text
                 const highlightClass = diff.type === "modified"
                     ? "highlight-modified"
                     : "highlight-added";
@@ -99,7 +115,6 @@ export function CorrectedContractReader({
                     </button>
                 );
             }
-
             lastIndex = diff.endIndex;
         });
 
@@ -126,85 +141,123 @@ export function CorrectedContractReader({
         }
     };
 
-    return (
-        <div className="flex flex-col h-full bg-background">
-            {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-primary/10 bg-white">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <FileText className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                        <h2 className="font-bold text-foreground">AI修正版 契約書</h2>
-                        <p className="text-xs text-muted-foreground">
-                            {diffs.length}箇所を改善しました
-                        </p>
-                    </div>
-                </div>
-
-                {/* Legend */}
-                <div className="hidden md:flex items-center gap-4 text-xs">
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-3 h-3 rounded highlight-modified" />
-                        <span className="text-muted-foreground">修正</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-3 h-3 rounded highlight-added" />
-                        <span className="text-muted-foreground">追記</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-3 h-3 rounded bg-red-100 border border-red-200" />
-                        <span className="text-muted-foreground">削除</span>
-                    </div>
-                </div>
+    const renderConfetti = () => {
+        if (score < 100) return null;
+        return (
+            <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
+                {Array.from({ length: 30 }).map((_, i) => (
+                    <div
+                        key={i}
+                        className="confetti-piece"
+                        style={{
+                            left: `${Math.random() * 100}vw`,
+                            animationDuration: `${2 + Math.random() * 2}s`,
+                            animationDelay: `${Math.random()}s`,
+                            backgroundColor: ['#34d399', '#fbbf24', '#60a5fa', '#f87171'][Math.floor(Math.random() * 4)]
+                        }}
+                    />
+                ))}
             </div>
+        );
+    };
 
-            {/* Contract Content */}
-            <div className="flex-1 overflow-y-auto p-6 md:p-8">
-                <div className="max-w-3xl mx-auto">
-                    <div className="bg-white rounded-xl border border-primary/10 shadow-sm p-6 md:p-8">
-                        <div className="prose prose-sm max-w-none leading-relaxed text-foreground whitespace-pre-wrap">
-                            {renderHighlightedText()}
+    return (
+        <div className="flex flex-col h-full bg-slate-50 relative">
+            {renderConfetti()}
+            {/* Score Header */}
+            {typeof score === 'number' && (
+                <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm z-10 transition-colors duration-500"
+                    style={{ backgroundColor: score >= 100 ? 'rgba(236, 253, 245, 0.8)' : 'white' }}
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="relative">
+                            <svg className="w-12 h-12 transform -rotate-90">
+                                <circle
+                                    className="text-slate-100"
+                                    strokeWidth="4"
+                                    stroke="currentColor"
+                                    fill="transparent"
+                                    r="20"
+                                    cx="24"
+                                    cy="24"
+                                />
+                                <circle
+                                    className={cn(
+                                        "transition-all duration-1000 ease-out",
+                                        score >= 100 ? "text-emerald-500" :
+                                            score >= 80 ? "text-emerald-400" :
+                                                score >= 50 ? "text-yellow-400" : "text-red-400"
+                                    )}
+                                    strokeWidth="4"
+                                    strokeDasharray={2 * Math.PI * 20}
+                                    strokeDashoffset={2 * Math.PI * 20 * (1 - score / 100)}
+                                    strokeLinecap="round"
+                                    stroke="currentColor"
+                                    fill="transparent"
+                                    r="20"
+                                    cx="24"
+                                    cy="24"
+                                />
+                            </svg>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <span className={cn(
+                                    "text-sm font-bold",
+                                    score >= 100 ? "text-emerald-600" : "text-slate-700"
+                                )}>
+                                    {Math.round(score)}
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            <div className="text-xs text-slate-500 font-medium mb-0.5">現在の契約書スコア</div>
+                            <div className={cn(
+                                "text-lg font-bold flex items-center gap-2 transition-all",
+                                score >= 100 ? "text-emerald-600 scale-105" : "text-slate-800"
+                            )}>
+                                {score >= 100 ? (
+                                    <>
+                                        <span>Perfect Score!</span>
+                                        <span className="animate-bounce">💯</span>
+                                        <span className="text-sm font-normal text-emerald-600/80 ml-2">完璧です！</span>
+                                    </>
+                                ) : (
+                                    "修正を適用して100点を目指そう"
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            {/* Footer Actions */}
-            <div className="border-t border-primary/10 bg-white px-6 py-4">
-                <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
-                    <p className="text-xs text-muted-foreground hidden sm:block">
-                        ハイライト箇所をタップすると詳細を確認できます
-                    </p>
-                    <div className="flex items-center gap-3 ml-auto">
-                        <Button
-                            variant="outline"
-                            onClick={handleCopy}
-                            className="rounded-full border-primary/20 hover:bg-primary/5"
-                        >
-                            {copied ? (
-                                <>
-                                    <Check className="w-4 h-4 mr-2 text-green-500" />
-                                    コピー完了
-                                </>
-                            ) : (
-                                <>
-                                    <Copy className="w-4 h-4 mr-2" />
-                                    クリップボードにコピー
-                                </>
-                            )}
-                        </Button>
+                    <div className="flex gap-2">
                         {onExportDocs && (
-                            <Button
-                                onClick={onExportDocs}
-                                className="rounded-full bg-primary hover:bg-primary/90 text-white"
-                            >
-                                <FileText className="w-4 h-4 mr-2" />
-                                Google Docs連携
+                            <Button variant="outline" size="sm" onClick={onExportDocs} className="gap-2">
+                                <FileText className="w-4 h-4" />
+                                PDF出力
                             </Button>
                         )}
+                        <Button
+                            variant="default"
+                            size="sm"
+                            className={cn(
+                                "text-white gap-2 transition-all duration-300",
+                                score >= 100 ? "bg-emerald-600 hover:bg-emerald-700 shadow-md transform hover:scale-105" : "bg-slate-900 hover:bg-slate-800"
+                            )}
+                            onClick={() => {
+                                if (onCopy) {
+                                    onCopy();
+                                    setCopied(true);
+                                    setTimeout(() => setCopied(false), 2000);
+                                    navigator.clipboard.writeText(correctedText);
+                                }
+                            }}
+                        >
+                            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                            {copied ? "コピーしました" : "全文をコピー"}
+                        </Button>
                     </div>
                 </div>
+            )}
+
+            <div className="flex-1 overflow-y-auto p-8 font-serif leading-relaxed text-lg text-slate-800 whitespace-pre-wrap">
+                {renderHighlightedText()}
             </div>
 
             {/* Bottom Sheet */}

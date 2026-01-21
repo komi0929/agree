@@ -17,6 +17,7 @@ const getTypeLabel = (type: DiffType) => {
         case "modified": return "修正";
         case "added": return "追記";
         case "deleted": return "削除";
+        case "risk_remaining": return "未修正";
     }
 };
 
@@ -25,6 +26,7 @@ const getTypeColor = (type: DiffType) => {
         case "modified": return "bg-yellow-100 text-yellow-700 border-yellow-200";
         case "added": return "bg-blue-100 text-blue-700 border-blue-200";
         case "deleted": return "bg-red-100 text-red-700 border-red-200";
+        case "risk_remaining": return "bg-red-100 text-red-700 border-red-200";
     }
 };
 
@@ -43,6 +45,8 @@ const getRiskIcon = (level: string) => {
 
 export function DiffBottomSheet({ diff, onClose, onEdit, onApply }: DiffBottomSheetProps) {
     if (!diff) return null;
+
+    const isRiskRemaining = diff.type === "risk_remaining";
 
     return (
         <>
@@ -99,13 +103,21 @@ export function DiffBottomSheet({ diff, onClose, onEdit, onApply }: DiffBottomSh
                         </h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {/* Before */}
+                            {/* Before (Always show original) */}
                             {diff.originalText && (
-                                <div className="bg-red-50 rounded-xl p-4 border border-red-100">
+                                <div className={cn(
+                                    "rounded-xl p-4 border",
+                                    isRiskRemaining ? "bg-red-50 border-red-100 ring-2 ring-red-200" : "bg-red-50/50 border-red-100"
+                                )}>
                                     <div className="flex items-center gap-2 mb-2">
-                                        <span className="text-xs font-bold text-red-600 uppercase">Before</span>
+                                        <span className="text-xs font-bold text-red-600 uppercase">
+                                            {isRiskRemaining ? "現在の状態 (リスクあり)" : "Before"}
+                                        </span>
                                     </div>
-                                    <p className="text-sm text-red-900 leading-relaxed line-through opacity-70">
+                                    <p className={cn(
+                                        "text-sm text-red-900 leading-relaxed",
+                                        !isRiskRemaining && "line-through opacity-70"
+                                    )}>
                                         {diff.originalText}
                                     </p>
                                 </div>
@@ -115,16 +127,18 @@ export function DiffBottomSheet({ diff, onClose, onEdit, onApply }: DiffBottomSh
                             {diff.type !== "deleted" && (
                                 <div className={cn(
                                     "rounded-xl p-4 border",
-                                    diff.type === "modified"
-                                        ? "bg-yellow-50 border-yellow-100"
-                                        : "bg-blue-50 border-blue-100"
+                                    isRiskRemaining ? "opacity-50 grayscale" : (
+                                        diff.type === "modified"
+                                            ? "bg-yellow-50 border-yellow-100"
+                                            : "bg-blue-50 border-blue-100"
+                                    )
                                 )}>
                                     <div className="flex items-center gap-2 mb-2">
                                         <span className={cn(
                                             "text-xs font-bold uppercase",
                                             diff.type === "modified" ? "text-yellow-600" : "text-blue-600"
                                         )}>
-                                            After
+                                            {isRiskRemaining ? "修正案 (未適用)" : "After"}
                                         </span>
                                     </div>
                                     <p className={cn(
@@ -142,20 +156,27 @@ export function DiffBottomSheet({ diff, onClose, onEdit, onApply }: DiffBottomSh
                 {/* Footer */}
                 <div className="px-6 py-4 border-t border-slate-100 bg-slate-50">
                     <div className="flex items-center gap-3">
-                        <Button
-                            variant="outline"
-                            onClick={() => onEdit?.(diff)}
-                            className="flex-1 rounded-full border-primary/20 hover:bg-primary/5"
-                        >
-                            <Edit3 className="w-4 h-4 mr-2" />
-                            元に戻す
-                        </Button>
+                        {!isRiskRemaining && (
+                            <Button
+                                variant="outline"
+                                onClick={() => onEdit?.(diff)}
+                                className="flex-1 rounded-full border-primary/20 hover:bg-primary/5"
+                            >
+                                <Edit3 className="w-4 h-4 mr-2" />
+                                元に戻す
+                            </Button>
+                        )}
                         <Button
                             onClick={() => onApply?.(diff)}
-                            className="flex-1 rounded-full bg-primary hover:bg-primary/90 text-white"
+                            className={cn(
+                                "flex-1 rounded-full text-white",
+                                isRiskRemaining
+                                    ? "bg-emerald-600 hover:bg-emerald-700 shadow-lg scale-105 transition-all"
+                                    : "bg-primary hover:bg-primary/90"
+                            )}
                         >
                             <Check className="w-4 h-4 mr-2" />
-                            修正を適用
+                            {isRiskRemaining ? "この修正を適用する" : "修正を適用済み"}
                         </Button>
                     </div>
                 </div>
