@@ -64,47 +64,6 @@ function convertRuleBasedRisk(risk: RuleBasedRisk): MergedRisk {
     // Generate context-specific messages using the risk title
     const contextTitle = risk.title.replace(/[がありませんの規定]/g, "").trim();
 
-    const generateMessages = () => {
-        if (risk.negotiation_point) {
-            return {
-                formal: risk.negotiation_point,
-                neutral: risk.negotiation_point,
-                casual: risk.negotiation_point,
-            };
-        }
-
-        // Generate diverse messages based on risk source and title
-        if (risk.source === "recommended_clause" || risk.source === "missing_clause") {
-            return {
-                formal: `${contextTitle}について、追加をご検討いただけますでしょうか。`,
-                neutral: `${contextTitle}の条項を追加していただけると安心です。`,
-                casual: `${contextTitle}について一文追加していただけると助かります。`,
-            };
-        }
-
-        if (risk.source === "payment_rule") {
-            return {
-                formal: "支払条件について、法令に準拠した内容への修正をご検討いただけますでしょうか。",
-                neutral: "支払いサイクルについて、60日以内に調整いただけますか。",
-                casual: "支払い日について相談させていただけますか。",
-            };
-        }
-
-        if (risk.source === "danger_pattern") {
-            return {
-                formal: `「${contextTitle}」の条項について、修正をご検討いただけますでしょうか。`,
-                neutral: `この「${contextTitle}」部分、条件の調整は可能でしょうか。`,
-                casual: `「${contextTitle}」の部分、少し相談してもいいですか。`,
-            };
-        }
-
-        return {
-            formal: `${contextTitle}について、条件のご調整をお願いできますでしょうか。`,
-            neutral: `${contextTitle}について、相談させてください。`,
-            casual: `${contextTitle}のところ、少し話し合えますか。`,
-        };
-    };
-
     return {
         id: risk.id,
         source: "rule",
@@ -115,8 +74,13 @@ function convertRuleBasedRisk(risk: RuleBasedRisk): MergedRisk {
         explanation: risk.explanation,
         violated_laws: risk.law ? [risk.law] : [],
         suggestion: {
-            revised_text: risk.suggested_fix || "（修正案を自動生成できませんでした。リスク内容を確認して修正をご検討ください。）",
-            negotiation_message: generateMessages(),
+            // Priority: LLM will override this. If not, this fallback must be strict.
+            revised_text: risk.suggested_fix || "（LLMによる自動修正を適用します）",
+            negotiation_message: {
+                formal: `${contextTitle}の修正を希望します。`,
+                neutral: `${contextTitle}を修正してください。`,
+                casual: `${contextTitle}直して。`,
+            },
             legal_basis: risk.details || (risk.law ? VIOLATED_LAW_EXPLANATIONS[risk.law] : ""),
         },
     };
@@ -215,7 +179,14 @@ function mergeRisks(ruleRisk: MergedRisk, llmRisk: MergedRisk): MergedRisk {
         original_text: llmRisk.original_text,
         explanation: `${ruleRisk.explanation}\n\n${llmRisk.explanation}`,
         violated_laws: allLaws,
-        suggestion: llmRisk.suggestion, // LLMの方がより詳細
+        suggestion: {
+            // FORCE LLM Suggestion if available, as the Prompt is now "Perfect"
+            revised_text: llmRisk.suggestion.revised_text && llmRisk.suggestion.revised_text.length > 10
+                ? llmRisk.suggestion.revised_text
+                : (ruleRisk.suggestion.revised_text || "修正案の生成に失敗しました"),
+            negotiation_message: llmRisk.suggestion.negotiation_message,
+            legal_basis: llmRisk.suggestion.legal_basis
+        }
     };
 }
 
