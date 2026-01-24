@@ -52,143 +52,14 @@ const UnifiedContextForm = dynamic(
     }
 );
 
-// Helper: Generate corrected text from analysis
-// Filter out placeholder text to prevent corrupted output
-const PLACEHOLDER_TEXT = "LLMによる自動修正";
-
-function generateCorrectedText(originalText: string, analysis: EnhancedAnalysisResult, rejectedIds: Set<string>): string {
-    let correctedText = originalText;
-
-    // Apply suggestions in reverse order to maintain indices
-    const sortedRisks = [...analysis.risks]
-        .filter(r => r.suggestion?.revised_text && r.original_text)
-        // CRITICAL: Filter out placeholder text that was not replaced by LLM
-        .filter(r => !r.suggestion?.revised_text?.includes(PLACEHOLDER_TEXT))
-        .sort((a, b) => {
-            const indexA = originalText.indexOf(a.original_text);
-            const indexB = originalText.indexOf(b.original_text);
-            return indexB - indexA; // Reverse order
-        });
-
-    for (const risk of sortedRisks) {
-        // Skip if this risk was rejected by user
-        if (rejectedIds.has(risk.original_text)) continue;
-
-        if (risk.suggestion?.revised_text && risk.original_text) {
-            correctedText = correctedText.replace(risk.original_text, risk.suggestion.revised_text);
-        }
-    }
-
-    return correctedText;
-}
-
-// PERFECT CONTRACT GENERATION: Apply all fixes + Add missing clauses
-function generatePerfectContract(originalText: string, analysis: EnhancedAnalysisResult, rejectedIds: Set<string>): string {
-    // Step 1: Apply all text-based fixes (修正)
-    let perfectContract = generateCorrectedText(originalText, analysis, rejectedIds);
-
-    // Step 2: Collect missing clauses that need to be ADDED (追加条項)
-    const addedClauses: string[] = [];
-
-    // Check risks for missing clauses with suggested additions
-    for (const risk of analysis.risks) {
-        // Skip if no suggestion or no revised_text
-        if (!risk.suggestion?.revised_text) continue;
-        // Skip if it has original_text (this is a modification, not addition)
-        if (risk.original_text && risk.original_text.length > 20) continue;
-        // Skip placeholder text
-        if (risk.suggestion.revised_text.includes(PLACEHOLDER_TEXT)) continue;
-        // Skip if rejected
-        if (risk.original_text && rejectedIds.has(risk.original_text)) continue;
-
-        // This is a NEW clause that should be added
-        addedClauses.push(`【追加条項：${risk.section_title}】\n${risk.suggestion.revised_text}`);
-    }
-
-    // Add missing clauses from analysis.missing_clauses identifiers
-    // These are the critical ones detected by rule-based checker
-    if (analysis.missing_clauses && analysis.missing_clauses.length > 0) {
-        const missingClauseTemplates: Record<string, string> = {
-            "みなし検収条項がありません": "【追加条項：みなし検収】\n納品後10日以内に甲から異議がない場合は、検収に合格したものとみなす。",
-            "支払条件の規定がありません": "【追加条項：支払条件】\n甲は乙に対し、成果物納入日から60日以内に、乙の指定する銀行口座に振り込む方法により委託料を支払う。振込手数料は甲の負担とする。",
-            "損害賠償の規定がありません": "【追加条項：損害賠償上限】\n甲又は乙が本契約に違反した場合の損害賠償責任は、通常かつ直接の損害に限り、本契約に基づき支払われた委託料総額を上限とする。",
-            "中途解約時の精算規定がありません": "【追加条項：中途解約精算】\n本契約が中途で終了した場合、甲は乙に対し、終了時点までに乙が遂行した作業相当額を支払うものとする。",
-            "遅延利息の規定がありません": "【追加条項：遅延利息】\n甲が支払いを遅延した場合、乙に対し年率14.6%の遅延損害金を支払うものとする。",
-            "背景IP留保の規定がありません": "【追加条項：背景IP留保】\n乙が従前より保有していたプログラム、ライブラリ、ツール等の知的財産権は乙に留保される。",
-        };
-
-        for (const clause of analysis.missing_clauses) {
-            const template = missingClauseTemplates[clause];
-            if (template && !addedClauses.some(c => c.includes(template.split('\n')[0]))) {
-                addedClauses.push(template);
-            }
-        }
-    }
-
-    // Step 3: Append added clauses at the end if any
-    if (addedClauses.length > 0) {
-        perfectContract += "\n\n" + "─".repeat(40) + "\n";
-        perfectContract += "【以下、契約書の保護強化のため追加された条項】\n";
-        perfectContract += "─".repeat(40) + "\n\n";
-        perfectContract += addedClauses.join("\n\n");
-    }
-
-    return perfectContract;
-}
+// NOTE: Old client-side patching functions removed. 
+// Contract rewriting is now handled by /api/generate-corrected API which uses Gemini LLM.
 
 
-// Helper: Generate diff metadata from analysis
+// NOTE: Diff generation and score calculation functions removed.
+// The new flow uses /api/generate-corrected API which returns a complete rewritten contract.
+// No diff tracking is needed as the entire contract is rewritten.
 
-// Calculate real-time score based on accepted/rejected fixes
-function calculateCurrentScore(initialScore: number, totalRisks: number, rejectedCount: number): number {
-    if (totalRisks === 0) return 100;
-    const resolvedCount = totalRisks - rejectedCount;
-    // Linear interpolation: Initial -> 100
-    const potentialGain = 100 - initialScore;
-    const gain = potentialGain * (resolvedCount / totalRisks);
-    return Math.min(100, Math.round(initialScore + gain));
-}
-
-function generateDiffsFromAnalysis(analysis: EnhancedAnalysisResult, originalText: string, rejectedIds: Set<string>): DiffMetadata[] {
-    const diffs: DiffMetadata[] = [];
-    let diffIdCounter = 0;
-
-    // Generate corrected text first to get proper indices
-    // Note: for "risk_remaining", we still need to map them to the text
-    const correctedText = generateCorrectedText(originalText, analysis, rejectedIds);
-
-    for (const risk of analysis.risks) {
-        if (!risk.original_text) continue;
-
-        // CRITICAL: Skip risks with placeholder text
-        if (risk.suggestion?.revised_text?.includes(PLACEHOLDER_TEXT)) continue;
-
-        const isRejected = rejectedIds.has(risk.original_text);
-
-        // Find position in the *corrected* text
-        // If rejected, the text in correctedText is the ORIGINAL text.
-        // If accepted, the text in correctedText is the REVISED text.
-        const searchTarget = isRejected ? risk.original_text : risk.suggestion?.revised_text;
-
-        if (!searchTarget) continue;
-
-        // Simple strict search (might fail if duplicates exist, but sufficient for now)
-        const startIndex = correctedText.indexOf(searchTarget);
-        if (startIndex === -1) continue;
-
-        diffs.push({
-            id: `diff-${diffIdCounter++}`,
-            type: isRejected ? "risk_remaining" : (risk.suggestion?.revised_text ? "modified" : "deleted"), // Assuming modified for accepted
-            startIndex: startIndex,
-            endIndex: startIndex + searchTarget.length,
-            originalText: risk.original_text,
-            correctedText: risk.suggestion?.revised_text || "",
-            reason: risk.explanation || "修正が推奨されます",
-            riskLevel: risk.risk_level
-        });
-    }
-    return diffs;
-}
 
 export function HomePage() {
     const [analysisData, setAnalysisData] = useState<EnhancedAnalysisResult | null>(null);
