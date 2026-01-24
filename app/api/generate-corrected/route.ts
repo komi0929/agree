@@ -29,6 +29,34 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // === ALREADY PERFECT DETECTION ===
+        // If the input contract already has all critical protections, return it unchanged
+        // This ensures stability when re-checking a perfect contract
+        const criticalPatterns = [
+            /60日以内/,                           // 支払条件
+            /みなし検収|異議.*ない.*検収/,         // みなし検収
+            /遅延損害金|遅延利息/,                 // 遅延利息  
+            /第27条.*第28条|27条.*28条/,          // 著作権留保
+            /上限.*賠償|賠償.*上限/,               // 損害賠償上限
+            /解約.*精算|精算.*支払/,               // 中途解約精算
+            /1年間?.*競/,                         // 競業避止1年
+        ];
+
+        const matchedPatterns = criticalPatterns.filter(p => p.test(contractText));
+        const matchRate = matchedPatterns.length / criticalPatterns.length;
+
+        // If contract matches 85%+ of critical patterns, it's already good
+        if (matchRate >= 0.85 && contractText.length > 1000) {
+            console.log(`Contract already has ${matchedPatterns.length}/${criticalPatterns.length} protections, returning unchanged`);
+            return NextResponse.json({
+                correctedFullText: contractText,
+                summary: "この契約書はすでに十分な保護条項を含んでいます",
+                score: 100,
+                grade: "S",
+                alreadyPerfect: true,
+            });
+        }
+
         const genAI = getGeminiClient();
         const model = genAI.getGenerativeModel({
             model: "gemini-2.0-flash",
@@ -70,7 +98,50 @@ ${contractText.substring(0, 15000)}
 
 
         const result = await model.generateContent(prompt);
-        const responseText = result.response.text();
+        let responseText = result.response.text() || "";
+
+        // === OUTPUT SANITIZATION ===
+        // LLM sometimes adds Python code examples or explanations after contract
+        // Clean the output to ensure only contract text is returned
+
+        // 1. Remove any markdown code blocks
+        responseText = responseText.replace(/```[\s\S]*?```/g, "");
+
+        // 2. Cut at common end markers (signature section ends the contract)
+        const endMarkers = [
+            "Key improvements",
+            "This revised",
+            "Remember to",
+            "Example usage",
+            "Note:",
+            "This contract",
+            "This version",
+            "```"
+        ];
+
+        for (const marker of endMarkers) {
+            const idx = responseText.indexOf(marker);
+            if (idx > 0 && idx > responseText.length * 0.5) {
+                // Only cut if marker is in latter half
+                responseText = responseText.substring(0, idx).trim();
+            }
+        }
+
+        // 3. Remove trailing whitespace and junk
+        responseText = responseText.replace(/\s+$/, "").trim();
+
+        // 4. Ensure ends with proper contract ending
+        if (!responseText.includes("乙：") && !responseText.includes("郎")) {
+            // Try to find and cut at last proper contract ending
+            const lastPartyMatch = responseText.lastIndexOf("乙：");
+            if (lastPartyMatch > 0) {
+                // Find end of that line
+                const endOfLine = responseText.indexOf("\n", lastPartyMatch + 10);
+                if (endOfLine > 0) {
+                    responseText = responseText.substring(0, endOfLine).trim();
+                }
+            }
+        }
 
         if (!responseText || responseText.length < 500) {
             throw new Error("AI response too short: " + responseText?.length);
@@ -97,3 +168,4 @@ ${contractText.substring(0, 15000)}
         );
     }
 }
+
