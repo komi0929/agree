@@ -16,8 +16,6 @@ interface ScoreRevealProps {
     grade: "A" | "B" | "C" | "D" | "F";
     risks: RiskCard[];
     onContinue: () => void;
-    isLoggedIn?: boolean;
-    onLoginClick?: () => void;
 }
 
 export function ScoreReveal({
@@ -25,19 +23,27 @@ export function ScoreReveal({
     grade,
     risks,
     onContinue,
-    isLoggedIn = false,
-    onLoginClick,
 }: ScoreRevealProps) {
     const [displayScore, setDisplayScore] = useState(100);
     const [isRevealed, setIsRevealed] = useState(false);
     const [showRisks, setShowRisks] = useState(false);
     const [isAnimating, setIsAnimating] = useState(true);
 
+    // Auto-advance to result (Treating scoring as loading/processing)
+    useEffect(() => {
+        if (isRevealed) {
+            const timer = setTimeout(() => {
+                onContinue();
+            }, 3500); // Wait 3.5s after score reveal to show the "fixing" effect
+            return () => clearTimeout(timer);
+        }
+    }, [isRevealed, onContinue]);
+
     // Drum roll animation - count DOWN from 100 to final score
     useEffect(() => {
         let frame = 0;
         const totalFrames = 60;
-        const duration = 2500; // 2.5 seconds
+        const duration = 2000; // Speed up slightly (2.0s)
         const frameInterval = duration / totalFrames;
 
         // Start from 100 and go down to actual score
@@ -209,13 +215,8 @@ export function ScoreReveal({
                         className="w-full h-14 text-lg rounded-full bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all btn-guardian-pulse"
                     >
                         <Shield className="w-5 h-5 mr-2" />
-                        AI修正版（{Math.min(score + 50, 98)}点）を見る
+                        AI修正版（100点）を見る
                     </Button>
-                    {!isLoggedIn && (
-                        <p className="text-center text-muted-foreground text-xs">
-                            ※テストモード：ログイン不要で閲覧可能
-                        </p>
-                    )}
                 </div>
             )}
         </div>

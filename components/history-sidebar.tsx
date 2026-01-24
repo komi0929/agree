@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@/lib/auth/auth-context";
-import { supabase } from "@/lib/auth/supabase-client";
+// import { useAuth } from "@/lib/auth/auth-context"; // Removed Auth
+// import { supabase } from "@/lib/auth/supabase-client"; // Removed Auth
 import { FileText, Plus, Trash2, ChevronLeft, ChevronRight, Clock, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EnhancedAnalysisResult } from "@/lib/types/analysis";
@@ -14,7 +14,7 @@ interface HistoryItem {
     created_at: string;
 }
 
-import { AuthModal, UserMenu } from "@/components/auth/auth-modal";
+// import { AuthModal, UserMenu } from "@/components/auth/auth-modal"; // Removed Auth
 
 interface HistorySidebarProps {
     isOpen: boolean;
@@ -22,7 +22,7 @@ interface HistorySidebarProps {
     onSelectHistory: (historyId: string) => void;
     onNewAnalysis: () => void;
     currentHistoryId?: string;
-    onLoginClick?: () => void;
+    // onLoginClick?: () => void; // Removed
 }
 
 export function HistorySidebar({
@@ -31,54 +31,29 @@ export function HistorySidebar({
     onSelectHistory,
     onNewAnalysis,
     currentHistoryId,
-    onLoginClick,
 }: HistorySidebarProps) {
-    const { user, session } = useAuth();
+    // const { user, session } = useAuth(); // Removed
     const [history, setHistory] = useState<HistoryItem[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
+    // Auth-based history fetching disabled for now
+    /*
     useEffect(() => {
         if (user && session) {
             fetchHistory();
         }
     }, [user, session]);
+    */
 
+    /*
     const fetchHistory = async () => {
-        if (!session?.access_token) return;
-
-        setIsLoading(true);
-        try {
-            const response = await fetch("/api/history", {
-                // Cookie auth handled automatically
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setHistory(data.history || []);
-            }
-        } catch (error) {
-            console.error("Failed to fetch history:", error);
-        } finally {
-            setIsLoading(false);
-        }
+       // ... removed
     };
+    */
 
     const deleteHistory = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!session?.access_token) return;
-
-        try {
-            const response = await fetch(`/api/history/${id}`, {
-                method: "DELETE",
-                // Cookie auth handled automatically
-            });
-
-            if (response.ok) {
-                setHistory(prev => prev.filter(item => item.id !== id));
-            }
-        } catch (error) {
-            console.error("Failed to delete history:", error);
-        }
+        // Disabled
     };
 
     const formatDate = (dateString: string) => {
@@ -137,83 +112,18 @@ export function HistorySidebar({
 
                 {/* History List */}
                 <div className="flex-1 overflow-y-auto px-3 pb-4">
-                    {!user ? (
-                        // Non-logged-in: Show placeholder with lock icon
-                        <div className="text-center py-8 text-muted-foreground text-sm">
-                            <Lock className="w-8 h-8 mx-auto mb-2 opacity-50 text-primary" />
-                            <p className="text-xs">ログインして履歴を表示</p>
-                        </div>
-                    ) : isLoading ? (
-                        <div className="text-center py-8 text-muted-foreground">
-                            読み込み中...
-                        </div>
-                    ) : history.length === 0 ? (
-                        <div className="text-center py-8 text-muted-foreground text-sm">
-                            <Clock className="w-8 h-8 mx-auto mb-2 opacity-50 text-primary" />
-                            履歴がありません
-                        </div>
-                    ) : (
-                        <div className="space-y-1">
-                            {history.map((item) => (
-                                <button
-                                    key={item.id}
-                                    onClick={() => onSelectHistory(item.id)}
-                                    className={`w-full text-left p-3 rounded-xl transition-colors group ${currentHistoryId === item.id
-                                        ? "bg-primary/10"
-                                        : "hover:bg-primary/5"
-                                        }`}
-                                >
-                                    <div className="flex items-start gap-3">
-                                        <FileText className={`w-4 h-4 mt-0.5 flex-shrink-0 ${currentHistoryId === item.id ? "text-primary" : "text-muted-foreground"}`} />
-                                        <div className="flex-1 min-w-0">
-                                            <p className={`text-sm font-medium truncate ${currentHistoryId === item.id ? "text-primary" : "text-foreground"}`}>
-                                                {item.title}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground mt-0.5">
-                                                {item.contract_type && `${item.contract_type} · `}
-                                                {formatDate(item.created_at)}
-                                            </p>
-                                        </div>
-                                        <button
-                                            onClick={(e) => deleteHistory(item.id, e)}
-                                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-50 rounded transition-all"
-                                        >
-                                            <Trash2 className="w-4 h-4 text-muted-foreground hover:text-red-500" />
-                                        </button>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    )}
+                    {/* Temporarily showing "Coming Soon" or Empty State since db auth is removed */}
+                    <div className="text-center py-8 text-muted-foreground text-sm">
+                        <Clock className="w-8 h-8 mx-auto mb-2 opacity-50 text-primary" />
+                        履歴機能は現在調整中です
+                    </div>
                 </div>
 
-                {/* Footer - Different content based on auth state */}
+                {/* Footer - Copyright or Link */}
                 <div className="p-4 border-t border-primary/10 flex-shrink-0 bg-white/50 backdrop-blur-sm">
-                    {user ? (
-                        // Logged in: Show history count and user menu
-                        <>
-                            <div className="flex items-center justify-between mb-4 px-1">
-                                <span className="text-[10px] uppercase font-bold text-primary/50 tracking-widest">
-                                    {history.length}件の履歴
-                                </span>
-                            </div>
-                            <UserMenu />
-                        </>
-                    ) : (
-                        // Not logged in: Show login CTA
-                        <div className="space-y-3">
-                            <p className="text-xs text-muted-foreground flex items-center gap-2">
-                                <Lock className="w-3 h-3" />
-                                登録すれば履歴を保存できます
-                            </p>
-                            <Button
-                                onClick={onLoginClick}
-                                className="w-full bg-primary hover:bg-primary/90 text-white rounded-full font-medium"
-                            >
-                                無料ではじめる
-                            </Button>
-                        </div>
-                    )}
+                    <div className="text-[10px] text-center text-slate-400">
+                        © 2026 Agree
+                    </div>
                 </div>
             </div>
         </>
@@ -222,7 +132,7 @@ export function HistorySidebar({
 
 // Hook for history operations
 export function useAnalysisHistory() {
-    const { session } = useAuth();
+    // const { session } = useAuth(); // Removed
 
     const saveToHistory = async (
         title: string,
@@ -230,29 +140,7 @@ export function useAnalysisHistory() {
         analysisResult: EnhancedAnalysisResult,
         contractType?: string
     ): Promise<string | null> => {
-        if (!session?.access_token) return null;
-
-        try {
-            const response = await fetch("/api/history", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    title,
-                    contract_text: contractText,
-                    analysis_result: analysisResult,
-                    contract_type: contractType,
-                }),
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                return data.history?.id || null;
-            }
-        } catch (error) {
-            console.error("Failed to save history:", error);
-        }
+        // Disabled
         return null;
     };
 
@@ -263,26 +151,11 @@ export function useAnalysisHistory() {
         analysisResult: EnhancedAnalysisResult;
         contractType?: string;
     } | null> => {
-        if (!session?.access_token) return null;
-
-        try {
-            const response = await fetch(`/api/history/${historyId}`, {
-                // Cookie auth handled automatically
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                return {
-                    contractText: data.history.contract_text,
-                    analysisResult: data.history.analysis_result,
-                    contractType: data.history.contract_type,
-                };
-            }
-        } catch (error) {
-            console.error("Failed to load history:", error);
-        }
+        // Disabled
         return null;
     };
 
     return { saveToHistory, loadFromHistory };
 }
+
+

@@ -15,10 +15,10 @@ export const config = {
     ],
 };
 
-import { updateSession } from "@/lib/auth/middleware-util";
+
 
 export async function middleware(request: NextRequest) {
-    const response = await updateSession(request); // Handle Auth Session Refresh
+    const response = NextResponse.next();
 
     // Add performance headers
     response.headers.set("X-Edge-Region", process.env.VERCEL_REGION || "local");
