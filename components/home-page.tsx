@@ -524,24 +524,14 @@ export function HomePage() {
                 <div className={`flex-1 max-w-6xl mx-auto w-full px-8 pb-20`}>
                     {step === "complete" && analysisData ? (
                         <div className="h-[calc(100vh-5rem)] -mx-8">
-                            <CorrectedContractReader
-                                originalText={contractText}
-                                correctedText={generateCorrectedText(contractText, analysisData, rejectedRiskIds)}
-                                diffs={generateDiffsFromAnalysis(analysisData, contractText, rejectedRiskIds)}
-                                score={scoreData ? calculateCurrentScore(scoreData.score, analysisData.risks.length, rejectedRiskIds.size) : 0}
-                                onApplyDiff={(diff) => {
-                                    // Already applied by default. Ensure it's not in rejected list
-                                    const next = new Set(rejectedRiskIds);
-                                    next.delete(diff.originalText);
-                                    setRejectedRiskIds(next);
+                            <AnalysisViewer
+                                data={analysisData}
+                                text={contractText}
+                                contractType={extractionData?.contract_type}
+                                onSave={() => {
+                                    // History save disabled in no-auth mode
                                 }}
-                                onSkipDiff={(diff) => {
-                                    // User wants to keep original (reject the fix)
-                                    const next = new Set(rejectedRiskIds);
-                                    next.add(diff.originalText);
-                                    setRejectedRiskIds(next);
-                                }}
-                                onCopy={() => trackEvent(ANALYTICS_EVENTS.SUGGESTION_COPIED)}
+                                isSaved={true}
                             />
                         </div>
                     ) : (
