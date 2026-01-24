@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@/lib/auth/auth-context";
+// import { useAuth } from "@/lib/auth/auth-context";
 import {
     getAnonymousCheckCount,
     getAnonymousRemainingChecks,
@@ -55,53 +55,33 @@ export function useUsageLimit(): UsageState & {
     incrementGenerationCount: () => Promise<boolean>;
     refreshUsage: () => Promise<void>;
 } {
-    const { user, session } = useAuth();
+    // Auth-less implementation
     const [checkCount, setCheckCount] = useState(0);
     const [generationCount, setGenerationCount] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
-    const isRegistered = !!user;
-    // TESTING_MODE makes everyone an "admin" effectively
-    const isAdmin = TESTING_MODE || (user?.email ? ADMIN_EMAILS.includes(user.email.toLowerCase()) : false);
-    const plan: UserPlan = isAdmin ? "admin" : isRegistered ? "registered" : "anonymous";
+    // Always treat as anonymous (or admin if testing mode) to avoid auth dependencies
+    const isRegistered = false;
+    const isAdmin = TESTING_MODE;
+    const plan: UserPlan = "anonymous";
 
-    // Limits based on plan (admin/testing = unlimited)
-    const checkLimit = isAdmin ? Infinity : isRegistered ? REGISTERED_CHECK_LIMIT : ANONYMOUS_CHECK_LIMIT;
-    const generationLimit = isAdmin ? Infinity : isRegistered ? REGISTERED_GENERATION_LIMIT : 0;
+    // Limits
+    const checkLimit = isAdmin ? Infinity : ANONYMOUS_CHECK_LIMIT;
+    const generationLimit = 0; // No generation for anonymous
 
-    // Calculated values - TESTING_MODE always returns 0 for hasReached
+    // Calculated values
     const checkRemaining = Math.max(0, checkLimit - checkCount);
     const hasReachedCheckLimit = TESTING_MODE ? false : checkCount >= checkLimit;
-    const generationRemaining = Math.max(0, generationLimit - generationCount);
-    const hasReachedGenerationLimit = TESTING_MODE ? false : generationCount >= generationLimit;
+    const generationRemaining = 0;
+    const hasReachedGenerationLimit = true;
 
     const loadUsage = useCallback(async () => {
         setIsLoading(true);
-
-        if (!isRegistered) {
-            // Anonymous user - use localStorage
-            setCheckCount(getAnonymousCheckCount());
-            setGenerationCount(0); // Anonymous can't generate
-        } else if (session?.access_token) {
-            // Registered user - fetch from server
-            try {
-                const response = await fetch("/api/usage", {
-                    headers: {
-                        Authorization: `Bearer ${session.access_token}`,
-                    },
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    setCheckCount(data.checkCount || 0);
-                    setGenerationCount(data.generationCount || 0);
-                }
-            } catch (error) {
-                console.error("Failed to fetch usage:", error);
-            }
-        }
-
+        // Always usage local storage for now
+        setCheckCount(getAnonymousCheckCount());
+        setGenerationCount(0);
         setIsLoading(false);
-    }, [isRegistered, session?.access_token]);
+    }, []);
 
     useEffect(() => {
         loadUsage();
@@ -110,54 +90,14 @@ export function useUsageLimit(): UsageState & {
     const incrementCheckCount = async (): Promise<boolean> => {
         if (hasReachedCheckLimit) return false;
 
-        if (!isRegistered) {
-            const success = incrementAnonymousCheckCount();
-            if (success) {
-                setCheckCount(prev => prev + 1);
-            }
-            return success;
-        } else if (session?.access_token) {
-            try {
-                const response = await fetch("/api/usage/increment-check", {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${session.access_token}`,
-                    },
-                });
-                if (response.ok) {
-                    setCheckCount(prev => prev + 1);
-                    return true;
-                }
-            } catch (error) {
-                console.error("Failed to increment check count:", error);
-            }
-            return false;
+        const success = incrementAnonymousCheckCount();
+        if (success) {
+            setCheckCount(prev => prev + 1);
         }
-
-        return false;
+        return success;
     };
 
     const incrementGenerationCount = async (): Promise<boolean> => {
-        if (!isRegistered || hasReachedGenerationLimit) return false;
-
-        if (session?.access_token) {
-            try {
-                const response = await fetch("/api/usage/increment-generation", {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${session.access_token}`,
-                    },
-                });
-                if (response.ok) {
-                    setGenerationCount(prev => prev + 1);
-                    return true;
-                }
-            } catch (error) {
-                console.error("Failed to increment generation count:", error);
-            }
-            return false;
-        }
-
         return false;
     };
 
