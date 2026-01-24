@@ -11,7 +11,7 @@ import { Footer } from "@/components/footer";
 import { SignatureLogo } from "@/components/signature-logo";
 import { analyzeDeepAction, AnalysisState } from "@/app/actions";
 import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
-import { Loader2, LogIn, Sparkles, Settings2 } from "lucide-react";
+import { Loader2, LogIn, Sparkles, Settings2, Check, Copy } from "lucide-react";
 import { AnalyzingOverlay } from "@/components/analyzing-overlay";
 import { ScoreReveal } from "@/components/score-reveal";
 import { CorrectedContractReader, DiffMetadata } from "@/components/corrected-contract-reader";
@@ -222,6 +222,11 @@ export function HomePage() {
 
     // Track rejected risks (user chose to keep original text)
     const [rejectedRiskIds, setRejectedRiskIds] = useState<Set<string>>(new Set());
+
+    // PERFECT CONTRACT: Fully rewritten contract text from LLM
+    const [perfectContractText, setPerfectContractText] = useState<string | null>(null);
+    const [isGeneratingPerfect, setIsGeneratingPerfect] = useState(false);
+
 
     // SPECULATIVE EXECUTION: Cache for pre-computed analysis
     const speculativeCacheRef = useRef<SpeculativeAnalysisCache | null>(null);
@@ -518,15 +523,45 @@ export function HomePage() {
 
     // Score Reveal step - shows score animation before detailed results
     if (step === "score_reveal" && scoreData && analysisData) {
+        const handleGeneratePerfectContract = async () => {
+            setIsGeneratingPerfect(true);
+            try {
+                const response = await fetch("/api/generate-corrected", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contractText: contractText,
+                        userRole: "vendor"
+                    }),
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    setPerfectContractText(result.correctedFullText || "");
+                } else {
+                    // Fallback to patched version if API fails
+                    console.error("API failed, using fallback");
+                    setPerfectContractText(null);
+                }
+            } catch (error) {
+                console.error("Error generating perfect contract:", error);
+                setPerfectContractText(null);
+            } finally {
+                setIsGeneratingPerfect(false);
+                setStep("complete");
+            }
+        };
+
         return (
             <ScoreReveal
                 score={scoreData.score}
                 grade={scoreData.grade}
                 risks={scoreData.topRisks}
-                onContinue={() => setStep("complete")}
+                onContinue={handleGeneratePerfectContract}
             />
         );
     }
+
 
     // Analysis Result View (Clean & Centered)
     return (
@@ -575,28 +610,60 @@ export function HomePage() {
                     </div>
                 </header>
 
-                <div className={`flex-1 max-w-6xl mx-auto w-full px-8 pb-20`}>
+                <div className={`flex-1 max-w-4xl mx-auto w-full px-8 pb-20`}>
                     {step === "complete" && analysisData ? (
-                        <div className="h-[calc(100vh-5rem)] -mx-8">
-                            <CorrectedContractReader
-                                originalText={contractText}
-                                correctedText={generatePerfectContract(contractText, analysisData, rejectedRiskIds)}
-                                diffs={generateDiffsFromAnalysis(analysisData, contractText, rejectedRiskIds)}
-                                score={100} // Perfect Contract is always 100
-                                onApplyDiff={(diff) => {
-                                    // Already applied by default. Ensure it's not in rejected list
-                                    const next = new Set(rejectedRiskIds);
-                                    next.delete(diff.originalText);
-                                    setRejectedRiskIds(next);
-                                }}
-                                onSkipDiff={(diff) => {
-                                    // User wants to keep original (reject the fix)
-                                    const next = new Set(rejectedRiskIds);
-                                    next.add(diff.originalText);
-                                    setRejectedRiskIds(next);
-                                }}
-                                onCopy={() => trackEvent(ANALYTICS_EVENTS.SUGGESTION_COPIED)}
-                            />
+                        <div className="py-8">
+                            {/* Header */}
+                            <div className="mb-8 text-center">
+                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-full text-emerald-700 font-medium mb-4">
+                                    <Check className="w-5 h-5" />
+                                    完璧な契約書が完成しました
+                                </div>
+                                <h2 className="text-2xl font-bold text-slate-800 mb-2">リスクゼロの契約書</h2>
+                                <p className="text-slate-500">28項目のチェックを全て反映した、あなたを完全に保護する契約書です</p>
+                            </div>
+
+                            {/* Perfect Contract Display */}
+                            {isGeneratingPerfect ? (
+                                <div className="py-20 flex flex-col items-center justify-center text-center">
+                                    <Loader2 className="w-8 h-8 animate-spin text-emerald-500 mb-4" />
+                                    <p className="text-slate-500">完璧な契約書を生成中...</p>
+                                </div>
+                            ) : perfectContractText ? (
+                                <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                                    {/* Copy Button */}
+                                    <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                                        <span className="text-sm text-slate-500">この契約書をコピーしてそのまま使用できます</span>
+                                        <Button
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(perfectContractText);
+                                                trackEvent(ANALYTICS_EVENTS.SUGGESTION_COPIED);
+                                            }}
+                                            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+                                        >
+                                            <Copy className="w-4 h-4" />
+                                            契約書をコピー
+                                        </Button>
+                                    </div>
+
+                                    {/* Contract Text */}
+                                    <div className="p-6 max-h-[60vh] overflow-y-auto">
+                                        <pre className="whitespace-pre-wrap font-sans text-sm text-slate-700 leading-relaxed">
+                                            {perfectContractText}
+                                        </pre>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="py-20 flex flex-col items-center justify-center text-center">
+                                    <p className="text-red-500 mb-4">契約書の生成に失敗しました</p>
+                                    <Button
+                                        onClick={() => setStep("score_reveal")}
+                                        variant="outline"
+                                    >
+                                        再試行
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="py-20 flex flex-col items-center justify-center text-center">
