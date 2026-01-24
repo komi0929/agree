@@ -139,11 +139,35 @@ export function HomePage() {
     // Score reveal data
     const [scoreData, setScoreData] = useState<{ score: number; grade: "A" | "B" | "C" | "D" | "F"; topRisks: Array<{ title: string; description: string; level: "critical" | "high" | "medium" }> } | null>(null);
 
+    // Auth Removed - Dummy variables to satisfy legacy code
+    const user = null;
+    const authLoading = false;
+    const [showAuthModal, setShowAuthModal] = useState(false); // Kept to avoid breaking references, but unused
+    const [showGateModal, setShowGateModal] = useState(false);
+
     // History state
     const { saveToHistory, loadFromHistory } = useAnalysisHistory();
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [currentHistoryId, setCurrentHistoryId] = useState<string | undefined>();
     const [showSavePrompt, setShowSavePrompt] = useState(false);
+
+    // Store the promise of the deep analysis so we can await it later
+    const deepAnalysisPromiseRef = useRef<Promise<AnalysisState> | null>(null);
+
+    // Usage limit hook - Dummy
+    const { hasReachedCheckLimit, incrementCheckCount } = { hasReachedCheckLimit: false, incrementCheckCount: async () => true };
+
+    // Track rejected risks (user chose to keep original text)
+    const [rejectedRiskIds, setRejectedRiskIds] = useState<Set<string>>(new Set());
+
+    // SPECULATIVE EXECUTION: Cache for pre-computed analysis
+    const speculativeCacheRef = useRef<SpeculativeAnalysisCache | null>(null);
+    const speculativePromiseRef = useRef<Promise<SpeculativeAnalysisCache | null> | null>(null);
+
+    // Track page view on mount
+    useEffect(() => {
+        trackPageView();
+    }, []);
 
     // Store the promise of the deep analysis so we can await it later
     const deepAnalysisPromiseRef = useRef<Promise<AnalysisState> | null>(null);
@@ -832,9 +856,8 @@ if (step === "upload" && !analysisData) {
                 onLoginClick={() => setShowAuthModal(true)}
             />
 
-            {/* Usage limit banner */}
+            {/* Usage limit banner - REMOVED */}
             <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarOpen ? "md:ml-72" : ""}`}>
-                <UsageLimitBanner type="check" onRegisterClick={() => setShowGateModal(true)} />
 
                 <section className="flex-1 flex flex-col items-center pt-32 pb-16 px-6 max-w-2xl mx-auto w-full transition-all duration-500">
                     {/* Minimalist Logo - Optimized size/aspect for new branding */}
@@ -873,15 +896,7 @@ if (step === "upload" && !analysisData) {
                 <Footer />
             </div>
 
-            {/* Auth Modal */}
-            <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
-
-            {/* Registration Gate Modal */}
-            <RegistrationGateModal
-                open={showGateModal}
-                onClose={() => setShowGateModal(false)}
-                reason="limit"
-            />
+            {/* Auth Modal & Gate - Removed */}
             {/* Analyzing Overlay - shows step-by-step progress */}
             <AnalyzingOverlay isActive={isAnalyzing} onCancel={handleCancelAnalysis} />
         </div>
@@ -1055,8 +1070,8 @@ return (
             </div>
         )}
 
-        {/* Auth Modal */}
-        <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+        {/* Auth Modal - Removed */}
+        {/* Registration Gate Modal - Removed */}
 
         {/* DEBUG: Quick Load Button for UI Verification */}
         {process.env.NODE_ENV === "development" && !analysisData && step === "upload" && (
