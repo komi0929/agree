@@ -82,6 +82,60 @@ function generateCorrectedText(originalText: string, analysis: EnhancedAnalysisR
     return correctedText;
 }
 
+// PERFECT CONTRACT GENERATION: Apply all fixes + Add missing clauses
+function generatePerfectContract(originalText: string, analysis: EnhancedAnalysisResult, rejectedIds: Set<string>): string {
+    // Step 1: Apply all text-based fixes (修正)
+    let perfectContract = generateCorrectedText(originalText, analysis, rejectedIds);
+
+    // Step 2: Collect missing clauses that need to be ADDED (追加条項)
+    const addedClauses: string[] = [];
+
+    // Check risks for missing clauses with suggested additions
+    for (const risk of analysis.risks) {
+        // Skip if no suggestion or no revised_text
+        if (!risk.suggestion?.revised_text) continue;
+        // Skip if it has original_text (this is a modification, not addition)
+        if (risk.original_text && risk.original_text.length > 20) continue;
+        // Skip placeholder text
+        if (risk.suggestion.revised_text.includes(PLACEHOLDER_TEXT)) continue;
+        // Skip if rejected
+        if (risk.original_text && rejectedIds.has(risk.original_text)) continue;
+
+        // This is a NEW clause that should be added
+        addedClauses.push(`【追加条項：${risk.section_title}】\n${risk.suggestion.revised_text}`);
+    }
+
+    // Add missing clauses from analysis.missing_clauses identifiers
+    // These are the critical ones detected by rule-based checker
+    if (analysis.missing_clauses && analysis.missing_clauses.length > 0) {
+        const missingClauseTemplates: Record<string, string> = {
+            "みなし検収条項がありません": "【追加条項：みなし検収】\n納品後10日以内に甲から異議がない場合は、検収に合格したものとみなす。",
+            "支払条件の規定がありません": "【追加条項：支払条件】\n甲は乙に対し、成果物納入日から60日以内に、乙の指定する銀行口座に振り込む方法により委託料を支払う。振込手数料は甲の負担とする。",
+            "損害賠償の規定がありません": "【追加条項：損害賠償上限】\n甲又は乙が本契約に違反した場合の損害賠償責任は、通常かつ直接の損害に限り、本契約に基づき支払われた委託料総額を上限とする。",
+            "中途解約時の精算規定がありません": "【追加条項：中途解約精算】\n本契約が中途で終了した場合、甲は乙に対し、終了時点までに乙が遂行した作業相当額を支払うものとする。",
+            "遅延利息の規定がありません": "【追加条項：遅延利息】\n甲が支払いを遅延した場合、乙に対し年率14.6%の遅延損害金を支払うものとする。",
+            "背景IP留保の規定がありません": "【追加条項：背景IP留保】\n乙が従前より保有していたプログラム、ライブラリ、ツール等の知的財産権は乙に留保される。",
+        };
+
+        for (const clause of analysis.missing_clauses) {
+            const template = missingClauseTemplates[clause];
+            if (template && !addedClauses.some(c => c.includes(template.split('\n')[0]))) {
+                addedClauses.push(template);
+            }
+        }
+    }
+
+    // Step 3: Append added clauses at the end if any
+    if (addedClauses.length > 0) {
+        perfectContract += "\n\n" + "─".repeat(40) + "\n";
+        perfectContract += "【以下、契約書の保護強化のため追加された条項】\n";
+        perfectContract += "─".repeat(40) + "\n\n";
+        perfectContract += addedClauses.join("\n\n");
+    }
+
+    return perfectContract;
+}
+
 
 // Helper: Generate diff metadata from analysis
 
@@ -524,14 +578,24 @@ export function HomePage() {
                 <div className={`flex-1 max-w-6xl mx-auto w-full px-8 pb-20`}>
                     {step === "complete" && analysisData ? (
                         <div className="h-[calc(100vh-5rem)] -mx-8">
-                            <AnalysisViewer
-                                data={analysisData}
-                                text={contractText}
-                                contractType={extractionData?.contract_type}
-                                onSave={() => {
-                                    // History save disabled in no-auth mode
+                            <CorrectedContractReader
+                                originalText={contractText}
+                                correctedText={generatePerfectContract(contractText, analysisData, rejectedRiskIds)}
+                                diffs={generateDiffsFromAnalysis(analysisData, contractText, rejectedRiskIds)}
+                                score={100} // Perfect Contract is always 100
+                                onApplyDiff={(diff) => {
+                                    // Already applied by default. Ensure it's not in rejected list
+                                    const next = new Set(rejectedRiskIds);
+                                    next.delete(diff.originalText);
+                                    setRejectedRiskIds(next);
                                 }}
-                                isSaved={true}
+                                onSkipDiff={(diff) => {
+                                    // User wants to keep original (reject the fix)
+                                    const next = new Set(rejectedRiskIds);
+                                    next.add(diff.originalText);
+                                    setRejectedRiskIds(next);
+                                }}
+                                onCopy={() => trackEvent(ANALYTICS_EVENTS.SUGGESTION_COPIED)}
                             />
                         </div>
                     ) : (
