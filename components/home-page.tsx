@@ -53,12 +53,17 @@ const UnifiedContextForm = dynamic(
 );
 
 // Helper: Generate corrected text from analysis
+// Filter out placeholder text to prevent corrupted output
+const PLACEHOLDER_TEXT = "LLMによる自動修正";
+
 function generateCorrectedText(originalText: string, analysis: EnhancedAnalysisResult, rejectedIds: Set<string>): string {
     let correctedText = originalText;
 
     // Apply suggestions in reverse order to maintain indices
     const sortedRisks = [...analysis.risks]
         .filter(r => r.suggestion?.revised_text && r.original_text)
+        // CRITICAL: Filter out placeholder text that was not replaced by LLM
+        .filter(r => !r.suggestion?.revised_text?.includes(PLACEHOLDER_TEXT))
         .sort((a, b) => {
             const indexA = originalText.indexOf(a.original_text);
             const indexB = originalText.indexOf(b.original_text);
@@ -76,6 +81,7 @@ function generateCorrectedText(originalText: string, analysis: EnhancedAnalysisR
 
     return correctedText;
 }
+
 
 // Helper: Generate diff metadata from analysis
 
@@ -99,6 +105,9 @@ function generateDiffsFromAnalysis(analysis: EnhancedAnalysisResult, originalTex
 
     for (const risk of analysis.risks) {
         if (!risk.original_text) continue;
+
+        // CRITICAL: Skip risks with placeholder text
+        if (risk.suggestion?.revised_text?.includes(PLACEHOLDER_TEXT)) continue;
 
         const isRejected = rejectedIds.has(risk.original_text);
 

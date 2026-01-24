@@ -59,10 +59,42 @@ export interface MergedAnalysisResult {
 
 /**
  * ルールベースのリスクをMergedRiskに変換
+ * Generate meaningful fallback suggestions when LLM match is not found
  */
 function convertRuleBasedRisk(risk: RuleBasedRisk): MergedRisk {
     // Generate context-specific messages using the risk title
     const contextTitle = risk.title.replace(/[がありませんの規定]/g, "").trim();
+
+    // Generate actionable fallback suggestion based on risk type
+    const generateFallbackSuggestion = (): string => {
+        // If we already have a specific suggested fix, use it
+        if (risk.suggested_fix && risk.suggested_fix.length > 20) {
+            return risk.suggested_fix;
+        }
+
+        // Generate fallback based on source and law
+        if (risk.source === "payment_rule" || risk.law === "freelance_new_law_art4") {
+            return "委託料は、乙が成果物を納入した日から60日以内に、乙の指定する銀行口座に振り込む方法により支払うものとする。";
+        }
+        if (risk.law === "copyright_art27_28") {
+            return "本業務の遂行過程で生じた成果物に関する著作権（著作権法第27条及び第28条の権利を含む）は、委託料の完済をもって甲に移転する。ただし、乙が従前から保有していたノウハウ、ツール、ライブラリ等の権利は乙に留保される。";
+        }
+        if (risk.law === "civil_code_conformity") {
+            return "甲又は乙が本契約に違反した場合、相手方に対し、通常かつ直接の損害に限り賠償する責任を負うものとする。ただし、賠償額の上限は、本契約に基づき支払われた委託料の総額とする。";
+        }
+        if (risk.id.includes("non_compete")) {
+            return "乙は、本契約終了後1年間は、甲の事前の書面による承諾なく、本業務と実質的に競合する業務を行う企業との業務委託契約を締結してはならない。ただし、甲が合理的な代償を支払うことを合意した場合に限る。";
+        }
+        if (risk.source === "missing_clause") {
+            return `${contextTitle}に関する条項を追加してください。`;
+        }
+        if (risk.source === "danger_pattern") {
+            return `${contextTitle}の条項を、当事者双方に公平な内容に修正してください。`;
+        }
+
+        // Default: return suggested_fix or a generic but actionable message
+        return risk.suggested_fix || `${contextTitle}について、契約当事者が不利にならない条件に修正してください。`;
+    };
 
     return {
         id: risk.id,
@@ -74,8 +106,7 @@ function convertRuleBasedRisk(risk: RuleBasedRisk): MergedRisk {
         explanation: risk.explanation,
         violated_laws: risk.law ? [risk.law] : [],
         suggestion: {
-            // Priority: LLM will override this. If not, this fallback must be strict.
-            revised_text: risk.suggested_fix || "（LLMによる自動修正を適用します）",
+            revised_text: generateFallbackSuggestion(),
             negotiation_message: {
                 formal: `${contextTitle}の修正を希望します。`,
                 neutral: `${contextTitle}を修正してください。`,
@@ -85,6 +116,7 @@ function convertRuleBasedRisk(risk: RuleBasedRisk): MergedRisk {
         },
     };
 }
+
 
 /**
  * リスクからClauseTagを推測
