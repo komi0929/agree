@@ -169,20 +169,7 @@ export function HomePage() {
         trackPageView();
     }, []);
 
-    // Store the promise of the deep analysis so we can await it later
-    const deepAnalysisPromiseRef = useRef<Promise<AnalysisState> | null>(null);
 
-    // Track rejected risks (user chose to keep original text)
-    const [rejectedRiskIds, setRejectedRiskIds] = useState<Set<string>>(new Set());
-
-    // SPECULATIVE EXECUTION: Cache for pre-computed analysis
-    const speculativeCacheRef = useRef<SpeculativeAnalysisCache | null>(null);
-    const speculativePromiseRef = useRef<Promise<SpeculativeAnalysisCache | null> | null>(null);
-
-    // Track page view on mount
-    useEffect(() => {
-        trackPageView();
-    }, []);
 
     const handleAnalysisStart = () => {
         setLoading(true);
