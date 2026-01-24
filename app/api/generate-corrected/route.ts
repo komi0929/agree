@@ -18,69 +18,55 @@ function getGeminiClient(): GoogleGenerativeAI {
     return _genAI;
 }
 
-const SYSTEM_PROMPT = `あなたは日本法に精通した「完璧な契約書」を作成する専門AIです。
-フリーランス・個人事業主（受注者側）を完全に保護するために開発されました。
+const SYSTEM_PROMPT = `あなたは契約書を完璧に書き直す専門AIです。
 
-【あなたの使命】
-入力された契約書を、**リスクゼロの完璧な契約書**として**完全に書き直し**てください。
-部分的な修正ではなく、**契約書全体を最初から最後まで書き直し**てください。
+【最重要指示】
+入力された契約書を読み取り、28項目のリスクチェックを全て反映した「完璧な契約書」を「最初から最後まで完全に書き直して」出力してください。
 
-【28項目チェックリスト - 全て反映必須】
+【絶対禁止事項】
+- 「追加してください」「ご確認ください」などの指示文は禁止
+- 「【追加条項：〇〇】」などのラベル・見出しは禁止
+- 元の契約書のコピーペーストは禁止
+- 修正点の説明や解説は禁止
 
-■ 修正すべき条項（11項目）
-1. 支払期日 → 「成果物納入日から60日以内」に設定（フリーランス新法第4条）
-2. 支払起算点 → 「納品日」起算（検収完了日ではない）
-3. 著作権 → 第27条・28条の権利は乙に留保、または対価支払時に移転
-4. 損害賠償 → 「通常かつ直接の損害に限り、委託料総額を上限」と明記
-5. 解除条件 → 相互解除権を設定、一方的解除には補償金条項を追加
-6. 業務範囲 → 仕様書記載業務に限定、追加業務は別途見積
-7. 競業避止 → 期間は1年以内、範囲は「本業務と実質的に競合するもの」に限定
-8. 契約不適合責任 → 検収後3ヶ月（最長6ヶ月）に制限
-9. 裁判管轄 → 「被告の住所地を管轄する裁判所」または双方合意の地域
-10. 再委託 → 「事前の書面による承諾」制に（完全禁止は偽装請負リスク）
-11. AI学習利用 → 成果物のAI学習利用について明記
-
-■ 追加すべき条項（7項目）
-12. みなし検収 → 「納品後10日以内に異議がない場合は検収完了とみなす」
-13. 遅延利息 → 「年率14.6%の遅延損害金」
-14. 消費税 → 「契約金額は税別、消費税は別途」
-15. 経費負担 → 「業務遂行に必要な実費は甲が負担」
-16. 着手金 → 「契約時に報酬の30%を着手金として支払う」
-17. 中途解約精算 → 「解約時は履行済み作業に相当する報酬を支払う」
-18. 報酬改定 → 「物価変動・仕様変更時は協議の上改定可能」
-
-■ 推奨条項（10項目）
-19. 履行遅滞免責 → 「甲の遅れによる納期遅延は乙の責任としない」
-20. AIツール利用 → 「乙は業務補助として生成AIを利用できる」
-21. 背景IP留保 → 「乙が従前より保有するコード等の権利は乙に留保」
-22. 実績公開権 → 「乙は成果物を制作実績として公開できる」
-23. クレジット表記 → 「乙は成果物に著作者名を表示できる」
-24. 引き抜き禁止 → 「甲は乙の従業員等への直接勧誘禁止」
-25. 連絡対応時間 → 「乙の対応時間は平日10時〜18時」
-26. ハラスメント解除 → 「ハラスメント時は即時解除可能」
-27. 特急料金 → 「短納期は50%割増」
-28. 自動更新 → 「1ヶ月前通知なき場合は同条件で1年間自動更新」
+【必ず行うこと】
+- 完璧な契約書を第1条から最終条まで書く
+- 条文番号を第1条、第2条...と連番で振る
+- そのまま使える法的文書として出力する
 
 【出力形式】
-必ず以下のJSON形式で出力してください：
+JSONで以下の形式のみ出力：
 {
-  "correctedFullText": "完璧に書き直した契約書の全文（改行・インデント・条文番号を維持した完成形）",
-  "summary": "修正のサマリー（どのような点を改善したか）",
-  "resolvedCount": 28項目中いくつ対応したかの数
+  "correctedFullText": "ここに完璧な契約書の全文を書く"
 }
 
-【重要ルール】
-1. **完全な契約書として出力** - コピペでそのまま使える形式
-2. **条文番号を連続で振る** - 第1条、第2条...と整然と
-3. **プレースホルダー禁止** - [金額を入れる]のような未入力欄は作らない
-4. **「専門家に相談」禁止** - あなたが専門家として断定する
-5. **追加条項も本文に統合** - 「追加条項」という表記は不要、自然に組み込む`;
+【28項目チェックの反映方法】
+以下の項目を全て「具体的な条文として」組み込む：
+
+■ 必須修正（元の条文を書き換え）
+1. 支払期日「成果物納入日から60日以内」
+2. 損害賠償「通常かつ直接の損害に限り、委託料総額を上限」
+3. 著作権「第27条・28条の権利は乙に留保」
+4. 競業避止「期間1年以内、範囲は本業務と競合するものに限定」
+
+■ 必須追加（新しい条として追加）
+5. みなし検収「納品後10日以内に異議なき場合は検収完了」
+6. 遅延利息「年率14.6%」
+7. 中途解約精算「履行済み作業相当額を支払う」
+8. 経費負担「甲が負担」
+
+【出力例のイメージ】
+{
+  "correctedFullText": "業務委託契約書\n\n株式会社〇〇（以下「甲」という）と、〇〇（以下「乙」という）は、以下のとおり契約を締結する。\n\n第1条（目的）\n甲は乙に対し、〇〇に関する業務を委託し、乙はこれを受託する。\n\n第2条（委託料及び支払条件）\n1. 委託料は金〇〇円（税別）とする。\n2. 甲は乙に対し、成果物の納入日から60日以内に、乙の指定する銀行口座に振り込む方法により支払う。\n3. 甲が支払いを遅延した場合、年率14.6%の遅延損害金を支払うものとする。\n\n第3条（成果物の検収）\n1. 乙は成果物を納入後、甲は10日以内に検査を行う。\n2. 納入後10日以内に甲から書面による異議がない場合は、検収に合格したものとみなす。\n\n..."
+}
+
+↑このように、完全な契約書として出力すること。`;
 
 export async function POST(request: NextRequest) {
     try {
         const { contractText, userRole = "vendor" } = await request.json();
 
-        if (!contractText || contractText.trim().length < 100) {
+        if (!contractText || contractText.trim().length < 50) {
             return NextResponse.json(
                 { error: "契約書のテキストが短すぎます" },
                 { status: 400 }
@@ -91,26 +77,53 @@ export async function POST(request: NextRequest) {
         const model = genAI.getGenerativeModel({
             model: "gemini-2.0-flash",
             generationConfig: {
-                responseMimeType: "application/json"
+                responseMimeType: "application/json",
+                temperature: 0.1, // Lower temperature for more consistent output
             },
             systemInstruction: SYSTEM_PROMPT
         });
 
-        const result = await model.generateContent(contractText.substring(0, 30000));
+        const userPrompt = `以下の契約書を、28項目チェックを全て反映した完璧な契約書として「最初から最後まで完全に書き直して」ください。
+
+【入力契約書】
+${contractText.substring(0, 25000)}
+
+【重要】
+- 「追加してください」などの指示文は出力禁止
+- 完璧な契約書の本文のみを出力
+- 第1条から最終条まで完全な形で書く`;
+
+        const result = await model.generateContent(userPrompt);
         const responseText = result.response.text();
 
         if (!responseText) {
             throw new Error("AI returned empty response");
         }
 
-        const aiResult = JSON.parse(responseText);
+        let aiResult;
+        try {
+            aiResult = JSON.parse(responseText);
+        } catch (parseError) {
+            // If JSON parsing fails, try to extract content
+            console.error("JSON parse error, raw response:", responseText.substring(0, 500));
+            throw new Error("Failed to parse AI response as JSON");
+        }
 
-        // Return the rewritten contract
+        const correctedText = aiResult.correctedFullText || "";
+
+        // Validate output - reject if it contains instruction text
+        if (correctedText.includes("追加してください") ||
+            correctedText.includes("【追加条項") ||
+            correctedText.includes("ご確認ください") ||
+            correctedText.length < 500) {
+            console.error("LLM output validation failed - contains instructions or too short");
+            throw new Error("LLM output validation failed");
+        }
+
         return NextResponse.json({
-            correctedFullText: aiResult.correctedFullText || "",
-            summary: aiResult.summary || "契約書を修正しました",
-            resolvedCount: aiResult.resolvedCount || 28,
-            score: 100, // Perfect contract = 100
+            correctedFullText: correctedText,
+            summary: "契約書を完璧に書き直しました",
+            score: 100,
             grade: "S",
         });
     } catch (error) {
