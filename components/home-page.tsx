@@ -934,157 +934,157 @@ if (step === "unified_context" && extractionData) {
             <Footer />
         </div>
     );
-}
-
-// Score Reveal step - shows score animation before detailed results
-if (step === "score_reveal" && scoreData && analysisData) {
-    return (
-        <ScoreReveal
-            score={scoreData.score}
-            grade={scoreData.grade}
-            risks={scoreData.topRisks}
-            isLoggedIn={!!user}
-            onLoginClick={() => setShowAuthModal(true)}
-            onContinue={() => setStep("complete")}
-        />
     );
-}
 
-// Analysis Result View (Clean & Centered)
-return (
-    <main className="min-h-screen flex flex-col bg-white">
-        {/* History Sidebar - visible for all users */}
-        <HistorySidebar
-            isOpen={sidebarOpen}
-            onToggle={() => setSidebarOpen(!sidebarOpen)}
-            onSelectHistory={handleSelectHistory}
-            onNewAnalysis={handleNewAnalysis}
-            currentHistoryId={currentHistoryId}
-            onLoginClick={() => setShowAuthModal(true)}
-        />
+    // Score Reveal step - shows score animation before detailed results
+    if (step === "score_reveal" && scoreData && analysisData) {
+        return (
+            <ScoreReveal
+                score={scoreData.score}
+                grade={scoreData.grade}
+                risks={scoreData.topRisks}
+                isLoggedIn={!!user}
+                onLoginClick={() => setShowAuthModal(true)}
+                onContinue={() => setStep("complete")}
+            />
+        );
+    }
 
-        <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "md:ml-72" : ""}`}>
-            <header className="h-20 px-8 flex items-center gap-8 max-w-5xl mx-auto w-full">
-                <div
-                    className="flex items-center gap-3 cursor-pointer"
-                    onClick={() => {
-                        setAnalysisData(null);
-                        setStep("upload");
-                        setCurrentHistoryId(undefined);
-                        // Clear speculative cache
-                        speculativeCacheRef.current = null;
-                        speculativePromiseRef.current = null;
-                    }}
-                >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/logo.png" alt="agree" className="h-16 w-auto" />
-                </div>
-                <div className="flex items-center gap-3">
-                    {analysisData && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                                setAnalysisData(null);
-                                setStep("upload");
-                                setCurrentHistoryId(undefined);
-                            }}
-                            className="text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-full font-normal"
-                        >
-                            別の契約書をチェックする
-                        </Button>
+    // Analysis Result View (Clean & Centered)
+    return (
+        <main className="min-h-screen flex flex-col bg-white">
+            {/* History Sidebar - visible for all users */}
+            <HistorySidebar
+                isOpen={sidebarOpen}
+                onToggle={() => setSidebarOpen(!sidebarOpen)}
+                onSelectHistory={handleSelectHistory}
+                onNewAnalysis={handleNewAnalysis}
+                currentHistoryId={currentHistoryId}
+                onLoginClick={() => setShowAuthModal(true)}
+            />
+
+            <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "md:ml-72" : ""}`}>
+                <header className="h-20 px-8 flex items-center gap-8 max-w-5xl mx-auto w-full">
+                    <div
+                        className="flex items-center gap-3 cursor-pointer"
+                        onClick={() => {
+                            setAnalysisData(null);
+                            setStep("upload");
+                            setCurrentHistoryId(undefined);
+                            // Clear speculative cache
+                            speculativeCacheRef.current = null;
+                            speculativePromiseRef.current = null;
+                        }}
+                    >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/logo.png" alt="agree" className="h-16 w-auto" />
+                    </div>
+                    <div className="flex items-center gap-3">
+                        {analysisData && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    setAnalysisData(null);
+                                    setStep("upload");
+                                    setCurrentHistoryId(undefined);
+                                }}
+                                className="text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-full font-normal"
+                            >
+                                別の契約書をチェックする
+                            </Button>
+                        )}
+                        {/* Login button moved to footer/actions in viewer for better flow */}
+                    </div>
+                </header>
+
+                <div className={`flex-1 max-w-6xl mx-auto w-full px-8 pb-20`}>
+                    {step === "complete" && analysisData ? (
+                        <div className="h-[calc(100vh-5rem)] -mx-8">
+                            <CorrectedContractReader
+                                originalText={contractText}
+                                correctedText={generateCorrectedText(contractText, analysisData, rejectedRiskIds)}
+                                diffs={generateDiffsFromAnalysis(analysisData, contractText, rejectedRiskIds)}
+                                score={scoreData ? calculateCurrentScore(scoreData.score, analysisData.risks.length, rejectedRiskIds.size) : 0}
+                                onApplyDiff={(diff) => {
+                                    // Already applied by default. Ensure it's not in rejected list
+                                    const next = new Set(rejectedRiskIds);
+                                    next.delete(diff.originalText);
+                                    setRejectedRiskIds(next);
+                                }}
+                                onSkipDiff={(diff) => {
+                                    // User wants to keep original (reject the fix)
+                                    const next = new Set(rejectedRiskIds);
+                                    next.add(diff.originalText);
+                                    setRejectedRiskIds(next);
+                                }}
+                                onCopy={() => trackEvent(ANALYTICS_EVENTS.SUGGESTION_COPIED)}
+                            />
+                        </div>
+                    ) : (
+                        <div className="py-20 flex flex-col items-center justify-center text-center">
+                            <Loader2 className="w-8 h-8 animate-spin text-slate-300 mb-4" />
+                            <p className="text-slate-400">結果を読み込んでいます...</p>
+                        </div>
                     )}
-                    {/* Login button moved to footer/actions in viewer for better flow */}
-                </div>
-            </header>
-
-            <div className={`flex-1 max-w-6xl mx-auto w-full px-8 pb-20`}>
-                {step === "complete" && analysisData ? (
-                    <div className="h-[calc(100vh-5rem)] -mx-8">
-                        <CorrectedContractReader
-                            originalText={contractText}
-                            correctedText={generateCorrectedText(contractText, analysisData, rejectedRiskIds)}
-                            diffs={generateDiffsFromAnalysis(analysisData, contractText, rejectedRiskIds)}
-                            score={scoreData ? calculateCurrentScore(scoreData.score, analysisData.risks.length, rejectedRiskIds.size) : 0}
-                            onApplyDiff={(diff) => {
-                                // Already applied by default. Ensure it's not in rejected list
-                                const next = new Set(rejectedRiskIds);
-                                next.delete(diff.originalText);
-                                setRejectedRiskIds(next);
-                            }}
-                            onSkipDiff={(diff) => {
-                                // User wants to keep original (reject the fix)
-                                const next = new Set(rejectedRiskIds);
-                                next.add(diff.originalText);
-                                setRejectedRiskIds(next);
-                            }}
-                            onCopy={() => trackEvent(ANALYTICS_EVENTS.SUGGESTION_COPIED)}
-                        />
-                    </div>
-                ) : (
-                    <div className="py-20 flex flex-col items-center justify-center text-center">
-                        <Loader2 className="w-8 h-8 animate-spin text-slate-300 mb-4" />
-                        <p className="text-slate-400">結果を読み込んでいます...</p>
-                    </div>
-                )}
-            </div>
-        </div>
-
-        {/* Save prompt for non-logged-in users */}
-        {showSavePrompt && !user && step === "complete" && (
-            <div className="fixed bottom-20 left-4 bg-white rounded-xl shadow-lg border border-slate-200 p-4 max-w-sm animate-in slide-in-from-bottom-4 z-[60]">
-                <p className="text-sm text-slate-700 mb-3">
-                    診断結果を保存しませんか？<br />
-                    <span className="text-slate-500">登録すると履歴をいつでも確認できます！</span>
-                </p>
-                <div className="flex gap-2">
-                    <Button
-                        size="sm"
-                        onClick={() => setShowAuthModal(true)}
-                        className="flex-1 bg-slate-900 hover:bg-slate-800"
-                    >
-                        無料で登録
-                    </Button>
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setShowSavePrompt(false)}
-                        className="text-slate-500"
-                    >
-                        後で
-                    </Button>
                 </div>
             </div>
-        )}
 
-        {/* Auth Modal - Removed */}
-        {/* Registration Gate Modal - Removed */}
+            {/* Save prompt for non-logged-in users */}
+            {showSavePrompt && !user && step === "complete" && (
+                <div className="fixed bottom-20 left-4 bg-white rounded-xl shadow-lg border border-slate-200 p-4 max-w-sm animate-in slide-in-from-bottom-4 z-[60]">
+                    <p className="text-sm text-slate-700 mb-3">
+                        診断結果を保存しませんか？<br />
+                        <span className="text-slate-500">登録すると履歴をいつでも確認できます！</span>
+                    </p>
+                    <div className="flex gap-2">
+                        <Button
+                            size="sm"
+                            onClick={() => setShowAuthModal(true)}
+                            className="flex-1 bg-slate-900 hover:bg-slate-800"
+                        >
+                            無料で登録
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setShowSavePrompt(false)}
+                            className="text-slate-500"
+                        >
+                            後で
+                        </Button>
+                    </div>
+                </div>
+            )}
 
-        {/* DEBUG: Quick Load Button for UI Verification */}
-        {process.env.NODE_ENV === "development" && !analysisData && step === "upload" && (
-            <div className="fixed bottom-4 left-4 z-50 opacity-50 hover:opacity-100 transition-opacity">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="bg-yellow-50 border-yellow-200 text-yellow-700 text-xs"
-                    onClick={async () => {
-                        const { SAMPLE_ANALYSIS_RESULT, SAMPLE_CONTRACT_TEXT } = await import("@/lib/debug-data");
-                        setContractText(SAMPLE_CONTRACT_TEXT);
-                        setAnalysisData(SAMPLE_ANALYSIS_RESULT);
-                        setExtractionData({
-                            party_a: "株式会社グッドカンパニー",
-                            party_b: "田中花子",
-                            contract_type: "業務委託基本契約書",
-                            estimated_contract_months: 12,
-                            client_party: "party_a"
-                        });
-                        setStep("complete");
-                    }}
-                >
-                    🐛 Debug: Load Sample
-                </Button>
-            </div>
-        )}
-    </main>
-);
+            {/* Auth Modal - Removed */}
+            {/* Registration Gate Modal - Removed */}
+
+            {/* DEBUG: Quick Load Button for UI Verification */}
+            {process.env.NODE_ENV === "development" && !analysisData && step === "upload" && (
+                <div className="fixed bottom-4 left-4 z-50 opacity-50 hover:opacity-100 transition-opacity">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-yellow-50 border-yellow-200 text-yellow-700 text-xs"
+                        onClick={async () => {
+                            const { SAMPLE_ANALYSIS_RESULT, SAMPLE_CONTRACT_TEXT } = await import("@/lib/debug-data");
+                            setContractText(SAMPLE_CONTRACT_TEXT);
+                            setAnalysisData(SAMPLE_ANALYSIS_RESULT);
+                            setExtractionData({
+                                party_a: "株式会社グッドカンパニー",
+                                party_b: "田中花子",
+                                contract_type: "業務委託基本契約書",
+                                estimated_contract_months: 12,
+                                client_party: "party_a"
+                            });
+                            setStep("complete");
+                        }}
+                    >
+                        🐛 Debug: Load Sample
+                    </Button>
+                </div>
+            )}
+        </main>
+    );
 }
