@@ -11,10 +11,10 @@ import { Footer } from "@/components/footer";
 import { SignatureLogo } from "@/components/signature-logo";
 import { analyzeDeepAction, AnalysisState } from "@/app/actions";
 import { UserContext, DEFAULT_USER_CONTEXT } from "@/lib/types/user-context";
-import { Loader2, LogIn, Sparkles, Settings2, Check, Copy } from "lucide-react";
+import { Loader2, Check, Copy } from "lucide-react";
 import { AnalyzingOverlay } from "@/components/analyzing-overlay";
 import { ScoreReveal } from "@/components/score-reveal";
-import { CorrectedContractReader, DiffMetadata } from "@/components/corrected-contract-reader";
+// CorrectedContractReader removed - now using simple text display with API result
 import { HistorySidebar, useAnalysisHistory } from "@/components/history-sidebar";
 
 import {
@@ -24,21 +24,7 @@ import {
     getContextDiff
 } from "@/lib/speculative-analysis";
 
-// Phase 5: Dynamic imports for heavy components (reduces initial bundle)
-const AnalysisViewer = dynamic(
-    () => import("@/components/analysis-viewer").then(m => ({ default: m.AnalysisViewer })),
-    {
-        loading: () => (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50">
-                <div className="flex items-center gap-3">
-                    <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
-                    <span className="text-slate-500">結果を表示しています...</span>
-                </div>
-            </div>
-        ),
-        ssr: false
-    }
-);
+// AnalysisViewer removed - now using simple perfect contract display with API result
 
 const UnifiedContextForm = dynamic(
     () => import("@/components/unified-context-form").then(m => ({ default: m.UnifiedContextForm })),
@@ -88,12 +74,6 @@ export function HomePage() {
     // Store the promise of the deep analysis so we can await it later
     const deepAnalysisPromiseRef = useRef<Promise<AnalysisState> | null>(null);
 
-    // Usage limit hook - Dummy
-    const { hasReachedCheckLimit, incrementCheckCount } = { hasReachedCheckLimit: false, incrementCheckCount: async () => true };
-
-    // Track rejected risks (user chose to keep original text)
-    const [rejectedRiskIds, setRejectedRiskIds] = useState<Set<string>>(new Set());
-
     // PERFECT CONTRACT: Fully rewritten contract text from LLM
     const [perfectContractText, setPerfectContractText] = useState<string | null>(null);
     const [isGeneratingPerfect, setIsGeneratingPerfect] = useState(false);
@@ -118,7 +98,6 @@ export function HomePage() {
         setStep("upload");
         setCurrentHistoryId(undefined);
         setShowSavePrompt(false);
-        setRejectedRiskIds(new Set());
         // Clear speculative cache
         speculativeCacheRef.current = null;
         speculativePromiseRef.current = null;
