@@ -142,7 +142,7 @@ export function CorrectedContractReader({
     };
 
     const renderConfetti = () => {
-        if (score < 100) return null;
+        if (score === undefined || score < 100) return null;
         return (
             <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
                 {Array.from({ length: 30 }).map((_, i) => (

@@ -12,7 +12,7 @@ import { GuideBar } from "@/components/onboarding/guide-bar";
 import { WelcomeModal } from "@/components/onboarding/welcome-modal";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, FileText, Send, Sparkles, Loader2, X, Lightbulb, Layers } from "lucide-react";
-import { modifyContractAction } from "@/app/generate/actions";
+// modifyContractAction removed - generate feature disabled
 import { ContractInput, DEFAULT_CONTRACT_OPTIONS } from "@/lib/types/contract-input";
 import { runAllCheckpoints, CheckpointResult, reconcileCheckpoints } from "@/lib/rules/checkpoints-28";
 import { ShareModal } from "@/components/share-modal";
@@ -143,64 +143,11 @@ export function AnalysisViewer({ data, text, contractType, onSave, isSaved }: An
     };
 
     // Generate new contract based on selected risks
+    // DISABLED: generate feature removed in auth cleanup
     const handleGenerateNewContract = async () => {
         if (selectedRiskIndices.length === 0) return;
-        setIsGenerating(true);
-
-        try {
-            // Collect all instructions
-            const instructions = selectedRiskIndices
-                .map(index => {
-                    const risk = risks[index];
-                    return `- ${risk.section_title}: ${risk.suggestion.revised_text}`;
-                })
-                .join("\n");
-
-            const fullInstruction = `以下の修正点を反映してください：\n${instructions}`;
-
-            // Determine contract input context
-            let input: ContractInput;
-            try {
-                const stored = sessionStorage.getItem("contractInput");
-                input = stored ? JSON.parse(stored) : {
-                    clientName: "甲",
-                    userName: "乙",
-                    amount: 0,
-                    deadline: "契約締結時",
-                    scopeDescription: "",
-                    options: DEFAULT_CONTRACT_OPTIONS,
-                };
-            } catch {
-                input = {
-                    clientName: "甲",
-                    userName: "乙",
-                    amount: 0,
-                    deadline: "契約締結時",
-                    scopeDescription: "",
-                    options: DEFAULT_CONTRACT_OPTIONS,
-                };
-            }
-
-            const result = await modifyContractAction(text, fullInstruction, input);
-
-            if (result.success && result.markdown) {
-                // Save to session storage for the preview page
-                sessionStorage.setItem("contractResult", JSON.stringify({
-                    markdown: result.markdown,
-                    highlightedClauses: []
-                }));
-                sessionStorage.setItem("contractInput", JSON.stringify(input));
-
-                router.push("/generate/preview");
-            } else {
-                alert("契約書の生成に失敗しました: " + (result.error || "不明なエラー"));
-            }
-        } catch (e) {
-            console.error(e);
-            alert("エラーが発生しました");
-        } finally {
-            setIsGenerating(false);
-        }
+        // Feature disabled - show message
+        alert("この機能は現在無効化されています。");
     };
 
     const handleClearSelection = () => {
